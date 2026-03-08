@@ -3,13 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RCH CRM — Finance Dashboard</title>
+<title>RCH CRM — Account Manager</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root {
   --navy:        #1B2D5E;
   --navy-dark:   #131f43;
-  --navy-mid:    #243771;
   --navy-light:  #e8ecf5;
   --magenta:     #C4006A;
   --magenta-dk:  #9c0054;
@@ -34,10 +33,52 @@
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--gray900); -webkit-font-smoothing: antialiased; }
 
-/* ── Layout ── */
+/* ════════════════════════════════════════
+   LOGIN SCREEN
+   ════════════════════════════════════════ */
+.login-screen {
+  display: flex; align-items: center; justify-content: center;
+  height: 100vh; background: linear-gradient(135deg, var(--navy) 0%, var(--navy-dark) 100%);
+  padding: 20px;
+}
+.login-container { width: 100%; max-width: 480px; }
+.login-header {
+  text-align: center; margin-bottom: 48px;
+}
+.login-logo { display: inline-flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+.login-logo svg { width: 44px; height: 44px; }
+.login-title { font-size: 28px; font-weight: 800; color: white; margin-bottom: 6px; }
+.login-subtitle { font-size: 14px; color: rgba(255,255,255,0.6); }
+
+.login-form { background: white; border-radius: 16px; padding: 32px; box-shadow: 0 20px 60px rgba(27,45,94,0.2); }
+.login-form h2 { font-size: 18px; font-weight: 700; color: var(--navy); margin-bottom: 24px; text-align: center; }
+
+.form-group { margin-bottom: 16px; }
+.form-label { font-size: 12px; font-weight: 700; color: var(--gray700); text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 6px; }
+.form-input {
+  width: 100%; padding: 11px 14px; border: 1.5px solid var(--border);
+  border-radius: 9px; background: var(--gray50); font-size: 14px;
+  font-family: inherit; color: var(--gray900); transition: border-color 0.2s;
+}
+.form-input:focus { outline: none; border-color: var(--magenta); background: white; box-shadow: 0 0 0 3px var(--magenta-lt); }
+
+.login-btn {
+  width: 100%; padding: 12px; background: var(--magenta); color: white;
+  border: none; border-radius: 9px; font-size: 14px; font-weight: 700;
+  cursor: pointer; transition: background 0.2s; margin-top: 8px;
+}
+.login-btn:hover { background: var(--magenta-dk); }
+.login-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.login-error { color: var(--red); font-size: 12px; margin-top: 8px; }
+.login-hint { font-size: 11px; color: var(--gray500); margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border); text-align: center; }
+
+/* ════════════════════════════════════════
+   MAIN APP
+   ════════════════════════════════════════ */
 .app { display: flex; height: 100vh; overflow: hidden; }
 
-/* ── Sidebar ── */
+/* Sidebar */
 .sidebar {
   width: 220px; flex-shrink: 0;
   background: var(--navy);
@@ -49,29 +90,13 @@ body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); c
   border-bottom: 1px solid rgba(255,255,255,0.08);
   display: flex; align-items: center; gap: 11px;
 }
-.brand-logo {
-  display: flex; align-items: center; gap: 9px;
-}
+.brand-logo { display: flex; align-items: center; gap: 9px; }
 .brand-logo svg { width: 32px; height: 32px; flex-shrink: 0; }
-.brand-wordmark {
-  display: flex; flex-direction: column;
-}
-.brand-rch {
-  font-size: 20px; font-weight: 800; color: white;
-  letter-spacing: -0.5px; line-height: 1;
-}
-.brand-sub {
-  font-size: 9px; font-weight: 500; color: rgba(255,255,255,0.38);
-  letter-spacing: 1.2px; text-transform: uppercase; margin-top: 2px;
-}
+.brand-wordmark { display: flex; flex-direction: column; }
+.brand-rch { font-size: 20px; font-weight: 800; color: white; letter-spacing: -0.5px; line-height: 1; }
+.brand-sub { font-size: 9px; font-weight: 500; color: rgba(255,255,255,0.38); letter-spacing: 1.2px; text-transform: uppercase; margin-top: 2px; }
 
 .sidebar-nav { padding: 12px 10px; flex: 1; overflow-y: auto; }
-.nav-section {
-  font-size: 9px; font-weight: 600; color: rgba(255,255,255,0.3);
-  letter-spacing: 1.2px; text-transform: uppercase;
-  padding: 14px 10px 6px;
-}
-.nav-section:first-child { padding-top: 4px; }
 .nav-item {
   display: flex; align-items: center; gap: 10px;
   padding: 9px 12px; border-radius: 7px;
@@ -93,10 +118,6 @@ body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); c
   border-radius: 0 2px 2px 0;
 }
 .nav-icon { font-size: 15px; width: 18px; text-align: center; flex-shrink: 0; }
-.nav-badge {
-  margin-left: auto; background: var(--magenta); color: white;
-  font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 10px;
-}
 
 .sidebar-footer {
   padding: 14px 18px; border-top: 1px solid rgba(255,255,255,0.08);
@@ -110,8 +131,15 @@ body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); c
 }
 .user-name { font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.85); }
 .user-role { font-size: 10px; color: rgba(255,255,255,0.35); margin-top: 1px; }
+.logout-btn {
+  margin-top: 8px; width: 100%;
+  padding: 6px; background: rgba(255,255,255,0.1);
+  border: none; border-radius: 5px; color: rgba(255,255,255,0.7);
+  font-size: 11px; cursor: pointer; transition: all 0.14s;
+}
+.logout-btn:hover { background: rgba(255,255,255,0.15); color: white; }
 
-/* ── Main area ── */
+/* Main area */
 .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
 
 .topbar {
@@ -123,26 +151,20 @@ body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); c
 .topbar-left { display: flex; flex-direction: column; }
 .topbar-title { font-size: 16px; font-weight: 700; color: var(--navy); }
 .topbar-sub { font-size: 11px; color: var(--gray500); margin-top: 1px; }
-.topbar-right { display: flex; align-items: center; gap: 8px; }
-.chip {
-  display: inline-flex; align-items: center; gap: 5px;
-  padding: 5px 12px; border-radius: 20px;
-  font-size: 11px; font-weight: 600;
-}
-.chip-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
 
 .content { flex: 1; overflow-y: auto; padding: 24px 28px; }
 .content::-webkit-scrollbar { width: 5px; }
 .content::-webkit-scrollbar-thumb { background: var(--gray300); border-radius: 3px; }
 
-/* ── Section heading ── */
-.section-title {
-  font-size: 11px; font-weight: 700; color: var(--gray500);
-  text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;
+/* Cards & Components */
+.card {
+  background: white; border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(27,45,94,0.07), 0 0 0 1px rgba(27,45,94,0.05);
+  padding: 20px;
 }
+.card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.card-title { font-size: 13px; font-weight: 700; color: var(--navy); }
 
-/* ── Stat cards ── */
-.stats-row { display: flex; gap: 14px; margin-bottom: 22px; }
 .stat-card {
   background: white; border-radius: 12px;
   padding: 18px 20px 16px;
@@ -159,55 +181,9 @@ body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); c
 .stat-value { font-size: 26px; font-weight: 800; color: var(--stat-color, var(--navy)); margin-top: 5px; line-height: 1; }
 .stat-sub { font-size: 11px; color: var(--gray500); margin-top: 4px; }
 
-/* ── Cards ── */
-.card {
-  background: white; border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(27,45,94,0.07), 0 0 0 1px rgba(27,45,94,0.05);
-  padding: 20px;
-}
-.card-header {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 14px;
-}
-.card-title { font-size: 13px; font-weight: 700; color: var(--navy); }
-
+.stats-row { display: flex; gap: 14px; margin-bottom: 22px; }
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-.grid-sidebar { display: grid; grid-template-columns: 200px 1fr; gap: 16px; }
 
-/* ── Row items ── */
-.row-item {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 10px 0; border-bottom: 1px solid var(--gray100);
-}
-.row-item:last-child { border-bottom: none; }
-
-/* ── Badge / Pill ── */
-.badge {
-  display: inline-block; font-size: 10px; font-weight: 600;
-  padding: 2px 8px; border-radius: 4px;
-  margin-left: 5px; vertical-align: middle;
-}
-.tag {
-  display: inline-flex; align-items: center;
-  font-size: 10px; font-weight: 600;
-  padding: 2px 7px; border-radius: 4px;
-}
-
-/* ── Progress bar ── */
-.prog-wrap { background: var(--gray100); border-radius: 4px; height: 6px; width: 100%; overflow: hidden; margin: 4px 0; }
-.prog-fill { height: 100%; border-radius: 4px; transition: width 0.5s; }
-
-/* ── Alert box ── */
-.alert {
-  border-radius: 10px; padding: 12px 16px; font-size: 12px;
-  margin-bottom: 18px; display: flex; align-items: flex-start; gap: 10px;
-  border: 1px solid transparent;
-}
-.alert-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
-.alert-warn { background: var(--orange-lt); border-color: #f0a060; }
-.alert-ok   { background: var(--green-lt);  border-color: #5dbf8a; }
-
-/* ── Buttons ── */
 .btn {
   border: none; padding: 9px 18px; border-radius: 8px;
   font-weight: 600; cursor: pointer; font-size: 13px;
@@ -215,58 +191,38 @@ body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); c
   display: inline-flex; align-items: center; gap: 6px;
 }
 .btn:hover { filter: brightness(1.08); }
-.btn:active { filter: brightness(0.96); }
-.btn:disabled { opacity: 0.4; cursor: default; pointer-events: none; }
-.btn-primary   { background: var(--magenta); color: white; }
-.btn-navy      { background: var(--navy); color: white; }
-.btn-ghost     { background: var(--gray100); color: var(--gray700); border: 1px solid var(--border); }
-.btn-outline-green { background: white; color: var(--green); border: 1px solid var(--green); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-primary { background: var(--magenta); color: white; }
+.btn-ghost { background: var(--gray100); color: var(--gray700); border: 1px solid var(--border); }
 .btn-sm { padding: 5px 12px; font-size: 11px; border-radius: 6px; }
 
-/* ── Service item (checkbox list) ── */
-.svc-item {
-  display: flex; align-items: center; gap: 11px;
-  padding: 10px 12px; border-radius: 8px; margin-bottom: 4px;
-  cursor: pointer; border: 1.5px solid var(--border);
-  transition: border-color 0.14s, background 0.14s;
+.client-card {
+  background: white; border: 1.5px solid var(--border);
+  border-radius: 10px; padding: 16px; cursor: pointer;
+  transition: all 0.2s;
 }
-.svc-item:hover { border-color: var(--gray300); background: var(--gray50); }
-.svc-item.selected { border-color: var(--magenta); background: var(--magenta-lt); }
-.svc-check {
-  width: 18px; height: 18px; border-radius: 4px;
-  border: 2px solid var(--gray300); display: flex;
-  align-items: center; justify-content: center;
-  font-size: 11px; color: white; flex-shrink: 0;
-  transition: all 0.14s;
-}
-.svc-item.selected .svc-check { background: var(--magenta); border-color: var(--magenta); }
+.client-card:hover { border-color: var(--magenta); background: var(--magenta-lt); }
+.client-name { font-weight: 700; font-size: 13px; color: var(--gray900); }
+.client-role { font-size: 11px; color: var(--gray500); margin-top: 3px; }
 
-/* ── Client list ── */
-.client-list-item {
-  padding: 9px 12px; border-radius: 7px; cursor: pointer;
-  margin-bottom: 2px; transition: background 0.1s, color 0.1s;
+.form-group { margin-bottom: 16px; }
+.form-label { font-size: 10px; font-weight: 700; color: var(--gray500); text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 6px; }
+.form-input {
+  width: 100%; padding: 9px 13px; border: 1.5px solid var(--border);
+  border-radius: 8px; background: var(--gray50);
+  font-size: 13px; font-family: inherit; color: var(--gray900);
+  transition: border-color 0.14s;
 }
-.client-list-item:hover { background: var(--navy-light); }
-.client-list-item.active { background: var(--navy); color: white; }
+.form-input:focus { outline: none; border-color: var(--magenta); background: white; }
 
-/* ── Invoice preview ── */
-.invoice-preview {
-  background: white; border-radius: 12px;
-  padding: 32px; max-width: 680px;
-  box-shadow: 0 2px 16px rgba(27,45,94,0.1), 0 0 0 1px rgba(27,45,94,0.07);
+.alert {
+  border-radius: 10px; padding: 12px 16px; font-size: 12px;
+  margin-bottom: 18px; display: flex; align-items: flex-start; gap: 10px;
+  border: 1px solid transparent;
 }
-.invoice-preview table { width: 100%; border-collapse: collapse; font-size: 12px; }
-.invoice-preview th {
-  text-align: left; padding: 8px 6px; color: var(--navy);
-  font-size: 10px; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 0.5px; border-bottom: 2px solid var(--navy);
-}
-.invoice-preview th:not(:first-child) { text-align: right; }
-.invoice-preview td { padding: 8px 6px; border-bottom: 1px solid var(--gray100); vertical-align: top; }
-.invoice-preview td:not(:first-child) { text-align: right; }
-.invoice-preview tfoot td { border-top: 2px solid var(--navy); font-weight: 700; padding: 10px 6px; }
+.alert-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+.alert-success { background: var(--green-lt); border-color: #5dbf8a; }
 
-/* ── AM Step Wizard ── */
 .stepper { display: flex; align-items: flex-start; gap: 0; margin-bottom: 24px; }
 .step { flex: 1; display: flex; flex-direction: column; align-items: center; position: relative; }
 .step:not(:last-child)::after {
@@ -282,462 +238,182 @@ body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); c
   background: var(--gray300); color: var(--gray500);
   transition: all 0.25s;
 }
-.step.done .step-circle  { background: var(--magenta); color: white; }
+.step.done .step-circle { background: var(--magenta); color: white; }
 .step.active .step-circle { background: var(--navy); color: white; box-shadow: 0 0 0 4px var(--navy-light); }
 .step-label { font-size: 9px; margin-top: 5px; text-align: center; color: var(--gray500); font-weight: 500; }
-.step.active .step-label  { color: var(--navy); font-weight: 700; }
-.step.done .step-label    { color: var(--magenta); }
+.step.active .step-label { color: var(--navy); font-weight: 700; }
+.step.done .step-label { color: var(--magenta); }
 
-.form-field { margin-bottom: 13px; }
-.form-label { font-size: 10px; color: var(--gray500); font-weight: 700; display: block; margin-bottom: 5px; letter-spacing: 0.5px; text-transform: uppercase; }
-.form-input {
-  padding: 9px 13px; border: 1.5px solid var(--border);
-  border-radius: 8px; background: var(--gray50);
-  font-size: 13px; width: 100%; font-family: inherit; color: var(--gray900);
-  transition: border-color 0.14s;
-}
-.form-input:focus { outline: none; border-color: var(--magenta); background: white; }
-.form-seg { display: flex; gap: 0; border-radius: 8px; overflow: hidden; border: 1.5px solid var(--border); }
-.seg-opt {
-  flex: 1; text-align: center; padding: 9px; font-size: 13px; font-weight: 500;
-  cursor: pointer; color: var(--gray500); background: var(--gray50); transition: all 0.14s;
-}
-.seg-opt.active { background: var(--navy); color: white; font-weight: 700; }
-
-/* ── Schedule ── */
-.schedule-item {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 12px 16px; border-radius: 9px; margin-bottom: 7px;
-  border: 1px solid var(--border); background: white;
-}
-.schedule-item.overdue { background: var(--orange-lt); border-color: #f0a060; }
-.schedule-item.upcoming { background: var(--gray50); }
-
-/* ── Animations ── */
 .fade-in { animation: fadeIn 0.2s ease; }
 @keyframes fadeIn { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:translateY(0); } }
 
-/* ── Scrollbar in sidebar ── */
-.sidebar-nav::-webkit-scrollbar { width: 3px; }
-.sidebar-nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius:2px; }
+.row-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--gray100); }
+.row-item:last-child { border-bottom: none; }
 
-/* ── Divider ── */
+.badge { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 4px; margin-left: 5px; }
+.tag { display: inline-flex; align-items: center; font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 4px; }
+
 .divider { height: 1px; background: var(--border); margin: 14px 0; }
+
+.input-with-hint { position: relative; }
+.input-hint { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 11px; color: var(--gray500); pointer-events: none; }
 </style>
 </head>
 <body>
-<div class="app" id="app"></div>
+
+<div id="app"></div>
 
 <script>
+// ═══════════════════════════════════════════
+// USERS & AUTH
+// ═══════════════════════════════════════════
+const USERS = [
+  { id: 'violetta',  name: 'Violetta A.', role: 'Account Manager', password: 'rch2026', avatar: 'VA' },
+  { id: 'elena',     name: 'Elena F.',    role: 'Team Leader', password: 'rch2026', avatar: 'EF' },
+];
+
 // ═══════════════════════════════════════════
 // DATA
 // ═══════════════════════════════════════════
 const CLIENTS = [
-  { id:1, name:"ABB Qatar",              company:"Rapid", type:"per-job",  balance:48500, limit:80000,  contact:"Sarah Al-Mansour", email:"sarah@abb.qa" },
-  { id:2, name:"Acrogym Sport Center",   company:"Rapid", type:"per-job",  balance:3200,  limit:20000,  contact:"Kirill Bazhanov",  email:"info@acrogym.qa" },
-  { id:3, name:"Seaquest Services",      company:"RCHBS", type:"retainer", balance:12310, limit:50000,  contact:"Ahmad Siregar",    email:"accounts@seaquest.qa" },
-  { id:4, name:"EY Qatar",              company:"Rapid", type:"per-job",  balance:95000, limit:150000, contact:"Finance Dept",     email:"invoices@ey.qa", costCode:true },
-  { id:5, name:"Hitachi Energy",         company:"Rapid", type:"per-job",  balance:22000, limit:60000,  contact:"HR Dept",          email:"hr@hitachi.qa", costCode:true },
-  { id:6, name:"Property Finder Qatar", company:"RCHBS", type:"per-job",  balance:8400,  limit:30000,  contact:"Ops Team",         email:"ops@pf.qa" },
+  { id:1, name:"ABB Qatar",              company:"Rapid", contact:"Sarah Al-Mansour", email:"sarah@abb.qa" },
+  { id:2, name:"Acrogym Sport Center",   company:"Rapid", contact:"Kirill Bazhanov",  email:"info@acrogym.qa" },
+  { id:3, name:"Seaquest Services",      company:"RCHBS", contact:"Ahmad Siregar",    email:"accounts@seaquest.qa" },
+  { id:4, name:"EY Qatar",              company:"Rapid", contact:"Finance Dept",     email:"invoices@ey.qa" },
+  { id:5, name:"Hitachi Energy",         company:"Rapid", contact:"HR Dept",          email:"hr@hitachi.qa" },
+  { id:6, name:"Property Finder Qatar", company:"RCHBS", contact:"Ops Team",         email:"ops@pf.qa" },
 ];
-const QUEUE = [
-  { id:101, client:"ABB Qatar",             company:"Rapid", service:"QID Renewal",         person:"Mohammed Al-Thani",  date:"02 Mar 2026", govtFee:1220, profFee:350,  card:"Rapid CC-1" },
-  { id:102, client:"ABB Qatar",             company:"Rapid", service:"QID Renewal",         person:"James Wilson",       date:"02 Mar 2026", govtFee:1220, profFee:350,  card:"Rapid CC-1" },
-  { id:103, client:"ABB Qatar",             company:"Rapid", service:"Work Visa",            person:"Chen Wei",           date:"03 Mar 2026", govtFee:300,  profFee:350,  card:"Rapid CC-2" },
-  { id:104, client:"Seaquest Services",     company:"RCHBS", service:"QID Renewal",         person:"Thu Maung",          date:"01 Mar 2026", govtFee:1220, profFee:0,    card:"RCHBS CC" },
-  { id:105, client:"Seaquest Services",     company:"RCHBS", service:"QID Renewal",         person:"Moe Zawoo",          date:"01 Mar 2026", govtFee:1220, profFee:0,    card:"RCHBS CC" },
-  { id:106, client:"Seaquest Services",     company:"RCHBS", service:"HC Issuance",         person:"Femidia Saputra",    date:"03 Mar 2026", govtFee:100,  profFee:0,    card:"Himyan-1" },
-  { id:107, client:"EY Qatar",             company:"Rapid", service:"Company Reg Renewal",  person:"—",                 date:"28 Feb 2026", govtFee:2500, profFee:1000, card:"Rapid CC-3" },
-  { id:108, client:"Property Finder Qatar",company:"RCHBS", service:"Gate Passes",          person:"Ali Hassan",         date:"03 Mar 2026", govtFee:200,  profFee:350,  card:"Himyan-2" },
-  { id:109, client:"Property Finder Qatar",company:"RCHBS", service:"Gate Passes",          person:"Omar Khalid",        date:"03 Mar 2026", govtFee:200,  profFee:350,  card:"Himyan-2" },
-  { id:110, client:"Acrogym Sport Center",  company:"Rapid", service:"Smart ID Issuance",   person:"Kristina Bazhanova", date:"04 Mar 2026", govtFee:200,  profFee:700,  card:"Rapid CC-1" },
+
+const SERVICES = [
+  { id: 'qid', label: 'QID Renewal', price: 1220 },
+  { id: 'visa', label: 'Work Visa', price: 300 },
+  { id: 'hc', label: 'HC Issuance', price: 100 },
+  { id: 'smartid', label: 'Smart ID Issuance', price: 200 },
+  { id: 'gate', label: 'Gate Passes', price: 200 },
+  { id: 'company', label: 'Company Registration Renewal', price: 2500 },
 ];
-const INVOICES = [
-  { id:"INV/RCH/8245",  client:"ABB Qatar",             amount:15400, date:"27 Feb", due:"06 Mar", status:"sent",    age:6  },
-  { id:"INV/RCHBS/9501",client:"Seaquest Services",     amount:12310, date:"20 Feb", due:"27 Feb", status:"overdue", age:13 },
-  { id:"INV/RCH/8240",  client:"Hitachi Energy",        amount:8200,  date:"13 Feb", due:"20 Feb", status:"overdue", age:20 },
-  { id:"INV/RCH/8238",  client:"EY Qatar",             amount:32000, date:"06 Feb", due:"13 Feb", status:"overdue", age:27 },
-  { id:"INV/RCHBS/9495",client:"Property Finder Qatar", amount:4200,  date:"20 Feb", due:"27 Feb", status:"paid",    age:0  },
-];
-const CARDS = [
-  { name:"Rapid CC-1 (xxx1001)", company:"Rapid", type:"Credit", spent:34200, limit:50000 },
-  { name:"Rapid CC-2 (xxx3139)", company:"Rapid", type:"Credit", spent:22800, limit:50000 },
-  { name:"Rapid CC-3 (xxx5427)", company:"Rapid", type:"Credit", spent:8900,  limit:50000 },
-  { name:"RCHBS CC (xxx5958)",   company:"RCHBS", type:"Credit", spent:41200, limit:50000 },
-  { name:"Himyan-1 (xxx8427)",   company:"RCHBS", type:"Himyan", spent:3200,  limit:5000  },
-  { name:"Himyan-2 (xxx7612)",   company:"RCHBS", type:"Himyan", spent:4100,  limit:5000  },
-  { name:"Himyan-3 (xxx9034)",   company:"RCHBS", type:"Himyan", spent:1800,  limit:5000  },
-];
-const SCHEDULED = [
-  { client:"Seaquest Services",     type:"Retainer",           amount:8500,  due:"15 Mar 2026", status:"upcoming" },
-  { client:"ABB Qatar",             type:"Annual Sponsorship",  amount:12000, due:"20 Mar 2026", status:"upcoming" },
-  { client:"EY Qatar",             type:"Monthly Accounting",  amount:5000,  due:"01 Mar 2026", status:"overdue"  },
-  { client:"Hitachi Energy",        type:"Retainer",           amount:6000,  due:"10 Mar 2026", status:"upcoming" },
-  { client:"Property Finder Qatar", type:"Retainer",           amount:3500,  due:"28 Feb 2026", status:"overdue"  },
-];
+
+// ═══════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════
+let state = {
+  screen: 'login',
+  user: null,
+  loginError: '',
+  selectedClient: null,
+  logStep: 0,
+  logForm: { service: null, employees: [], card: null, govtFee: null, receipt: false },
+};
+
+function setState(patch) { Object.assign(state, patch); render(); }
+
+// ═══════════════════════════════════════════
+// LOGIN
+// ═══════════════════════════════════════════
+function handleLogin(e) {
+  e.preventDefault();
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value;
+
+  const user = USERS.find(u => u.id === username);
+  if (!user || user.password !== password) {
+    setState({ loginError: 'Invalid credentials' });
+    return;
+  }
+  setState({ screen: 'app', user, loginError: '' });
+}
+
+function handleLogout() {
+  setState({ screen: 'login', user: null, loginError: '', logStep: 0, selectedClient: null });
+  document.getElementById('username').value = '';
+  document.getElementById('password').value = '';
+}
 
 // ═══════════════════════════════════════════
 // HELPERS
 // ═══════════════════════════════════════════
-let state = { view:'dashboard', selClient:null, selServices:[], showInvoice:false, created:false, amStep:0 };
-function setState(patch) { Object.assign(state, patch); render(); }
 function fmt(n) { return n.toLocaleString(); }
 
-function badge(text, bg, fg) {
-  return `<span class="badge" style="background:${bg};color:${fg||bg}">${text}</span>`;
-}
-function tagCo(co) {
-  return co === 'Rapid'
-    ? `<span class="tag" style="background:var(--navy-light);color:var(--navy)">${co}</span>`
-    : `<span class="tag" style="background:var(--magenta-lt);color:var(--magenta)">${co}</span>`;
-}
-function tagStatus(status, age) {
-  if (status === 'paid')    return `<span class="tag" style="background:var(--green-lt);color:var(--green)">Paid</span>`;
-  if (status === 'overdue') return `<span class="tag" style="background:var(--red-lt);color:var(--red)">${age}d overdue</span>`;
-  return `<span class="tag" style="background:var(--orange-lt);color:var(--orange)">Awaiting</span>`;
-}
-function progBar(val, max, color) {
-  const pct = Math.min(val / max * 100, 100);
-  const c = pct > 90 ? 'var(--red)' : pct > 75 ? 'var(--orange)' : color;
-  return `<div class="prog-wrap"><div class="prog-fill" style="width:${pct}%;background:${c}"></div></div>`;
-}
-function clientGroups() {
-  return [...new Set(QUEUE.map(s => s.client))].sort((a, b) => {
-    const aT = QUEUE.filter(s => s.client === a).reduce((x, s) => x + s.govtFee, 0);
-    const bT = QUEUE.filter(s => s.client === b).reduce((x, s) => x + s.govtFee, 0);
-    return bT - aT;
-  });
+function logoSVG(size) {
+  size = size || 36;
+  return `<svg width="${size}" height="${size}" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <polygon points="8,90 92,10 58,90" fill="#8c0050"/>
+    <polygon points="8,90 92,10 36,54" fill="#C4006A"/>
+    <polygon points="92,10 58,90 36,54" fill="#e0439a"/>
+  </svg>`;
 }
 
 // ═══════════════════════════════════════════
-// VIEW: DASHBOARD
+// VIEWS
 // ═══════════════════════════════════════════
 function viewDashboard() {
-  const totalU  = QUEUE.reduce((s, x) => s + x.govtFee + x.profFee, 0);
-  const totalO  = INVOICES.filter(i => i.status === 'overdue').reduce((s, i) => s + i.amount, 0);
-  const overdue20 = INVOICES.filter(i => i.status === 'overdue' && i.age >= 20);
-  const grp = clientGroups();
-
-  let html = `<div class="stats-row">
-    <div class="stat-card" style="--stat-color:var(--navy)">
-      <div class="stat-label">Uninvoiced Services</div>
-      <div class="stat-value">${QUEUE.length}</div>
-      <div class="stat-sub">QAR ${fmt(totalU)} pending</div>
-    </div>
-    <div class="stat-card" style="--stat-color:var(--red)">
-      <div class="stat-label">Overdue Invoices</div>
-      <div class="stat-value">${INVOICES.filter(i => i.status === 'overdue').length}</div>
-      <div class="stat-sub">QAR ${fmt(totalO)} outstanding</div>
-    </div>
-    <div class="stat-card" style="--stat-color:var(--orange)">
-      <div class="stat-label">Awaiting Payment</div>
-      <div class="stat-value">${INVOICES.filter(i => i.status === 'sent').length}</div>
-      <div class="stat-sub">Sent, not yet received</div>
-    </div>
-    <div class="stat-card" style="--stat-color:var(--magenta)">
-      <div class="stat-label">Active Clients</div>
-      <div class="stat-value">${grp.length}</div>
-      <div class="stat-sub">With verified services</div>
-    </div>
-  </div>`;
-
-  if (overdue20.length) {
-    html += `<div class="alert alert-warn">
-      <div class="alert-icon">⚠️</div>
-      <div><strong style="color:var(--orange)">Action required:</strong> ${overdue20.map(i => `<strong>${i.client}</strong> (${i.age}d)`).join(', ')} — follow up immediately</div>
-    </div>`;
-  }
-
-  html += `<div class="grid-2">
-    <div class="card">
-      <div class="card-header"><span class="card-title">Ready to Invoice</span><span style="font-size:11px;color:var(--gray500)">${grp.length} clients</span></div>`;
-  grp.forEach(cl => {
-    const svcs = QUEUE.filter(s => s.client === cl);
-    const tot  = svcs.reduce((x, s) => x + s.govtFee + s.profFee, 0);
-    html += `<div class="row-item">
-      <div style="display:flex;align-items:center;gap:8px">
-        <div>
-          <div style="font-size:13px;font-weight:600;color:var(--gray900)">${cl}</div>
-          <div style="display:flex;align-items:center;gap:4px;margin-top:3px">${tagCo(svcs[0].company)}<span style="font-size:10px;color:var(--gray500)">${svcs.length} service${svcs.length > 1 ? 's' : ''}</span></div>
-        </div>
+  return `
+    <div class="stats-row">
+      <div class="stat-card" style="--stat-color:var(--navy)">
+        <div class="stat-label">My Clients</div>
+        <div class="stat-value">${CLIENTS.length}</div>
+        <div class="stat-sub">Active accounts</div>
       </div>
-      <div style="text-align:right">
-        <div style="font-weight:700;font-size:13px;color:var(--navy)">QAR ${fmt(tot)}</div>
+      <div class="stat-card" style="--stat-color:var(--magenta)">
+        <div class="stat-label">Services Logged</div>
+        <div class="stat-value">12</div>
+        <div class="stat-sub">This month</div>
       </div>
-    </div>`;
-  });
-  html += `</div>
-    <div class="card">
-      <div class="card-header"><span class="card-title">Recent Invoices</span></div>`;
-  INVOICES.forEach(inv => {
-    html += `<div class="row-item">
-      <div>
-        <div style="font-size:12px;font-weight:700;color:var(--navy);font-variant-numeric:tabular-nums">${inv.id}</div>
-        <div style="font-size:11px;color:var(--gray500);margin-top:2px">${inv.client} · Due ${inv.due}</div>
-      </div>
-      <div style="text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:4px">
-        <div style="font-weight:700;font-size:13px">QAR ${fmt(inv.amount)}</div>
-        ${tagStatus(inv.status, inv.age)}
-      </div>
-    </div>`;
-  });
-  html += `</div></div>`;
-  return html;
-}
-
-// ═══════════════════════════════════════════
-// VIEW: INVOICING
-// ═══════════════════════════════════════════
-function viewInvoicing() {
-  if (state.showInvoice && state.selClient) return viewInvoicePreview();
-  const grp   = clientGroups();
-  const selT  = state.selServices.reduce((s, id) => { const x = QUEUE.find(q => q.id === id); return s + (x ? x.govtFee + x.profFee : 0); }, 0);
-
-  let html = `<div class="stats-row">
-    <div class="stat-card" style="--stat-color:var(--navy)">
-      <div class="stat-label">Uninvoiced</div><div class="stat-value">${QUEUE.length}</div>
-    </div>
-    <div class="stat-card" style="--stat-color:var(--magenta)">
-      <div class="stat-label">Clients</div><div class="stat-value">${grp.length}</div>
-    </div>
-    <div class="stat-card" style="--stat-color:var(--green)">
-      <div class="stat-label">Selected Value</div>
-      <div class="stat-value" style="font-size:18px">QAR ${fmt(selT)}</div>
-      <div class="stat-sub">${state.selServices.length} services</div>
-    </div>
-  </div>
-  <div class="grid-sidebar">
-    <div class="card" style="padding:14px">
-      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--gray500);margin-bottom:10px">Clients</div>`;
-
-  grp.forEach(cl => {
-    const tot = QUEUE.filter(s => s.client === cl).reduce((x, s) => x + s.govtFee, 0);
-    const act = state.selClient === cl;
-    html += `<div class="client-list-item ${act ? 'active' : ''}" onclick="setState({selClient:'${cl.replace(/'/g,"\\'")}',selServices:[]})">
-      <div style="font-weight:600;font-size:12px">${cl}</div>
-      <div style="font-size:10px;opacity:0.65;margin-top:1px">QAR ${fmt(tot)}</div>
-    </div>`;
-  });
-
-  html += `</div><div class="card">`;
-
-  if (!state.selClient) {
-    html += `<div style="text-align:center;color:var(--gray500);padding:48px 20px">
-      <div style="font-size:36px;margin-bottom:10px;opacity:0.35">📋</div>
-      <div style="font-weight:600;font-size:13px;margin-bottom:4px">Select a client</div>
-      <div style="font-size:12px">Choose a client on the left to view uninvoiced services</div>
-    </div>`;
-  } else {
-    const svcs = QUEUE.filter(s => s.client === state.selClient);
-    html += `<div class="card-header">
-      <div>
-        <div class="card-title" style="font-size:15px">${state.selClient}</div>
-        <div style="margin-top:3px">${tagCo(svcs[0].company)}</div>
-      </div>
-      <div style="display:flex;gap:7px;align-items:center">
-        <button class="btn btn-ghost btn-sm" onclick="setState({selServices:[${svcs.map(s => s.id)}]})">Select All</button>
-        ${state.selServices.length
-          ? `<button class="btn btn-primary btn-sm" onclick="setState({showInvoice:true})">Generate Invoice &nbsp;(${state.selServices.length})</button>`
-          : ''}
-      </div>
-    </div>`;
-    svcs.forEach(s => {
-      const sel = state.selServices.includes(s.id);
-      html += `<div class="svc-item ${sel ? 'selected' : ''}" onclick="toggleSvc(${s.id})">
-        <div class="svc-check">${sel ? '✓' : ''}</div>
-        <div style="flex:1">
-          <div style="font-weight:600;font-size:12px;color:var(--gray900)">${s.service} · ${s.person}</div>
-          <div style="font-size:10px;color:var(--gray500);margin-top:2px">${s.date} · ${s.card}</div>
-        </div>
-        <div style="text-align:right;flex-shrink:0">
-          <div style="font-weight:700;color:var(--navy);font-size:13px">QAR ${fmt(s.govtFee + s.profFee)}</div>
-          <div style="font-size:10px;color:var(--gray500)">G: ${fmt(s.govtFee)} · P: ${fmt(s.profFee)}</div>
-        </div>
-      </div>`;
-    });
-  }
-
-  html += `</div></div>`;
-  return html;
-}
-
-function viewInvoicePreview() {
-  const svcs = QUEUE.filter(s => state.selServices.includes(s.id));
-  const cl   = CLIENTS.find(c => c.name === state.selClient);
-  const gT   = svcs.reduce((s, x) => s + x.govtFee, 0);
-  const pT   = svcs.reduce((s, x) => s + x.profFee, 0);
-  const co   = cl?.company === 'Rapid' ? 'RCH' : 'RCHBS';
-
-  let html = `<button class="btn btn-ghost btn-sm" onclick="setState({showInvoice:false,created:false})" style="margin-bottom:16px">← Back to selection</button>`;
-
-  if (state.created) {
-    html += `<div class="alert alert-ok"><div class="alert-icon">✅</div><div><strong>Invoice INV/${co}/8250 created as draft</strong> — ready for Finance review.</div></div>`;
-  }
-
-  html += `<div class="invoice-preview">
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px">
-      <div>
-        <div style="font-size:10px;font-weight:700;color:var(--magenta);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px">Draft Invoice</div>
-        <div style="display:flex;align-items:center;gap:8px">
-          ${logoSVG(28)}
-          <span style="font-size:22px;font-weight:800;color:var(--navy)">RCH</span>
-        </div>
-      </div>
-      <div style="text-align:right;font-size:12px;color:var(--gray700);line-height:1.8">
-        <div style="font-size:16px;font-weight:700;color:var(--navy)">INV/${co}/8250</div>
-        <div>Date: 06 Mar 2026</div>
-        <div>Due: 13 Mar 2026</div>
+      <div class="stat-card" style="--stat-color:var(--green)">
+        <div class="stat-label">Pending Approval</div>
+        <div class="stat-value">3</div>
+        <div class="stat-sub">Waiting on Finance</div>
       </div>
     </div>
-    <div style="padding:12px 16px;background:var(--gray50);border-radius:8px;margin-bottom:18px">
-      <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--gray500);letter-spacing:0.5px;margin-bottom:4px">Billed To</div>
-      <div style="font-weight:700;font-size:14px;color:var(--navy)">${state.selClient}</div>
-      <div style="font-size:12px;color:var(--gray500)">Doha, Qatar</div>
-    </div>
-    <table>
-      <thead><tr><th>Description</th><th>Govt</th><th>Prof</th><th>Total (QAR)</th></tr></thead>
-      <tbody>`;
-  svcs.forEach((s, i) => {
-    html += `<tr>
-      <td style="color:var(--gray900)">${i + 1}. ${s.service} — ${s.person} <span style="color:var(--gray500);font-size:11px">(${s.date})</span></td>
-      <td>${fmt(s.govtFee)}</td>
-      <td>${fmt(s.profFee)}</td>
-      <td style="font-weight:600">${fmt(s.govtFee + s.profFee)}</td>
-    </tr>`;
-  });
-  html += `</tbody>
-      <tfoot>
-        <tr>
-          <td colspan="3" style="font-weight:700;color:var(--navy)">Total</td>
-          <td style="font-weight:800;color:var(--navy);font-size:16px">QAR ${fmt(gT + pT)}</td>
-        </tr>
-      </tfoot>
-    </table>
-    <div style="margin-top:18px;padding:12px 16px;background:var(--navy-light);border-radius:8px;font-size:11px;color:var(--navy)">
-      <strong>Bank:</strong> Qatar National Bank &nbsp;|&nbsp; <strong>Account:</strong> ${cl?.company === 'Rapid' ? 'Rapid Clearing House W.L.L.' : 'RCH Business Solutions W.L.L.'}
-    </div>
-    <div style="display:flex;gap:8px;margin-top:18px">`;
-  if (!state.created) {
-    html += `<button class="btn btn-primary" onclick="setState({created:true})">Create as Draft</button>
-             <button class="btn btn-ghost" onclick="setState({showInvoice:false})">Cancel</button>`;
-  } else {
-    html += `<button class="btn btn-navy" style="background:var(--green)">✓ Approve & Send</button>
-             <button class="btn btn-ghost">Edit Draft</button>`;
-  }
-  html += `</div></div>`;
-  return html;
-}
 
-// ═══════════════════════════════════════════
-// VIEW: CLIENTS
-// ═══════════════════════════════════════════
-function viewClients() {
-  let html = `<div class="grid-2">`;
-  CLIENTS.forEach(cl => {
-    const pct  = Math.round(cl.balance / cl.limit * 100);
-    const warn = pct > 80;
-    html += `<div class="card" style="${warn ? 'border:1.5px solid #f0a060' : ''}">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
-        <div>
-          <div style="font-weight:700;font-size:14px;color:var(--gray900)">${cl.name}</div>
-          <div style="display:flex;align-items:center;gap:4px;margin-top:5px">
-            ${tagCo(cl.company)}
-            <span class="tag" style="background:var(--gray100);color:var(--gray700)">${cl.type}</span>
-            ${cl.costCode ? `<span class="tag" style="background:var(--orange-lt);color:var(--orange)">Cost Code</span>` : ''}
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header"><span class="card-title">My Clients</span></div>
+        ${CLIENTS.map(c => `
+          <div class="row-item">
+            <div>
+              <div style="font-weight:600;font-size:13px;color:var(--gray900)">${c.name}</div>
+              <div style="font-size:10px;color:var(--gray500);margin-top:2px">${c.company}</div>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="setState({selectedClient:${c.id},logStep:0})">Log Service</button>
           </div>
+        `).join('')}
+      </div>
+
+      <div class="card">
+        <div class="card-header"><span class="card-title">Quick Stats</span></div>
+        <div class="row-item">
+          <span style="color:var(--gray500);font-size:12px">Services logged today</span>
+          <strong style="color:var(--navy);font-size:14px">2</strong>
         </div>
-        ${warn ? `<span style="font-size:16px" title="Near credit limit">⚠️</span>` : ''}
-      </div>
-      <div style="font-size:11px;color:var(--gray500);margin-bottom:5px">
-        Spend: <strong style="color:var(--gray900)">QAR ${fmt(cl.balance)}</strong> / ${fmt(cl.limit)} &nbsp;(${pct}%)
-      </div>
-      ${progBar(cl.balance, cl.limit, cl.company === 'Rapid' ? 'var(--navy)' : 'var(--magenta)')}
-      <div class="divider"></div>
-      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--gray500)">
-        <span>${cl.contact}</span><span>${cl.email}</span>
-      </div>
-    </div>`;
-  });
-  html += `</div>`;
-  return html;
-}
-
-// ═══════════════════════════════════════════
-// VIEW: CARDS
-// ═══════════════════════════════════════════
-function viewCards() {
-  let html = `<div class="grid-2">`;
-  CARDS.forEach(card => {
-    const pct = Math.round(card.spent / card.limit * 100);
-    const col = card.company === 'Rapid' ? 'var(--navy)' : 'var(--magenta)';
-    html += `<div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-        <div style="font-weight:700;font-size:13px;color:var(--gray900)">${card.name}</div>
-        <div style="display:flex;gap:4px">${tagCo(card.company)}<span class="tag" style="background:var(--gray100);color:var(--gray700)">${card.type}</span></div>
-      </div>
-      <div style="font-size:24px;font-weight:800;color:${pct > 80 ? 'var(--orange)' : col};margin-bottom:4px">QAR ${fmt(card.spent)}</div>
-      <div style="font-size:11px;color:var(--gray500);margin-bottom:6px">of ${fmt(card.limit)} limit · ${pct}% used</div>
-      ${progBar(card.spent, card.limit, col)}
-      ${pct > 80 ? `<div style="margin-top:7px;font-size:11px;color:var(--orange);font-weight:600">⚠ Low balance — top-up needed</div>` : ''}
-    </div>`;
-  });
-  html += `</div>`;
-  return html;
-}
-
-// ═══════════════════════════════════════════
-// VIEW: SCHEDULE
-// ═══════════════════════════════════════════
-function viewSchedule() {
-  let html = `<div class="card">
-    <div class="card-header">
-      <span class="card-title">Invoice Schedule</span>
-      <span style="font-size:11px;color:var(--gray500)">March 2026</span>
-    </div>
-    <div style="display:flex;gap:0;margin-bottom:20px;border-radius:8px;overflow:hidden;border:1px solid var(--border)">
-      <div style="flex:1;text-align:center;padding:8px;background:var(--gray100);color:var(--gray500);font-size:12px;font-weight:600">Feb 2026</div>
-      <div style="flex:1;text-align:center;padding:8px;background:var(--navy);color:white;font-size:12px;font-weight:700">Mar 2026 · Current</div>
-      <div style="flex:1;text-align:center;padding:8px;background:var(--gray100);color:var(--gray500);font-size:12px;font-weight:600">Apr 2026</div>
-    </div>`;
-  SCHEDULED.forEach(s => {
-    const ov = s.status === 'overdue';
-    html += `<div class="schedule-item ${s.status}">
-      <div>
-        <div style="font-weight:600;font-size:13px;color:var(--gray900)">${s.client}</div>
-        <div style="font-size:11px;color:var(--gray500);margin-top:2px">${s.type}</div>
-      </div>
-      <div style="text-align:right">
-        <div style="font-weight:700;color:var(--navy);font-size:14px">QAR ${fmt(s.amount)}</div>
-        <div style="display:flex;align-items:center;justify-content:flex-end;gap:6px;margin-top:3px">
-          <span style="font-size:11px;color:var(--gray500)">Due ${s.due}</span>
-          ${ov
-            ? `<span class="tag" style="background:var(--red-lt);color:var(--red)">Overdue</span>`
-            : `<span class="tag" style="background:var(--green-lt);color:var(--green)">Upcoming</span>`}
+        <div class="row-item">
+          <span style="color:var(--gray500);font-size:12px">Awaiting approval</span>
+          <strong style="color:var(--orange);font-size:14px">1</strong>
+        </div>
+        <div class="row-item">
+          <span style="color:var(--gray500);font-size:12px">Total value (this month)</span>
+          <strong style="color:var(--green);font-size:14px">QAR 18,500</strong>
         </div>
       </div>
-    </div>`;
-  });
-  html += `</div>`;
-  return html;
+    </div>
+  `;
 }
 
-// ═══════════════════════════════════════════
-// VIEW: AM DEMO
-// ═══════════════════════════════════════════
-function viewAmDemo() {
-  const steps = ["Select Client", "Service Details", "Payment & Receipt", "Submit"];
-  let html = `<div class="card" style="max-width:580px">
-    <div class="card-header">
-      <span class="card-title" style="font-size:15px">Log a Service</span>
-      <span style="font-size:11px;color:var(--gray500)">Account Manager workflow</span>
-    </div>
-    <p style="font-size:12px;color:var(--gray500);margin-bottom:22px;line-height:1.6">
-      Walkthrough of how an Account Manager logs a completed government service into the CRM for Finance review.
-    </p>
-    <div class="stepper">`;
+function viewLogService() {
+  if (!state.selectedClient) return `<div style="padding:40px;text-align:center;color:var(--gray500)">Select a client to begin</div>`;
+
+  const client = CLIENTS.find(c => c.id === state.selectedClient);
+  const steps = ["Select Service", "Employee Details", "Payment Info", "Submit"];
+
+  let html = `
+    <button class="btn btn-ghost btn-sm" onclick="setState({selectedClient:null,logStep:0})" style="margin-bottom:16px">← Back</button>
+    <div class="card" style="max-width:680px">
+      <div class="card-header"><span class="card-title" style="font-size:15px">Log Service — ${client.name}</span></div>
+
+      <div class="stepper">`;
   steps.forEach((s, i) => {
-    const done   = i < state.amStep;
-    const active = i === state.amStep;
+    const done   = i < state.logStep;
+    const active = i === state.logStep;
     html += `<div class="step ${done ? 'done' : active ? 'active' : ''}">
       <div class="step-circle">${done ? '✓' : i + 1}</div>
       <div class="step-label">${s}</div>
@@ -745,190 +421,157 @@ function viewAmDemo() {
   });
   html += `</div>`;
 
-  if (state.amStep === 0) html += `
-    <div style="padding:16px;border:1.5px solid var(--border);border-radius:10px">
-      <div class="form-field">
-        <label class="form-label">Client</label>
-        <div class="form-input" style="font-weight:600;color:var(--navy)">ABB Qatar</div>
-      </div>
-      <div class="form-field">
-        <label class="form-label">Company</label>
-        <div class="form-seg">
-          <div class="seg-opt active">Rapid</div>
-          <div class="seg-opt">RCHBS</div>
-        </div>
-      </div>
-    </div>`;
-
-  if (state.amStep === 1) {
+  // Step 0: Select Service
+  if (state.logStep === 0) {
     html += `<div style="padding:16px;border:1.5px solid var(--border);border-radius:10px">
-      <div class="form-field">
-        <label class="form-label">Service Type</label>
-        <div class="form-input">QID Renewal ▾</div>
-      </div>
-      <div class="form-field"><label class="form-label">Employees (3)</label>`;
-    ["Mohammed Al-Thani", "James Wilson", "Chen Wei"].forEach((n, i) => {
-      html += `<div class="form-input" style="margin-bottom:5px;color:var(--gray900)">${i + 1}. ${n} <span style="color:var(--gray500)">— 04 Mar 2026</span></div>`;
-    });
-    html += `</div></div>`;
+      <label class="form-label">Service Type</label>
+      <select class="form-input" onchange="setState({logForm:{...state.logForm, service: this.value}})">
+        <option value="">Choose a service...</option>
+        ${SERVICES.map(s => `<option value="${s.id}">${s.label} (QAR ${fmt(s.price)})</option>`).join('')}
+      </select>
+    </div>`;
   }
 
-  if (state.amStep === 2) html += `
-    <div style="padding:16px;border:1.5px solid var(--border);border-radius:10px">
-      <div class="form-field">
-        <label class="form-label">Card Used</label>
-        <div class="form-input">Rapid CC-1 (xxx1001) ▾</div>
-      </div>
-      <div class="form-field">
-        <label class="form-label">Govt Fee</label>
-        <div class="form-input">QAR 1,220 × 3 = <strong>QAR 3,660</strong></div>
-      </div>
-      <div class="form-field">
-        <label class="form-label">Prof Fee <span style="color:var(--green);font-size:9px;font-weight:600">(AUTO-FILLED)</span></label>
-        <div class="form-input">QAR 350 × 3 = <strong>QAR 1,050</strong></div>
-      </div>
-      <div class="form-field">
-        <label class="form-label">Receipt</label>
-        <div style="padding:18px;border:2px dashed var(--border);border-radius:9px;text-align:center;color:var(--gray500);font-size:12px">
-          📎 govt_receipt_QID_ABB.pdf — <span style="color:var(--green);font-weight:600">Uploaded ✓</span>
+  // Step 1: Employee Details
+  if (state.logStep === 1) {
+    html += `<div style="padding:16px;border:1.5px solid var(--border);border-radius:10px">
+      <label class="form-label">Number of Employees</label>
+      <input type="number" class="form-input" value="1" min="1" max="20" onchange="setState({logForm:{...state.logForm, employees: Array(parseInt(this.value)).fill({name:'',date:''})}})" style="margin-bottom:12px">
+      ${state.logForm.employees.map((e, i) => `
+        <div style="margin-bottom:12px">
+          <input class="form-input" type="text" placeholder="Employee ${i+1} name" value="${e.name || ''}" style="margin-bottom:6px">
+          <input class="form-input" type="date" placeholder="Service date" value="${e.date || ''}">
         </div>
-      </div>
+      `).join('')}
     </div>`;
+  }
 
-  if (state.amStep === 3) html += `
-    <div style="padding:24px;border:2px solid var(--green);border-radius:10px;background:var(--green-lt);text-align:center">
-      <div style="font-size:36px;margin-bottom:10px">✅</div>
-      <div style="font-weight:700;color:var(--green);font-size:16px;margin-bottom:14px">Submitted for Verification</div>
-      <div style="font-size:12px;color:var(--gray700);line-height:2;text-align:left;display:inline-block">
-        → <strong>Elena</strong> will review and approve the submission<br>
-        → <strong>Gabi</strong> will verify payment via SMS confirmation<br>
-        → Appears on Finance dashboard once approved<br>
-        → Client spend: <strong>QAR 48,500 → QAR 53,210</strong> (of 80,000)
+  // Step 2: Payment Info
+  if (state.logStep === 2) {
+    const svc = SERVICES.find(s => s.id === state.logForm.service);
+    const total = svc ? svc.price * state.logForm.employees.length : 0;
+    html += `<div style="padding:16px;border:1.5px solid var(--border);border-radius:10px">
+      <label class="form-label">Payment Card</label>
+      <select class="form-input" onchange="setState({logForm:{...state.logForm, card: this.value}})" style="margin-bottom:12px">
+        <option value="">Select card...</option>
+        <option value="rapid1">Rapid CC-1 (xxx1001)</option>
+        <option value="rapid2">Rapid CC-2 (xxx3139)</option>
+        <option value="rchbs">RCHBS CC (xxx5958)</option>
+      </select>
+      <label class="form-label">Total Amount</label>
+      <div class="form-input" style="background:var(--navy-light);color:var(--navy);font-weight:700;font-size:16px">QAR ${fmt(total)}</div>
+      <div style="margin-top:12px;padding:12px;background:var(--gray50);border-radius:8px">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px">
+          <input type="checkbox" onchange="setState({logForm:{...state.logForm, receipt: this.checked}})">
+          <span>Receipt uploaded & verified</span>
+        </label>
       </div>
     </div>`;
+  }
+
+  // Step 3: Confirm
+  if (state.logStep === 3) {
+    const svc = SERVICES.find(s => s.id === state.logForm.service);
+    const total = svc ? svc.price * state.logForm.employees.length : 0;
+    html += `<div style="padding:24px;border:2px solid var(--green);border-radius:10px;background:var(--green-lt);text-align:center">
+      <div style="font-size:36px;margin-bottom:10px">✅</div>
+      <div style="font-weight:700;color:var(--green);font-size:16px;margin-bottom:12px">Service Logged Successfully</div>
+      <div style="font-size:12px;color:var(--gray700);line-height:1.8;text-align:left;max-width:400px;margin:0 auto">
+        → <strong>${svc?.label}</strong> for <strong>${state.logForm.employees.length}</strong> employee(s)<br>
+        → Total: <strong>QAR ${fmt(total)}</strong><br>
+        → Payment: <strong>${state.logForm.card}</strong><br>
+        → Status: <strong style="color:var(--orange)">Awaiting approval</strong><br><br>
+        Elena will review and Elena will verify payment via SMS.
+      </div>
+    </div>`;
+  }
 
   html += `<div style="display:flex;justify-content:space-between;margin-top:20px">
-    <button class="btn btn-ghost btn-sm" onclick="setState({amStep:Math.max(0,state.amStep-1)})" ${state.amStep === 0 ? 'disabled' : ''}>← Back</button>
-    <button class="btn btn-primary btn-sm" onclick="setState({amStep:Math.min(3,state.amStep+1)})" ${state.amStep === 3 ? 'disabled' : ''}>Next →</button>
+    <button class="btn btn-ghost btn-sm" onclick="setState({logStep:Math.max(0,state.logStep-1)})" ${state.logStep === 0 ? 'disabled' : ''}>← Back</button>
+    <button class="btn btn-primary btn-sm" onclick="setState({logStep:Math.min(3,state.logStep+1)})" ${state.logStep === 3 ? 'disabled' : ''}>Next →</button>
   </div></div>`;
+
   return html;
 }
-
-// ═══════════════════════════════════════════
-// LOGO SVG
-// ═══════════════════════════════════════════
-function logoSVG(size) {
-  size = size || 36;
-  return `<svg width="${size}" height="${size}" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-    <!-- Paper plane pointing upper-right, origami style -->
-    <!-- Main body -->
-    <polygon points="8,90 92,10 58,90" fill="#8c0050"/>
-    <!-- Top wing (lighter face) -->
-    <polygon points="8,90 92,10 36,54" fill="#C4006A"/>
-    <!-- Nose highlight -->
-    <polygon points="92,10 58,90 36,54" fill="#e0439a"/>
-  </svg>`;
-}
-
-// ═══════════════════════════════════════════
-// TOGGLE SERVICE SELECTION
-// ═══════════════════════════════════════════
-function toggleSvc(id) {
-  const s = state.selServices;
-  setState({ selServices: s.includes(id) ? s.filter(x => x !== id) : [...s, id] });
-}
-
-// ═══════════════════════════════════════════
-// NAV
-// ═══════════════════════════════════════════
-const NAV = [
-  { key:'dashboard', label:'Dashboard',  icon:'◈', section: 'Overview' },
-  { key:'invoicing', label:'Invoicing',  icon:'⬡', section: null,  badge: () => QUEUE.length },
-  { key:'clients',   label:'Clients',    icon:'◉', section: 'Management' },
-  { key:'cards',     label:'Cards',      icon:'▣', section: null },
-  { key:'schedule',  label:'Schedule',   icon:'◷', section: null },
-  { key:'am-demo',   label:'AM Demo',    icon:'⊕', section: 'Workflow' },
-];
-const VIEWS = {
-  dashboard: viewDashboard,
-  invoicing: viewInvoicing,
-  clients:   viewClients,
-  cards:     viewCards,
-  schedule:  viewSchedule,
-  'am-demo': viewAmDemo,
-};
-const VIEW_LABELS = {
-  dashboard: 'Dashboard',
-  invoicing: 'Invoicing',
-  clients:   'Clients',
-  cards:     'Cards',
-  schedule:  'Schedule',
-  'am-demo': 'AM Demo — Log Service',
-};
-
-function switchView(key) { setState({ view: key, showInvoice: false, created: false }); }
 
 // ═══════════════════════════════════════════
 // RENDER
 // ═══════════════════════════════════════════
 function render() {
-  const overdueCount = INVOICES.filter(i => i.status === 'overdue').length;
+  const app = document.getElementById('app');
 
-  let navHTML = '';
-  let lastSection = null;
-  NAV.forEach(n => {
-    if (n.section && n.section !== lastSection) {
-      navHTML += `<div class="nav-section">${n.section}</div>`;
-      lastSection = n.section;
-    }
-    const b = n.badge ? n.badge() : null;
-    navHTML += `<div class="nav-item ${state.view === n.key ? 'active' : ''}" onclick="switchView('${n.key}')">
-      <span class="nav-icon">${n.icon}</span>
-      <span>${n.label}</span>
-      ${b ? `<span class="nav-badge">${b}</span>` : ''}
-    </div>`;
-  });
+  if (state.screen === 'login') {
+    app.innerHTML = `
+      <div class="login-screen">
+        <div class="login-container">
+          <div class="login-header">
+            <div class="login-logo">${logoSVG(44)}<span style="font-size:24px;font-weight:800;color:white">RCH</span></div>
+            <h1 class="login-title">Account Manager</h1>
+            <p class="login-subtitle">Log services and manage client accounts</p>
+          </div>
+          <form class="login-form" onsubmit="handleLogin(event)">
+            <h2>Sign In</h2>
+            <div class="form-group">
+              <label class="form-label">Username</label>
+              <select id="username" class="form-input" required>
+                <option value="">Select your account...</option>
+                ${USERS.map(u => `<option value="${u.id}">${u.name} (${u.role})</option>`).join('')}
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Password</label>
+              <input type="password" id="password" class="form-input" placeholder="••••••" required>
+            </div>
+            ${state.loginError ? `<div class="login-error">❌ ${state.loginError}</div>` : ''}
+            <button type="submit" class="login-btn">Sign In</button>
+            <div class="login-hint">Demo password: <strong>rch2026</strong></div>
+          </form>
+        </div>
+      </div>`;
+    return;
+  }
 
-  document.getElementById('app').innerHTML = `
-    <div class="sidebar">
-      <div class="sidebar-brand">
-        <div class="brand-logo">
-          ${logoSVG(32)}
-          <div class="brand-wordmark">
-            <div class="brand-rch">RCH</div>
-            <div class="brand-sub">CRM System</div>
+  // Main app
+  const views = {
+    dashboard: viewDashboard,
+    log: viewLogService,
+  };
+  const currentView = state.selectedClient ? 'log' : 'dashboard';
+
+  app.innerHTML = `
+    <div class="app">
+      <div class="sidebar">
+        <div class="sidebar-brand">
+          <div class="brand-logo">${logoSVG(32)}<div class="brand-wordmark"><div class="brand-rch">RCH</div><div class="brand-sub">CRM System</div></div></div>
+        </div>
+        <div class="sidebar-nav">
+          <div class="nav-item ${!state.selectedClient ? 'active' : ''}" onclick="setState({selectedClient:null,logStep:0})">
+            <span class="nav-icon">◈</span><span>Dashboard</span>
           </div>
+          <div class="nav-item ${state.selectedClient ? 'active' : ''}" onclick="setState({selectedClient:CLIENTS[0].id,logStep:0})">
+            <span class="nav-icon">⊕</span><span>Log Service</span>
+          </div>
+        </div>
+        <div class="sidebar-footer">
+          <div class="user-row">
+            <div class="user-avatar">${state.user.avatar}</div>
+            <div>
+              <div class="user-name">${state.user.name}</div>
+              <div class="user-role">${state.user.role}</div>
+            </div>
+          </div>
+          <button class="logout-btn" onclick="handleLogout()">Logout</button>
         </div>
       </div>
-      <div class="sidebar-nav">${navHTML}</div>
-      <div class="sidebar-footer">
-        <div class="user-row">
-          <div class="user-avatar">SM</div>
-          <div>
-            <div class="user-name">Suleiman Mussa</div>
-            <div class="user-role">Finance Department</div>
+      <div class="main">
+        <div class="topbar">
+          <div class="topbar-left">
+            <div class="topbar-title">${currentView === 'log' ? 'Log Service' : 'Dashboard'}</div>
+            <div class="topbar-sub">Thursday, 6 March 2026</div>
           </div>
         </div>
+        <div class="content"><div class="fade-in">${views[currentView]()}</div></div>
       </div>
-    </div>
-    <div class="main">
-      <div class="topbar">
-        <div class="topbar-left">
-          <div class="topbar-title">${VIEW_LABELS[state.view]}</div>
-          <div class="topbar-sub">Thursday, 6 March 2026 — Invoicing Day</div>
-        </div>
-        <div class="topbar-right">
-          <div class="chip" style="background:var(--red-lt);color:var(--red)">
-            <div class="chip-dot" style="background:var(--red)"></div>
-            ${overdueCount} Overdue
-          </div>
-          <div class="chip" style="background:var(--navy-light);color:var(--navy)">
-            <div class="chip-dot" style="background:var(--navy)"></div>
-            ${QUEUE.length} To Invoice
-          </div>
-        </div>
-      </div>
-      <div class="content"><div class="fade-in">${VIEWS[state.view]()}</div></div>
     </div>`;
 }
 
