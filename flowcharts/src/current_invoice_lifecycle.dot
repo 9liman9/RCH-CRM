@@ -1,0 +1,62 @@
+digraph invoice_lifecycle {
+    rankdir=TB; bgcolor="white"; pad=0.4; nodesep=0.4; ranksep=0.45; dpi=200;
+    node [shape=box, style="rounded,filled", fontname="DejaVu Sans", fontsize=10, width=2.4, height=0.45, penwidth=1.3];
+    edge [fontname="DejaVu Sans", fontsize=8, color="#666666", arrowsize=0.7, penwidth=1.1];
+
+    title [label="Current Process: Weekly Invoice Lifecycle", shape=none, fillcolor=white, fontsize=15, fontname="DejaVu Sans Bold", fontcolor="#1B3A5C"];
+
+    // Row 1
+    a1 [label="AM prints 2 copies\nof govt receipt\n(writes details in pencil)", fillcolor="#E8E8E8", color="#999999", fontcolor="#333333"];
+    
+    // Row 2 - split
+    a2 [label="Copy 1 → Finance tray", fillcolor="#E3EDF7", color="#1B3A5C", fontcolor="#1B3A5C", width=2.0];
+    a3 [label="Copy 2 → Gabi", fillcolor="#FCE4EC", color="#A3195B", fontcolor="#A3195B", width=2.0];
+    
+    // Row 3
+    a4 [label="Finance collects daily,\nsorts into Rapid / RCHBS", fillcolor="#E3EDF7", color="#1B3A5C", fontcolor="#1B3A5C"];
+    a3b [label="Gabi logs expenses\nin Excel + keeps copies", fillcolor="#FCE4EC", color="#A3195B", fontcolor="#A3195B"];
+
+    // Row 4 - Wednesday
+    wed [label="WEDNESDAY", shape=none, fillcolor=white, fontsize=12, fontname="DejaVu Sans Bold", fontcolor="#1B3A5C"];
+    b1 [label="Group receipts by client\n→ Build invoice in Excel\n(govt fee + service fee per line)", fillcolor="#1B3A5C", color="#1B3A5C", fontcolor="white"];
+
+    // Row 5 - Gabi check
+    b2 [label="Gabi cross-checks every\nline against her records", fillcolor="#FCE4EC", color="#A3195B", fontcolor="#A3195B"];
+    b3 [label="Returns corrections:\nmissing / wrong / misallocated", fillcolor="#FCE4EC", color="#A3195B", fontcolor="#A3195B"];
+
+    // Row 6
+    b4 [label="Finance applies corrections\n+ final review", fillcolor="#E3EDF7", color="#1B3A5C", fontcolor="#1B3A5C"];
+
+    // Row 7 - Thursday
+    thu [label="THURSDAY", shape=none, fillcolor=white, fontsize=12, fontname="DejaVu Sans Bold", fontcolor="#1B3A5C"];
+    c1 [label="Print + scan invoice\nwith receipts → save PDF", fillcolor="#E3EDF7", color="#1B3A5C", fontcolor="#1B3A5C"];
+    c2 [label="Enter same data into\nQuickBooks (by hand)", fillcolor="#FFF3E0", color="#E65100", fontcolor="#BF360C"];
+
+    // Row 8
+    c3 [label="Email invoice to client", fillcolor="#E8F5E9", color="#2E7D32", fontcolor="#1B5E20"];
+
+    // Edges
+    title -> a1 [style=invis];
+    a1 -> a2; a1 -> a3;
+    a2 -> a4; a3 -> a3b;
+    a4 -> wed [style=invis]; wed -> b1 [style=invis]; a4 -> b1 [label="  accumulate\n  all week"];
+    a3b -> b2 [style=dashed, label="  her copies", color="#A3195B"];
+    b1 -> b2 [label="  send to Gabi"];
+    b2 -> b3; b3 -> b4;
+    b4 -> thu [style=invis]; thu -> c1 [style=invis]; b4 -> c1;
+    c1 -> c2 [label="same data\ntyped again"];
+    c1 -> c3;
+    c2 -> c3 [style=dashed, label="both done\nbefore sending"];
+
+    // Layout
+    {rank=same; a2; a3}
+    {rank=same; a4; a3b}
+    {rank=same; c1; c2}
+
+    // Legend
+    subgraph cluster_legend {
+        label=""; style="rounded"; color="#CCCCCC"; bgcolor="#FAFAFA"; margin=8;
+        leg [label="AM = gray  |  Finance = navy  |  Gabi = pink  |  Double work = orange  |  Done = green",
+             shape=none, fontname="DejaVu Sans", fontsize=9, fontcolor="#666666"];
+    }
+}

@@ -1,0 +1,68 @@
+digraph money_flow {
+    rankdir=TB; bgcolor="white"; pad=0.4; nodesep=0.5; ranksep=0.5; dpi=200;
+    node [shape=box, style="rounded,filled", fontname="DejaVu Sans", fontsize=10, width=2.2, height=0.45, penwidth=1.3];
+    edge [fontname="DejaVu Sans", fontsize=8, color="#666666", arrowsize=0.7, penwidth=1.1];
+
+    title [label="Current Process: Money Flow & Document Trail", shape=none, fillcolor=white, fontsize=15, fontname="DejaVu Sans Bold", fontcolor="#1B3A5C"];
+
+    subgraph cluster_out {
+        label="Money Going Out"; labeljust=l;
+        fontname="DejaVu Sans Bold"; fontsize=10; fontcolor="#E65100";
+        style="rounded,dashed"; color="#E65100"; bgcolor="#FFFAF5"; margin=12;
+
+        bank_r [label="Rapid Bank (QNB)", fillcolor="#1B3A5C", color="#1B3A5C", fontcolor="white"];
+        bank_b [label="RCHBS Bank (QNB)", fillcolor="#1B3A5C", color="#1B3A5C", fontcolor="white"];
+        topup [label="Gabi transfers to\ncards (almost daily)", fillcolor="#FCE4EC", color="#A3195B", fontcolor="#A3195B"];
+        cards_r [label="Rapid: 3 Credit Cards", fillcolor="#FFF3E0", color="#E65100", fontcolor="#BF360C"];
+        cards_b [label="RCHBS: 1 CC +\n3 Himyan Prepaid", fillcolor="#FFF3E0", color="#E65100", fontcolor="#BF360C"];
+        ops [label="OPs pays govt fees\nusing cards", fillcolor="#E8E8E8", color="#999999", fontcolor="#333333"];
+        receipt [label="Govt receipt issued\n(2 copies by AM)", fillcolor="#E8E8E8", color="#999999", fontcolor="#333333"];
+
+        {rank=same; bank_r; bank_b}
+        {rank=same; cards_r; cards_b}
+        bank_r -> topup; bank_b -> topup;
+        topup -> cards_r; topup -> cards_b;
+        cards_r -> ops; cards_b -> ops;
+        ops -> receipt;
+    }
+
+    subgraph cluster_track {
+        label="Daily Tracking (Gabi)"; labeljust=l;
+        fontname="DejaVu Sans Bold"; fontsize=10; fontcolor="#A3195B";
+        style="rounded,dashed"; color="#A3195B"; bgcolor="#FFF5F8"; margin=12;
+
+        sms [label="Bank SMS alerts\nfor every card payment", fillcolor="#FCE4EC", color="#A3195B", fontcolor="#A3195B"];
+        gabi_log [label="Gabi logs expenses\nin Excel daily", fillcolor="#A3195B", color="#A3195B", fontcolor="white"];
+        exp_report [label="Expense reports\n(1st + 2nd half of month)\ndelivered at month-end", fillcolor="#FCE4EC", color="#A3195B", fontcolor="#A3195B"];
+
+        sms -> gabi_log; gabi_log -> exp_report;
+    }
+
+    subgraph cluster_in {
+        label="Money Coming In + Month-End"; labeljust=l;
+        fontname="DejaVu Sans Bold"; fontsize=10; fontcolor="#2E7D32";
+        style="rounded,dashed"; color="#2E7D32"; bgcolor="#F5FFF5"; margin=12;
+
+        invoice [label="Finance creates invoice\n(govt fee + prof fee)", fillcolor="#E3EDF7", color="#1B3A5C", fontcolor="#1B3A5C"];
+        client_pays [label="Client pays\n(transfer or cheque)", fillcolor="#E8F5E9", color="#2E7D32", fontcolor="#1B5E20"];
+        pv [label="Finance creates PV\nfor every outflow", fillcolor="#E3EDF7", color="#1B3A5C", fontcolor="#1B3A5C"];
+        recon [label="FINANCE: Monthly\nBank Reconciliation\n(match every line to\nPVs, invoices, cheques)", fillcolor="#1B3A5C", color="#1B3A5C", fontcolor="white"];
+        binders [label="File into ~8 physical\nbinders per month", fillcolor="#FFF3E0", color="#E65100", fontcolor="#BF360C"];
+
+        invoice -> client_pays; client_pays -> recon;
+        pv -> recon; recon -> binders;
+    }
+
+    receipt -> invoice [label=" Finance copy"];
+    receipt -> sms [style=dashed, label=" Gabi copy", color="#A3195B"];
+    topup -> pv [style=dashed, label=" learned later\n from bank stmt", color="#1B3A5C"];
+    exp_report -> recon [label=" delivered\n at month-end"];
+
+    {rank=same; receipt; sms; invoice}
+
+    subgraph cluster_legend {
+        label=""; style="rounded"; color="#CCCCCC"; bgcolor="#FAFAFA"; margin=8;
+        leg [label="Banks = navy  |  Cards = orange  |  Finance = blue  |  Gabi = pink  |  Payments in = green",
+             shape=none, fontname="DejaVu Sans", fontsize=9, fontcolor="#666666"];
+    }
+}
