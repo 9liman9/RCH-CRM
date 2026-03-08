@@ -117,6 +117,7 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .b-rejected{background:var(--red-lt);color:var(--red)}
 .b-expensed{background:var(--purple-lt);color:var(--purple)}
 .b-invoiced{background:var(--navy-lt);color:var(--navy)}
+.b-ops{background:#e0f2fe;color:#0369a1}
 
 /* Stepper */
 .stepper{display:flex;align-items:flex-start;margin-bottom:22px}
@@ -230,7 +231,7 @@ const CARDS = [
 // ═══════════════════════════════════
 // DATABASE (localStorage)
 // ═══════════════════════════════════
-const DB_KEY = 'rch_logs_v3';
+const DB_KEY = 'rch_logs_v4';
 
 const SEED = [
   {
@@ -238,7 +239,7 @@ const SEED = [
     qty:3, unitPrice:1220, total:3660, card:'rapid1', cardLabel:'Rapid CC-1 (xxx1001)',
     employees:[{name:'Ali Hassan',date:'2026-03-04'},{name:'Sara Khan',date:'2026-03-04'},{name:'Priya Nair',date:'2026-03-04'}],
     submittedBy:'violetta', submittedByName:'Violetta A.', submittedAt:'2026-03-04T10:30:00',
-    status:'pending', approvedBy:null, approvedAt:null, rejectedReason:null,
+    status:'ops_pending', approvedBy:null, approvedAt:null, rejectedReason:null,
     expensedBy:null, expensedAt:null, invoiceId:null, invoicedBy:null, invoicedAt:null, notes:''
   },
   {
@@ -247,6 +248,22 @@ const SEED = [
     employees:[{name:'John Patel',date:'2026-03-05'}],
     submittedBy:'violetta', submittedByName:'Violetta A.', submittedAt:'2026-03-05T14:10:00',
     status:'pending', approvedBy:null, approvedAt:null, rejectedReason:null,
+    expensedBy:null, expensedAt:null, invoiceId:null, invoicedBy:null, invoicedAt:null, notes:''
+  },
+  {
+    id:'LOG-012', clientId:6, clientName:'Property Finder Qatar', serviceId:'visa', serviceName:'Work Visa',
+    qty:2, unitPrice:300, total:600, card:'rchbs', cardLabel:'RCHBS CC (xxx5958)',
+    employees:[{name:'Kevin Zhao',date:'2026-03-07'},{name:'Maria Santos',date:'2026-03-07'}],
+    submittedBy:'violetta', submittedByName:'Violetta A.', submittedAt:'2026-03-07T09:00:00',
+    status:'ops_pending', approvedBy:null, approvedAt:null, rejectedReason:null,
+    expensedBy:null, expensedAt:null, invoiceId:null, invoicedBy:null, invoicedAt:null, notes:''
+  },
+  {
+    id:'LOG-013', clientId:2, clientName:'Acrogym Sport Center', serviceId:'qid', serviceName:'QID Renewal',
+    qty:1, unitPrice:1220, total:1220, card:'rapid1', cardLabel:'Rapid CC-1 (xxx1001)',
+    employees:[{name:'Olga Petrov',date:'2026-03-08'}],
+    submittedBy:'violetta', submittedByName:'Violetta A.', submittedAt:'2026-03-08T08:30:00',
+    status:'ops_pending', approvedBy:null, approvedAt:null, rejectedReason:null,
     expensedBy:null, expensedAt:null, invoiceId:null, invoicedBy:null, invoicedAt:null, notes:''
   },
   {
@@ -398,13 +415,13 @@ const fmtDate = iso => { const d = new Date(iso); return d.toLocaleDateString('e
 const fmtDT = iso => { const d = new Date(iso); return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short'})+' '+d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}); };
 const uid = () => 'LOG-'+String(dbGet().length+1).padStart(3,'0')+'-'+Date.now().toString(36).slice(-4).toUpperCase();
 const statusBadge = s => {
-  const map = {pending:'b-pending',approved:'b-approved',rejected:'b-rejected',expensed:'b-expensed',invoiced:'b-invoiced',paid:'b-approved'};
-  const lbl = {pending:'Pending Approval',approved:'Approved',rejected:'Rejected',expensed:'Expensed',invoiced:'Invoiced',paid:'Paid'};
+  const map = {ops_pending:'b-ops',pending:'b-pending',approved:'b-approved',rejected:'b-rejected',expensed:'b-expensed',invoiced:'b-invoiced',paid:'b-approved'};
+  const lbl = {ops_pending:'With OPs',pending:'Pending Approval',approved:'Approved',rejected:'Rejected',expensed:'Expensed',invoiced:'Invoiced',paid:'Paid'};
   return `<span class="badge ${map[s]||''}">${lbl[s]||s}</span>`;
 };
 const pipeHTML = status => {
-  const steps = ['Submitted','Approved','Expensed','Invoiced'];
-  const idx = {pending:0,approved:1,expensed:2,invoiced:3}[status]??0;
+  const steps = ['With OPs','Approval','Expensed','Invoiced'];
+  const idx = {ops_pending:0,pending:1,approved:2,expensed:2,invoiced:3}[status]??0;
   return `<div class="pipeline">${steps.map((s,i)=>`<div class="pipe-step ${i<idx?'done':i===idx?'current':''}"><span class="pipe-step-num">${i<idx?'✓':i+1}</span>${s}</div>`).join('')}</div>`;
 };
 
@@ -451,7 +468,7 @@ function submitLog() {
     employees: S.logForm.employees.slice(0, S.logForm.qty),
     submittedBy: S.user.id, submittedByName: S.user.name,
     submittedAt: new Date().toISOString(),
-    status:'pending',
+    status:'ops_pending',
     approvedBy:null, approvedByName:null, approvedAt:null, rejectedReason:null,
     expensedBy:null, expensedByName:null, expensedAt:null,
     invoiceId:null, invoicedBy:null, invoicedByName:null, invoicedAt:null,
@@ -459,6 +476,11 @@ function submitLog() {
   };
   dbAdd(log);
   set({logDone:true, logStep:3});
+}
+
+function markOpsComplete(id) {
+  dbUpdate(id, {status:'pending'});
+  set({});
 }
 
 function approveLog(id) {
@@ -517,26 +539,23 @@ function vDashboardAM() {
   const pendingCount   = myLogs.filter(l => l.status === 'pending').length;
   const rejectedCount  = myLogs.filter(l => l.status === 'rejected').length;
 
-  // Client list — Rapid first, then RCHBS, alpha within each group
-  const sortedClients = [...CLIENTS].sort((a,b) => {
-    if (a.company !== b.company) return a.company === 'Rapid' ? -1 : 1;
-    return a.name.localeCompare(b.name);
-  });
+  // Client list — grouped by company: Rapid first, then RCHBS
+  const rapidClients = [...CLIENTS].filter(c => c.company === 'Rapid').sort((a,b) => a.name.localeCompare(b.name));
+  const rchbsClients = [...CLIENTS].filter(c => c.company === 'RCHBS').sort((a,b) => a.name.localeCompare(b.name));
 
-  const clientRowsHTML = sortedClients.map(c => {
+  const buildClientRows = (clients) => clients.map(c => {
     const invoicedLogs  = allLogs.filter(l => l.clientId === c.id && l.status === 'invoiced');
     const ar            = invoicedLogs.reduce((s,l) => s + l.total, 0);
     const invCount      = invoicedLogs.length;
     const limit         = c.creditLimit || 0;
     const st            = arStatus(ar, limit);
     const pct           = limit > 0 ? Math.min(ar / limit, 1) : 0;
-    const companyColor  = c.company === 'Rapid' ? 'var(--navy)'    : 'var(--magenta)';
-    const companyBg     = c.company === 'Rapid' ? 'var(--navy-lt)' : 'var(--mag-lt)';
+    const blocked       = pct >= 1;
     return `
       <tr>
         <td>
           <div style="font-weight:600;font-size:13px;color:var(--g900)">${c.name}</div>
-          <span class="badge" style="background:${companyBg};color:${companyColor};margin-top:3px">${c.company}</span>
+          <div style="font-size:10px;color:var(--g500);margin-top:2px">${c.contact}</div>
         </td>
         <td>
           <div style="font-weight:700;font-size:13px;color:var(--navy)">QAR ${fmt(ar)}</div>
@@ -546,24 +565,31 @@ function vDashboardAM() {
         <td>
           <div style="display:flex;align-items:center;gap:6px">
             <div class="ar-bar-wrap"><div class="ar-bar-fill" style="width:${Math.round(pct*100)}%;--bc:${st.color}"></div></div>
-            <span class="badge ${st.cls}">${st.label}</span>
+            <span style="font-size:10px;font-weight:600;color:${st.color}">${Math.round(pct*100)}%</span>
           </div>
         </td>
-        <td><button class="btn btn-primary btn-xs" onclick="startLog(${c.id})">+ Log</button></td>
+        <td>
+          ${blocked
+            ? `<span class="badge b-rejected" style="font-size:9px">Follow Up Required</span>`
+            : pct >= 0.75
+              ? `<span class="badge b-pending" style="font-size:9px">Follow Up Soon</span>`
+              : `<button class="btn btn-primary btn-xs" onclick="startLog(${c.id})">+ Log Service</button>`
+          }
+        </td>
       </tr>`;
   }).join('');
 
-  // Kanban
+  // Kanban — services removed from board once client pays
   const kanbanCols = [
-    { title:'Pending Approval', status:'pending',  color:'var(--orange)' },
-    { title:'Ops Processing',   status:'approved', color:'var(--green)'  },
-    { title:'Pending Invoice',  status:'expensed', color:'var(--purple)' },
-    { title:'Invoiced',         status:'invoiced', color:'var(--navy)'   },
+    { title:'With OPs',          statuses:['ops_pending'],         color:'#0369a1', icon:'⚙' },
+    { title:'Pending Approval',  statuses:['pending'],             color:'var(--orange)', icon:'◷' },
+    { title:'Pending Invoice',   statuses:['approved','expensed'], color:'var(--purple)', icon:'📄' },
+    { title:'Invoiced',          statuses:['invoiced'],            color:'var(--navy)',   icon:'✓' },
   ];
 
   const kanbanHTML = kanbanCols.map(col => {
     const cards = allLogs.filter(l =>
-      l.status === col.status &&
+      col.statuses.includes(l.status) &&
       (l.submittedBy === S.user.id || S.user.type === 'tl')
     );
     const cardsHTML = cards.length === 0
@@ -571,19 +597,21 @@ function vDashboardAM() {
       : cards.map(l => {
           const client = CLIENTS.find(c => c.id === l.clientId);
           const accent = client?.company === 'Rapid' ? 'var(--navy)' : 'var(--magenta)';
+          const isOps = l.status === 'ops_pending';
           return `<div class="k-card" style="--kc:${accent}">
             <div class="k-card-client">${l.clientName}</div>
-            <div class="k-card-svc">${l.serviceName}</div>
+            <div class="k-card-svc">${l.serviceName} · ${l.qty} emp.</div>
             <div class="k-card-footer">
               <span class="k-card-date">${fmtDate(l.submittedAt)}</span>
               <span class="k-card-amt">QAR ${fmt(l.total)}</span>
             </div>
+            ${isOps ? `<button class="btn btn-success btn-xs" style="width:100%;margin-top:6px;justify-content:center" onclick="markOpsComplete('${l.id}')">OPs Complete → Send for Approval</button>` : ''}
           </div>`;
         }).join('');
     return `
       <div class="kanban-col">
         <div class="kanban-col-hd">
-          <span class="kanban-col-title" style="color:${col.color}">${col.title}</span>
+          <span class="kanban-col-title" style="color:${col.color}">${col.icon} ${col.title}</span>
           <span class="kanban-count">${cards.length}</span>
         </div>
         ${cardsHTML}
@@ -598,32 +626,45 @@ function vDashboardAM() {
         <div class="stat-sub">Active accounts</div>
       </div>
       <div class="stat" style="--sc:var(--green)">
-        <div class="stat-lbl">Services Logged</div>
+        <div class="stat-lbl">Services This Week</div>
         <div class="stat-val">${thisWeekCount}</div>
         <div class="stat-sub">${thisMonthCount} this month</div>
       </div>
       <div class="stat" style="--sc:var(--orange)">
         <div class="stat-lbl">Pending Approval</div>
         <div class="stat-val">${pendingCount}</div>
-        <div class="stat-sub">Awaiting Elena / TL</div>
+        <div class="stat-sub">Awaiting Elena</div>
       </div>
       <div class="stat" style="--sc:var(--red)">
-        <div class="stat-lbl">Elena's Feedback</div>
+        <div class="stat-lbl">Feedback from Elena</div>
         <div class="stat-val">${rejectedCount}</div>
         <div class="stat-sub">${rejectedCount === 0 ? 'All clear' : 'Need re-submission'}</div>
       </div>
     </div>
 
-    <div class="card" style="margin-bottom:20px">
+    <div class="card" style="margin-bottom:10px">
       <div class="card-hd">
-        <span class="card-title">Client Accounts</span>
-        <span style="font-size:10px;color:var(--g500)">A/R vs Credit Limit</span>
+        <span class="card-title">Rapid Clearing House</span>
+        <span class="badge" style="background:var(--navy-lt);color:var(--navy)">${rapidClients.length} clients</span>
       </div>
       <table class="client-table">
         <thead><tr>
-          <th>Client</th><th>A/R Balance</th><th>Credit Limit</th><th>Status</th><th></th>
+          <th>Client</th><th>A/R Balance</th><th>Limit</th><th>Usage</th><th></th>
         </tr></thead>
-        <tbody>${clientRowsHTML}</tbody>
+        <tbody>${buildClientRows(rapidClients)}</tbody>
+      </table>
+    </div>
+
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-hd">
+        <span class="card-title">RCHBS</span>
+        <span class="badge" style="background:var(--mag-lt);color:var(--magenta)">${rchbsClients.length} clients</span>
+      </div>
+      <table class="client-table">
+        <thead><tr>
+          <th>Client</th><th>A/R Balance</th><th>Limit</th><th>Usage</th><th></th>
+        </tr></thead>
+        <tbody>${buildClientRows(rchbsClients)}</tbody>
       </table>
     </div>
 
@@ -712,8 +753,8 @@ function vLogService() {
           <div style="font-size:12px;color:var(--g500);line-height:1.8">
             <strong>${svc?.label}</strong> for <strong>${S.logForm.qty}</strong> employee(s)<br>
             Total: <strong>QAR ${fmt(total)}</strong> · Card: <strong>${CARDS.find(c=>c.id===S.logForm.card)?.label||''}</strong><br>
-            Status: <span class="badge b-pending">Pending Approval</span><br><br>
-            Elena will receive a notification to review.
+            Status: <span class="badge b-ops">With OPs</span><br><br>
+            Operations team will execute this service.
           </div>
           <div style="display:flex;gap:10px;justify-content:center;margin-top:20px">
             <button class="btn btn-ghost" onclick="set({view:'dashboard',logClient:null,logDone:false})">Back to Dashboard</button>
@@ -1013,6 +1054,7 @@ function getNav(type) {
   const counts = (() => {
     const logs = dbGet();
     return {
+      ops_pending: logs.filter(l=>l.status==='ops_pending').length,
       pending: logs.filter(l=>l.status==='pending').length,
       approved: logs.filter(l=>l.status==='approved').length,
       expensed: logs.filter(l=>l.status==='expensed').length,
