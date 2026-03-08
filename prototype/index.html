@@ -3,578 +3,1146 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RCH CRM — Account Manager</title>
+<title>RCH CRM</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root {
-  --navy:        #1B2D5E;
-  --navy-dark:   #131f43;
-  --navy-light:  #e8ecf5;
-  --magenta:     #C4006A;
-  --magenta-dk:  #9c0054;
-  --magenta-lt:  #fce8f3;
-  --green:       #1a7a4a;
-  --green-lt:    #e6f4ed;
-  --orange:      #d05a00;
-  --orange-lt:   #fff3e6;
-  --red:         #c0272d;
-  --red-lt:      #fdeaea;
-  --bg:          #f2f4f8;
-  --white:       #ffffff;
-  --border:      #e3e7f0;
-  --gray50:      #f8f9fc;
-  --gray100:     #f0f2f7;
-  --gray300:     #d4d9e8;
-  --gray500:     #8a93b0;
-  --gray700:     #4a5170;
-  --gray900:     #1a1f36;
+  --navy:      #1B2D5E;
+  --navy-dk:   #131f43;
+  --navy-lt:   #e8ecf5;
+  --magenta:   #C4006A;
+  --mag-dk:    #9c0054;
+  --mag-lt:    #fce8f3;
+  --green:     #1a7a4a;
+  --green-lt:  #e6f4ed;
+  --orange:    #c97000;
+  --orange-lt: #fff3e6;
+  --red:       #c0272d;
+  --red-lt:    #fdeaea;
+  --purple:    #5c3d9e;
+  --purple-lt: #ece8f7;
+  --bg:        #f2f4f8;
+  --white:     #ffffff;
+  --border:    #e3e7f0;
+  --g50:       #f8f9fc;
+  --g100:      #f0f2f7;
+  --g300:      #d4d9e8;
+  --g500:      #8a93b0;
+  --g700:      #4a5170;
+  --g900:      #1a1f36;
 }
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--g900);-webkit-font-smoothing:antialiased}
 
-*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--gray900); -webkit-font-smoothing: antialiased; }
+/* ── Login ── */
+.login-wrap{display:flex;align-items:center;justify-content:center;height:100vh;
+  background:linear-gradient(135deg,var(--navy) 0%,var(--navy-dk) 100%);padding:20px}
+.login-box{width:100%;max-width:440px}
+.login-hd{text-align:center;margin-bottom:40px}
+.login-logo{display:inline-flex;align-items:center;gap:12px;margin-bottom:18px}
+.login-form{background:white;border-radius:16px;padding:32px;box-shadow:0 24px 60px rgba(0,0,0,.18)}
+.login-form h2{font-size:17px;font-weight:700;color:var(--navy);margin-bottom:22px;text-align:center}
+.login-hint{font-size:11px;color:var(--g500);margin-top:18px;padding-top:16px;border-top:1px solid var(--border);text-align:center}
+.login-err{color:var(--red);font-size:12px;margin-top:6px;font-weight:500}
 
-/* ════════════════════════════════════════
-   LOGIN SCREEN
-   ════════════════════════════════════════ */
-.login-screen {
-  display: flex; align-items: center; justify-content: center;
-  height: 100vh; background: linear-gradient(135deg, var(--navy) 0%, var(--navy-dark) 100%);
-  padding: 20px;
-}
-.login-container { width: 100%; max-width: 480px; }
-.login-header {
-  text-align: center; margin-bottom: 48px;
-}
-.login-logo { display: inline-flex; align-items: center; gap: 12px; margin-bottom: 24px; }
-.login-logo svg { width: 44px; height: 44px; }
-.login-title { font-size: 28px; font-weight: 800; color: white; margin-bottom: 6px; }
-.login-subtitle { font-size: 14px; color: rgba(255,255,255,0.6); }
+/* ── Layout ── */
+.app{display:flex;height:100vh;overflow:hidden}
+.sidebar{width:220px;flex-shrink:0;background:var(--navy);display:flex;flex-direction:column;border-right:1px solid rgba(255,255,255,.06)}
+.sb-brand{padding:22px 20px 18px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:9px}
+.brand-rch{font-size:20px;font-weight:800;color:white;letter-spacing:-.5px;line-height:1}
+.brand-sub{font-size:9px;font-weight:500;color:rgba(255,255,255,.35);letter-spacing:1.2px;text-transform:uppercase;margin-top:2px}
+.sb-nav{padding:10px 8px;flex:1;overflow-y:auto}
+.nav-section{font-size:9px;font-weight:700;color:rgba(255,255,255,.25);letter-spacing:1px;text-transform:uppercase;padding:12px 12px 5px;margin-top:4px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;cursor:pointer;color:rgba(255,255,255,.5);font-size:13px;font-weight:500;margin-bottom:1px;transition:background .14s,color .14s;position:relative}
+.nav-item:hover{background:rgba(255,255,255,.07);color:rgba(255,255,255,.8)}
+.nav-item.active{background:rgba(196,0,106,.18);color:#f0a0cc;font-weight:600}
+.nav-item.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:18px;background:var(--magenta);border-radius:0 2px 2px 0}
+.nav-icon{font-size:14px;width:18px;text-align:center;flex-shrink:0}
+.nav-badge{margin-left:auto;background:var(--magenta);color:white;font-size:10px;font-weight:700;border-radius:10px;padding:1px 6px}
+.sb-footer{padding:14px 16px;border-top:1px solid rgba(255,255,255,.08)}
+.user-row{display:flex;align-items:center;gap:9px}
+.u-avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--magenta),var(--mag-dk));color:white;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.u-name{font-size:12px;font-weight:600;color:rgba(255,255,255,.85)}
+.u-role{font-size:10px;color:rgba(255,255,255,.32);margin-top:1px}
+.logout-btn{margin-top:8px;width:100%;padding:6px;background:rgba(255,255,255,.09);border:none;border-radius:5px;color:rgba(255,255,255,.65);font-size:11px;cursor:pointer;transition:all .14s}
+.logout-btn:hover{background:rgba(255,255,255,.15);color:white}
 
-.login-form { background: white; border-radius: 16px; padding: 32px; box-shadow: 0 20px 60px rgba(27,45,94,0.2); }
-.login-form h2 { font-size: 18px; font-weight: 700; color: var(--navy); margin-bottom: 24px; text-align: center; }
+/* ── Main ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.topbar{background:white;border-bottom:1px solid var(--border);padding:0 28px;height:58px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.tb-title{font-size:15px;font-weight:700;color:var(--navy)}
+.tb-sub{font-size:11px;color:var(--g500);margin-top:1px}
+.content{flex:1;overflow-y:auto;padding:22px 28px}
+.content::-webkit-scrollbar{width:5px}
+.content::-webkit-scrollbar-thumb{background:var(--g300);border-radius:3px}
 
-.form-group { margin-bottom: 16px; }
-.form-label { font-size: 12px; font-weight: 700; color: var(--gray700); text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 6px; }
-.form-input {
-  width: 100%; padding: 11px 14px; border: 1.5px solid var(--border);
-  border-radius: 9px; background: var(--gray50); font-size: 14px;
-  font-family: inherit; color: var(--gray900); transition: border-color 0.2s;
-}
-.form-input:focus { outline: none; border-color: var(--magenta); background: white; box-shadow: 0 0 0 3px var(--magenta-lt); }
+/* ── Components ── */
+.card{background:white;border-radius:12px;box-shadow:0 1px 3px rgba(27,45,94,.07),0 0 0 1px rgba(27,45,94,.05);padding:20px;margin-bottom:16px}
+.card-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.card-title{font-size:13px;font-weight:700;color:var(--navy)}
 
-.login-btn {
-  width: 100%; padding: 12px; background: var(--magenta); color: white;
-  border: none; border-radius: 9px; font-size: 14px; font-weight: 700;
-  cursor: pointer; transition: background 0.2s; margin-top: 8px;
-}
-.login-btn:hover { background: var(--magenta-dk); }
-.login-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.stats-row{display:flex;gap:14px;margin-bottom:20px}
+.stat{background:white;border-radius:12px;padding:16px 18px;box-shadow:0 1px 3px rgba(27,45,94,.07),0 0 0 1px rgba(27,45,94,.05);flex:1;position:relative;overflow:hidden}
+.stat::after{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:var(--sc,var(--navy));border-radius:12px 0 0 12px}
+.stat-lbl{font-size:10px;font-weight:600;color:var(--g500);text-transform:uppercase;letter-spacing:.6px}
+.stat-val{font-size:24px;font-weight:800;color:var(--sc,var(--navy));margin-top:4px;line-height:1}
+.stat-sub{font-size:10px;color:var(--g500);margin-top:3px}
 
-.login-error { color: var(--red); font-size: 12px; margin-top: 8px; }
-.login-hint { font-size: 11px; color: var(--gray500); margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border); text-align: center; }
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 
-/* ════════════════════════════════════════
-   MAIN APP
-   ════════════════════════════════════════ */
-.app { display: flex; height: 100vh; overflow: hidden; }
+.btn{border:none;padding:8px 16px;border-radius:8px;font-weight:600;cursor:pointer;font-size:13px;font-family:inherit;transition:all .14s;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{filter:brightness(1.08)}
+.btn:disabled{opacity:.35;cursor:not-allowed;filter:none}
+.btn-primary{background:var(--magenta);color:white}
+.btn-navy{background:var(--navy);color:white}
+.btn-success{background:var(--green);color:white}
+.btn-danger{background:var(--red);color:white}
+.btn-ghost{background:var(--g100);color:var(--g700);border:1px solid var(--border)}
+.btn-sm{padding:5px 11px;font-size:11px;border-radius:6px}
+.btn-xs{padding:3px 9px;font-size:10px;border-radius:5px}
 
-/* Sidebar */
-.sidebar {
-  width: 220px; flex-shrink: 0;
-  background: var(--navy);
-  display: flex; flex-direction: column;
-  border-right: 1px solid rgba(255,255,255,0.06);
-}
-.sidebar-brand {
-  padding: 22px 20px 20px;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
-  display: flex; align-items: center; gap: 11px;
-}
-.brand-logo { display: flex; align-items: center; gap: 9px; }
-.brand-logo svg { width: 32px; height: 32px; flex-shrink: 0; }
-.brand-wordmark { display: flex; flex-direction: column; }
-.brand-rch { font-size: 20px; font-weight: 800; color: white; letter-spacing: -0.5px; line-height: 1; }
-.brand-sub { font-size: 9px; font-weight: 500; color: rgba(255,255,255,0.38); letter-spacing: 1.2px; text-transform: uppercase; margin-top: 2px; }
+.form-group{margin-bottom:15px}
+.form-label{font-size:10px;font-weight:700;color:var(--g500);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:5px}
+.form-input{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;background:var(--g50);font-size:13px;font-family:inherit;color:var(--g900);transition:border-color .14s}
+.form-input:focus{outline:none;border-color:var(--magenta);background:white}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 
-.sidebar-nav { padding: 12px 10px; flex: 1; overflow-y: auto; }
-.nav-item {
-  display: flex; align-items: center; gap: 10px;
-  padding: 9px 12px; border-radius: 7px;
-  cursor: pointer; color: rgba(255,255,255,0.5);
-  font-size: 13px; font-weight: 500; margin-bottom: 1px;
-  transition: background 0.14s, color 0.14s;
-  position: relative;
-}
-.nav-item:hover { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.8); }
-.nav-item.active {
-  background: rgba(196,0,106,0.18);
-  color: #f0a0cc;
-  font-weight: 600;
-}
-.nav-item.active::before {
-  content: '';
-  position: absolute; left: 0; top: 50%; transform: translateY(-50%);
-  width: 3px; height: 18px; background: var(--magenta);
-  border-radius: 0 2px 2px 0;
-}
-.nav-icon { font-size: 15px; width: 18px; text-align: center; flex-shrink: 0; }
+.row-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--g100)}
+.row-item:last-child{border-bottom:none}
 
-.sidebar-footer {
-  padding: 14px 18px; border-top: 1px solid rgba(255,255,255,0.08);
-}
-.user-row { display: flex; align-items: center; gap: 10px; }
-.user-avatar {
-  width: 30px; height: 30px; border-radius: 50%;
-  background: linear-gradient(135deg, var(--magenta) 0%, var(--magenta-dk) 100%);
-  color: white; font-size: 11px; font-weight: 700;
-  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-}
-.user-name { font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.85); }
-.user-role { font-size: 10px; color: rgba(255,255,255,0.35); margin-top: 1px; }
-.logout-btn {
-  margin-top: 8px; width: 100%;
-  padding: 6px; background: rgba(255,255,255,0.1);
-  border: none; border-radius: 5px; color: rgba(255,255,255,0.7);
-  font-size: 11px; cursor: pointer; transition: all 0.14s;
-}
-.logout-btn:hover { background: rgba(255,255,255,0.15); color: white; }
+/* Status badges */
+.badge{display:inline-flex;align-items:center;font-size:10px;font-weight:700;padding:3px 8px;border-radius:5px;letter-spacing:.2px}
+.b-pending{background:var(--orange-lt);color:var(--orange)}
+.b-approved{background:var(--green-lt);color:var(--green)}
+.b-rejected{background:var(--red-lt);color:var(--red)}
+.b-expensed{background:var(--purple-lt);color:var(--purple)}
+.b-invoiced{background:var(--navy-lt);color:var(--navy)}
 
-/* Main area */
-.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+/* Stepper */
+.stepper{display:flex;align-items:flex-start;margin-bottom:22px}
+.step{flex:1;display:flex;flex-direction:column;align-items:center;position:relative}
+.step:not(:last-child)::after{content:'';position:absolute;top:13px;left:50%;width:100%;height:2px;background:var(--g300)}
+.step.done::after,.step.active::after{background:var(--magenta)}
+.step-circle{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;z-index:1;background:var(--g300);color:var(--g500);transition:all .25s}
+.step.done .step-circle{background:var(--magenta);color:white}
+.step.active .step-circle{background:var(--navy);color:white;box-shadow:0 0 0 4px var(--navy-lt)}
+.step-lbl{font-size:9px;margin-top:4px;text-align:center;color:var(--g500);font-weight:500}
+.step.active .step-lbl{color:var(--navy);font-weight:700}
+.step.done .step-lbl{color:var(--magenta)}
 
-.topbar {
-  background: white; border-bottom: 1px solid var(--border);
-  padding: 0 28px; height: 60px;
-  display: flex; align-items: center; justify-content: space-between;
-  flex-shrink: 0;
-}
-.topbar-left { display: flex; flex-direction: column; }
-.topbar-title { font-size: 16px; font-weight: 700; color: var(--navy); }
-.topbar-sub { font-size: 11px; color: var(--gray500); margin-top: 1px; }
+/* Log entry card */
+.log-card{border:1.5px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:10px;background:white;transition:border-color .15s}
+.log-card:hover{border-color:var(--g300)}
+.log-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.log-card-actions{display:flex;gap:6px;flex-shrink:0}
+.log-meta{display:flex;gap:12px;margin-top:8px;flex-wrap:wrap}
+.log-meta-item{font-size:11px;color:var(--g500);display:flex;align-items:center;gap:4px}
 
-.content { flex: 1; overflow-y: auto; padding: 24px 28px; }
-.content::-webkit-scrollbar { width: 5px; }
-.content::-webkit-scrollbar-thumb { background: var(--gray300); border-radius: 3px; }
+/* Invoice */
+.invoice-box{border:2px solid var(--border);border-radius:12px;padding:24px;max-width:640px;margin:0 auto}
+.invoice-hd{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px}
+.invoice-table{width:100%;border-collapse:collapse;margin:16px 0}
+.invoice-table th{text-align:left;font-size:10px;font-weight:700;color:var(--g500);text-transform:uppercase;padding:6px 10px;border-bottom:2px solid var(--border)}
+.invoice-table td{padding:9px 10px;font-size:12px;border-bottom:1px solid var(--g100)}
+.invoice-total{text-align:right;margin-top:12px}
 
-/* Cards & Components */
-.card {
-  background: white; border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(27,45,94,0.07), 0 0 0 1px rgba(27,45,94,0.05);
-  padding: 20px;
-}
-.card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
-.card-title { font-size: 13px; font-weight: 700; color: var(--navy); }
+.fade{animation:fadeIn .2s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
 
-.stat-card {
-  background: white; border-radius: 12px;
-  padding: 18px 20px 16px;
-  box-shadow: 0 1px 3px rgba(27,45,94,0.07), 0 0 0 1px rgba(27,45,94,0.05);
-  flex: 1; min-width: 140px; position: relative; overflow: hidden;
-}
-.stat-card::after {
-  content: ''; position: absolute;
-  top: 0; left: 0; width: 4px; height: 100%;
-  background: var(--stat-color, var(--navy));
-  border-radius: 12px 0 0 12px;
-}
-.stat-label { font-size: 10px; font-weight: 600; color: var(--gray500); text-transform: uppercase; letter-spacing: 0.6px; }
-.stat-value { font-size: 26px; font-weight: 800; color: var(--stat-color, var(--navy)); margin-top: 5px; line-height: 1; }
-.stat-sub { font-size: 11px; color: var(--gray500); margin-top: 4px; }
+/* Pipeline strip */
+.pipeline{display:flex;gap:0;margin-bottom:22px;border-radius:10px;overflow:hidden;border:1px solid var(--border)}
+.pipe-step{flex:1;padding:10px 6px;text-align:center;font-size:10px;font-weight:600;background:var(--g100);color:var(--g500);border-right:1px solid var(--border);transition:all .2s}
+.pipe-step:last-child{border-right:none}
+.pipe-step.done{background:var(--green-lt);color:var(--green)}
+.pipe-step.current{background:var(--navy);color:white}
+.pipe-step-num{font-size:14px;font-weight:800;display:block;margin-bottom:2px}
 
-.stats-row { display: flex; gap: 14px; margin-bottom: 22px; }
-.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.empty-state{text-align:center;padding:48px 20px;color:var(--g500)}
+.empty-icon{font-size:36px;margin-bottom:10px}
+.empty-txt{font-size:14px;font-weight:600;margin-bottom:4px}
+.empty-sub{font-size:12px}
 
-.btn {
-  border: none; padding: 9px 18px; border-radius: 8px;
-  font-weight: 600; cursor: pointer; font-size: 13px;
-  font-family: inherit; transition: all 0.14s;
-  display: inline-flex; align-items: center; gap: 6px;
-}
-.btn:hover { filter: brightness(1.08); }
-.btn:disabled { opacity: 0.4; cursor: not-allowed; }
-.btn-primary { background: var(--magenta); color: white; }
-.btn-ghost { background: var(--gray100); color: var(--gray700); border: 1px solid var(--border); }
-.btn-sm { padding: 5px 12px; font-size: 11px; border-radius: 6px; }
-
-.client-card {
-  background: white; border: 1.5px solid var(--border);
-  border-radius: 10px; padding: 16px; cursor: pointer;
-  transition: all 0.2s;
-}
-.client-card:hover { border-color: var(--magenta); background: var(--magenta-lt); }
-.client-name { font-weight: 700; font-size: 13px; color: var(--gray900); }
-.client-role { font-size: 11px; color: var(--gray500); margin-top: 3px; }
-
-.form-group { margin-bottom: 16px; }
-.form-label { font-size: 10px; font-weight: 700; color: var(--gray500); text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 6px; }
-.form-input {
-  width: 100%; padding: 9px 13px; border: 1.5px solid var(--border);
-  border-radius: 8px; background: var(--gray50);
-  font-size: 13px; font-family: inherit; color: var(--gray900);
-  transition: border-color 0.14s;
-}
-.form-input:focus { outline: none; border-color: var(--magenta); background: white; }
-
-.alert {
-  border-radius: 10px; padding: 12px 16px; font-size: 12px;
-  margin-bottom: 18px; display: flex; align-items: flex-start; gap: 10px;
-  border: 1px solid transparent;
-}
-.alert-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
-.alert-success { background: var(--green-lt); border-color: #5dbf8a; }
-
-.stepper { display: flex; align-items: flex-start; gap: 0; margin-bottom: 24px; }
-.step { flex: 1; display: flex; flex-direction: column; align-items: center; position: relative; }
-.step:not(:last-child)::after {
-  content: ''; position: absolute;
-  top: 14px; left: 50%; width: 100%; height: 2px;
-  background: var(--gray300);
-}
-.step.done::after, .step.active::after { background: var(--magenta); }
-.step-circle {
-  width: 28px; height: 28px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 11px; font-weight: 700; z-index: 1;
-  background: var(--gray300); color: var(--gray500);
-  transition: all 0.25s;
-}
-.step.done .step-circle { background: var(--magenta); color: white; }
-.step.active .step-circle { background: var(--navy); color: white; box-shadow: 0 0 0 4px var(--navy-light); }
-.step-label { font-size: 9px; margin-top: 5px; text-align: center; color: var(--gray500); font-weight: 500; }
-.step.active .step-label { color: var(--navy); font-weight: 700; }
-.step.done .step-label { color: var(--magenta); }
-
-.fade-in { animation: fadeIn 0.2s ease; }
-@keyframes fadeIn { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:translateY(0); } }
-
-.row-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--gray100); }
-.row-item:last-child { border-bottom: none; }
-
-.badge { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 4px; margin-left: 5px; }
-.tag { display: inline-flex; align-items: center; font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 4px; }
-
-.divider { height: 1px; background: var(--border); margin: 14px 0; }
-
-.input-with-hint { position: relative; }
-.input-hint { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 11px; color: var(--gray500); pointer-events: none; }
+/* ── AM Dashboard Kanban ── */
+.kanban-wrap{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:4px}
+.kanban-col{background:var(--g50);border-radius:12px;border:1px solid var(--border);padding:12px;min-height:220px;display:flex;flex-direction:column}
+.kanban-col-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.kanban-col-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px}
+.kanban-count{font-size:10px;font-weight:700;background:var(--g300);color:var(--g700);border-radius:10px;padding:1px 7px}
+.k-card{background:white;border-radius:8px;border:1px solid var(--border);padding:10px 12px;margin-bottom:8px;border-left:3px solid var(--kc,var(--border));box-shadow:0 1px 2px rgba(27,45,94,.05)}
+.k-card:last-child{margin-bottom:0}
+.k-card-client{font-size:12px;font-weight:700;color:var(--g900);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.k-card-svc{font-size:10px;color:var(--g500);margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.k-card-footer{display:flex;justify-content:space-between;align-items:center}
+.k-card-date{font-size:10px;color:var(--g500)}
+.k-card-amt{font-size:11px;font-weight:700;color:var(--navy)}
+/* AM Client Table */
+.client-table{width:100%;border-collapse:collapse}
+.client-table th{text-align:left;font-size:10px;font-weight:700;color:var(--g500);text-transform:uppercase;letter-spacing:.5px;padding:7px 12px;border-bottom:2px solid var(--border)}
+.client-table td{padding:10px 12px;font-size:12px;border-bottom:1px solid var(--g100);vertical-align:middle}
+.client-table tr:last-child td{border-bottom:none}
+.client-table tr:hover td{background:var(--g50)}
+.ar-bar-wrap{width:80px;height:5px;background:var(--g100);border-radius:3px;display:inline-block;vertical-align:middle;margin-right:6px}
+.ar-bar-fill{height:100%;border-radius:3px;background:var(--bc,var(--green))}
 </style>
 </head>
 <body>
-
 <div id="app"></div>
-
 <script>
-// ═══════════════════════════════════════════
-// USERS & AUTH
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════
+// USERS
+// ═══════════════════════════════════
 const USERS = [
-  { id: 'violetta',  name: 'Violetta A.', role: 'Account Manager', password: 'rch2026', avatar: 'VA' },
-  { id: 'elena',     name: 'Elena F.',    role: 'Team Leader', password: 'rch2026', avatar: 'EF' },
+  { id:'violetta', name:'Violetta A.', role:'Account Manager',      password:'rch2026', avatar:'VA', type:'am'      },
+  { id:'elena',    name:'Elena F.',    role:'Team Leader',           password:'rch2026', avatar:'EF', type:'tl'      },
+  { id:'gabi',     name:'Gabi M.',     role:'Expense Tracker',       password:'rch2026', avatar:'GM', type:'expense' },
+  { id:'suleiman', name:'Suleiman M.', role:'Accountant',            password:'rch2026', avatar:'SM', type:'finance' },
+  { id:'arlene',   name:'Arlene D.',   role:'Accounting Manager',    password:'rch2026', avatar:'AD', type:'finance' },
+  { id:'mohamad',  name:'Mohamad J.',  role:'CFO',                   password:'rch2026', avatar:'MJ', type:'cfo'    },
 ];
 
-// ═══════════════════════════════════════════
-// DATA
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════
+// REFERENCE DATA
+// ═══════════════════════════════════
 const CLIENTS = [
-  { id:1, name:"ABB Qatar",              company:"Rapid", contact:"Sarah Al-Mansour", email:"sarah@abb.qa" },
-  { id:2, name:"Acrogym Sport Center",   company:"Rapid", contact:"Kirill Bazhanov",  email:"info@acrogym.qa" },
-  { id:3, name:"Seaquest Services",      company:"RCHBS", contact:"Ahmad Siregar",    email:"accounts@seaquest.qa" },
-  { id:4, name:"EY Qatar",              company:"Rapid", contact:"Finance Dept",     email:"invoices@ey.qa" },
-  { id:5, name:"Hitachi Energy",         company:"Rapid", contact:"HR Dept",          email:"hr@hitachi.qa" },
-  { id:6, name:"Property Finder Qatar", company:"RCHBS", contact:"Ops Team",         email:"ops@pf.qa" },
+  { id:1, name:'ABB Qatar',              company:'Rapid', contact:'Sarah Al-Mansour', creditLimit:8000  },
+  { id:2, name:'Acrogym Sport Center',   company:'Rapid', contact:'Kirill Bazhanov',  creditLimit:20000 },
+  { id:3, name:'Seaquest Services',      company:'RCHBS', contact:'Ahmad Siregar',    creditLimit:3000  },
+  { id:4, name:'EY Qatar',              company:'Rapid', contact:'Finance Dept',     creditLimit:75000 },
+  { id:5, name:'Hitachi Energy',         company:'Rapid', contact:'HR Dept',          creditLimit:2000  },
+  { id:6, name:'Property Finder Qatar', company:'RCHBS', contact:'Ops Team',         creditLimit:25000 },
 ];
 
 const SERVICES = [
-  { id: 'qid', label: 'QID Renewal', price: 1220 },
-  { id: 'visa', label: 'Work Visa', price: 300 },
-  { id: 'hc', label: 'HC Issuance', price: 100 },
-  { id: 'smartid', label: 'Smart ID Issuance', price: 200 },
-  { id: 'gate', label: 'Gate Passes', price: 200 },
-  { id: 'company', label: 'Company Registration Renewal', price: 2500 },
+  { id:'qid',     label:'QID Renewal',                  price:1220 },
+  { id:'visa',    label:'Work Visa',                     price:300  },
+  { id:'hc',      label:'HC Issuance',                  price:100  },
+  { id:'smartid', label:'Smart ID Issuance',             price:200  },
+  { id:'gate',    label:'Gate Passes',                  price:200  },
+  { id:'company', label:'Company Registration Renewal', price:2500 },
 ];
 
-// ═══════════════════════════════════════════
+const CARDS = [
+  { id:'rapid1', label:'Rapid CC-1 (xxx1001)'  },
+  { id:'rapid2', label:'Rapid CC-2 (xxx3139)'  },
+  { id:'rchbs',  label:'RCHBS CC (xxx5958)'    },
+];
+
+// ═══════════════════════════════════
+// DATABASE (localStorage)
+// ═══════════════════════════════════
+const DB_KEY = 'rch_logs_v3';
+
+const SEED = [
+  {
+    id:'LOG-001', clientId:1, clientName:'ABB Qatar', serviceId:'qid', serviceName:'QID Renewal',
+    qty:3, unitPrice:1220, total:3660, card:'rapid1', cardLabel:'Rapid CC-1 (xxx1001)',
+    employees:[{name:'Ali Hassan',date:'2026-03-04'},{name:'Sara Khan',date:'2026-03-04'},{name:'Priya Nair',date:'2026-03-04'}],
+    submittedBy:'violetta', submittedByName:'Violetta A.', submittedAt:'2026-03-04T10:30:00',
+    status:'pending', approvedBy:null, approvedAt:null, rejectedReason:null,
+    expensedBy:null, expensedAt:null, invoiceId:null, invoicedBy:null, invoicedAt:null, notes:''
+  },
+  {
+    id:'LOG-002', clientId:4, clientName:'EY Qatar', serviceId:'visa', serviceName:'Work Visa',
+    qty:1, unitPrice:300, total:300, card:'rapid2', cardLabel:'Rapid CC-2 (xxx3139)',
+    employees:[{name:'John Patel',date:'2026-03-05'}],
+    submittedBy:'violetta', submittedByName:'Violetta A.', submittedAt:'2026-03-05T14:10:00',
+    status:'pending', approvedBy:null, approvedAt:null, rejectedReason:null,
+    expensedBy:null, expensedAt:null, invoiceId:null, invoicedBy:null, invoicedAt:null, notes:''
+  },
+  {
+    id:'LOG-003', clientId:2, clientName:'Acrogym Sport Center', serviceId:'hc', serviceName:'HC Issuance',
+    qty:2, unitPrice:100, total:200, card:'rapid1', cardLabel:'Rapid CC-1 (xxx1001)',
+    employees:[{name:'Dmitri Volkov',date:'2026-03-03'},{name:'Nadia Cruz',date:'2026-03-03'}],
+    submittedBy:'violetta', submittedByName:'Violetta A.', submittedAt:'2026-03-03T11:00:00',
+    status:'approved', approvedBy:'elena', approvedByName:'Elena F.', approvedAt:'2026-03-03T16:45:00',
+    rejectedReason:null, expensedBy:null, expensedAt:null, invoiceId:null, invoicedBy:null, invoicedAt:null, notes:''
+  },
+  {
+    id:'LOG-004', clientId:5, clientName:'Hitachi Energy', serviceId:'smartid', serviceName:'Smart ID Issuance',
+    qty:4, unitPrice:200, total:800, card:'rchbs', cardLabel:'RCHBS CC (xxx5958)',
+    employees:[{name:'Mark Chen',date:'2026-03-01'},{name:'Fatima Al-Ali',date:'2026-03-01'},{name:'Robert Kim',date:'2026-03-01'},{name:'Aisha Patel',date:'2026-03-01'}],
+    submittedBy:'violetta', submittedByName:'Violetta A.', submittedAt:'2026-03-01T09:00:00',
+    status:'expensed', approvedBy:'elena', approvedByName:'Elena F.', approvedAt:'2026-03-01T14:00:00',
+    rejectedReason:null, expensedBy:'gabi', expensedByName:'Gabi M.', expensedAt:'2026-03-02T10:30:00',
+    invoiceId:null, invoicedBy:null, invoicedAt:null, notes:''
+  },
+  {
+    id:'LOG-005', clientId:3, clientName:'Seaquest Services', serviceId:'company', serviceName:'Company Registration Renewal',
+    qty:1, unitPrice:2500, total:2500, card:'rchbs', cardLabel:'RCHBS CC (xxx5958)',
+    employees:[{name:'Ahmad Siregar',date:'2026-02-25'}],
+    submittedBy:'violetta', submittedByName:'Violetta A.', submittedAt:'2026-02-25T08:00:00',
+    status:'invoiced', approvedBy:'elena', approvedByName:'Elena F.', approvedAt:'2026-02-25T12:00:00',
+    rejectedReason:null, expensedBy:'gabi', expensedByName:'Gabi M.', expensedAt:'2026-02-26T09:00:00',
+    invoiceId:'INV-2026-001', invoicedBy:'suleiman', invoicedByName:'Suleiman M.', invoicedAt:'2026-02-27T10:00:00', notes:''
+  },
+  {
+    id:'LOG-006', clientId:1, clientName:'ABB Qatar', serviceId:'qid', serviceName:'QID Renewal',
+    qty:5, unitPrice:1220, total:6100, card:'rapid1', cardLabel:'Rapid CC-1 (xxx1001)',
+    employees:[{name:'Tom Reid',date:'2026-02-10'},{name:'Jan Kowalski',date:'2026-02-10'},{name:'Mei Lin',date:'2026-02-10'},{name:'Youssef Osman',date:'2026-02-10'},{name:'Laura Diaz',date:'2026-02-10'}],
+    submittedBy:'violetta', submittedByName:'Violetta A.', submittedAt:'2026-02-10T09:00:00',
+    status:'invoiced', approvedBy:'elena', approvedByName:'Elena F.', approvedAt:'2026-02-10T14:00:00',
+    rejectedReason:null, expensedBy:'gabi', expensedByName:'Gabi M.', expensedAt:'2026-02-11T10:00:00',
+    invoiceId:'INV-2026-002', invoicedBy:'suleiman', invoicedByName:'Suleiman M.', invoicedAt:'2026-02-12T11:00:00', notes:''
+  },
+  {
+    id:'LOG-007', clientId:1, clientName:'ABB Qatar', serviceId:'visa', serviceName:'Work Visa',
+    qty:6, unitPrice:300, total:1800, card:'rapid1', cardLabel:'Rapid CC-1 (xxx1001)',
+    employees:[{name:'Carlos Mendez',date:'2026-02-15'},{name:'Rasha Hamdan',date:'2026-02-15'},{name:'David Park',date:'2026-02-15'},{name:'Nour Al-Farsi',date:'2026-02-15'},{name:'Ivan Petrov',date:'2026-02-15'},{name:'Anita Sharma',date:'2026-02-15'}],
+    submittedBy:'violetta', submittedByName:'Violetta A.', submittedAt:'2026-02-15T10:00:00',
+    status:'invoiced', approvedBy:'elena', approvedByName:'Elena F.', approvedAt:'2026-02-15T15:00:00',
+    rejectedReason:null, expensedBy:'gabi', expensedByName:'Gabi M.', expensedAt:'2026-02-16T09:00:00',
+    invoiceId:'INV-2026-003', invoicedBy:'suleiman', invoicedByName:'Suleiman M.', invoicedAt:'2026-02-17T13:00:00', notes:''
+  },
+  {
+    id:'LOG-008', clientId:5, clientName:'Hitachi Energy', serviceId:'gate', serviceName:'Gate Passes',
+    qty:8, unitPrice:200, total:1600, card:'rapid2', cardLabel:'Rapid CC-2 (xxx3139)',
+    employees:[{name:'Ben Clarke',date:'2026-02-20'},{name:'Zara Khan',date:'2026-02-20'},{name:'Liam Murphy',date:'2026-02-20'},{name:'Fatima Said',date:'2026-02-20'},{name:'Omar Hassan',date:'2026-02-20'},{name:'Lucy Wang',date:'2026-02-20'},{name:'Raj Kumar',date:'2026-02-20'},{name:'Anna Novak',date:'2026-02-20'}],
+    submittedBy:'violetta', submittedByName:'Violetta A.', submittedAt:'2026-02-20T08:30:00',
+    status:'invoiced', approvedBy:'elena', approvedByName:'Elena F.', approvedAt:'2026-02-20T13:00:00',
+    rejectedReason:null, expensedBy:'gabi', expensedByName:'Gabi M.', expensedAt:'2026-02-21T09:00:00',
+    invoiceId:'INV-2026-004', invoicedBy:'suleiman', invoicedByName:'Suleiman M.', invoicedAt:'2026-02-22T10:00:00', notes:''
+  },
+  {
+    id:'LOG-009', clientId:6, clientName:'Property Finder Qatar', serviceId:'hc', serviceName:'HC Issuance',
+    qty:3, unitPrice:100, total:300, card:'rchbs', cardLabel:'RCHBS CC (xxx5958)',
+    employees:[{name:'Sandra Osei',date:'2026-02-28'},{name:'Tariq Fahim',date:'2026-02-28'},{name:'Elena Vasquez',date:'2026-02-28'}],
+    submittedBy:'violetta', submittedByName:'Violetta A.', submittedAt:'2026-02-28T10:00:00',
+    status:'invoiced', approvedBy:'elena', approvedByName:'Elena F.', approvedAt:'2026-02-28T15:00:00',
+    rejectedReason:null, expensedBy:'gabi', expensedByName:'Gabi M.', expensedAt:'2026-03-01T09:00:00',
+    invoiceId:'INV-2026-005', invoicedBy:'suleiman', invoicedByName:'Suleiman M.', invoicedAt:'2026-03-02T11:00:00', notes:''
+  },
+  {
+    id:'LOG-010', clientId:4, clientName:'EY Qatar', serviceId:'smartid', serviceName:'Smart ID Issuance',
+    qty:3, unitPrice:200, total:600, card:'rapid1', cardLabel:'Rapid CC-1 (xxx1001)',
+    employees:[{name:'Paula Reyes',date:'2026-03-06'},{name:'Hamid Rashidi',date:'2026-03-06'},{name:'Yu Tanaka',date:'2026-03-06'}],
+    submittedBy:'violetta', submittedByName:'Violetta A.', submittedAt:'2026-03-06T09:00:00',
+    status:'expensed', approvedBy:'elena', approvedByName:'Elena F.', approvedAt:'2026-03-06T14:00:00',
+    rejectedReason:null, expensedBy:'gabi', expensedByName:'Gabi M.', expensedAt:'2026-03-07T09:00:00',
+    invoiceId:null, invoicedBy:null, invoicedAt:null, notes:''
+  },
+  {
+    id:'LOG-011', clientId:2, clientName:'Acrogym Sport Center', serviceId:'gate', serviceName:'Gate Passes',
+    qty:2, unitPrice:200, total:400, card:'rapid2', cardLabel:'Rapid CC-2 (xxx3139)',
+    employees:[{name:'Alice Sato',date:'2026-03-07'},{name:'Bruno Costa',date:'2026-03-07'}],
+    submittedBy:'violetta', submittedByName:'Violetta A.', submittedAt:'2026-03-07T10:30:00',
+    status:'rejected', approvedBy:'elena', approvedByName:'Elena F.', approvedAt:'2026-03-07T16:00:00',
+    rejectedReason:'Gate pass authorization not attached. Please re-submit with documentation.',
+    expensedBy:null, expensedAt:null, invoiceId:null, invoicedBy:null, invoicedAt:null, notes:''
+  },
+];
+
+function dbLoad() {
+  try {
+    const raw = localStorage.getItem(DB_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch(e) { return null; }
+}
+
+function dbSave(logs) {
+  localStorage.setItem(DB_KEY, JSON.stringify(logs));
+}
+
+function dbGet() {
+  let logs = dbLoad();
+  if (!logs) { logs = SEED; dbSave(logs); }
+  return logs;
+}
+
+function dbUpdate(id, patch) {
+  const logs = dbGet();
+  const idx = logs.findIndex(l => l.id === id);
+  if (idx !== -1) { Object.assign(logs[idx], patch); dbSave(logs); }
+  return logs;
+}
+
+function dbAdd(log) {
+  const logs = dbGet();
+  logs.unshift(log);
+  dbSave(logs);
+}
+
+function dbReset() {
+  localStorage.removeItem(DB_KEY);
+}
+
+// ═══════════════════════════════════
 // STATE
-// ═══════════════════════════════════════════
-let state = {
+// ═══════════════════════════════════
+let S = {
   screen: 'login',
   user: null,
   loginError: '',
-  selectedClient: null,
+  view: 'dashboard',
+  // Log service flow
+  logClient: null,
   logStep: 0,
-  logForm: { service: null, employees: [], card: null, govtFee: null, receipt: false },
+  logForm: { serviceId:'', qty:1, employees:[{name:'',date:''}], card:'', notes:'' },
+  logDone: false,
+  // approval reject modal
+  rejectId: null,
+  rejectReason: '',
+  // invoice preview
+  invoiceLogId: null,
 };
 
-function setState(patch) { Object.assign(state, patch); render(); }
-
-// ═══════════════════════════════════════════
-// LOGIN
-// ═══════════════════════════════════════════
-function handleLogin(e) {
-  e.preventDefault();
-  const username = document.getElementById('username').value.trim();
-  const password = document.getElementById('password').value;
-
-  const user = USERS.find(u => u.id === username);
-  if (!user || user.password !== password) {
-    setState({ loginError: 'Invalid credentials' });
-    return;
-  }
-  setState({ screen: 'app', user, loginError: '' });
+function set(patch) {
+  Object.assign(S, patch);
+  render();
 }
 
-function handleLogout() {
-  setState({ screen: 'login', user: null, loginError: '', logStep: 0, selectedClient: null });
-  document.getElementById('username').value = '';
-  document.getElementById('password').value = '';
-}
-
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════
 // HELPERS
-// ═══════════════════════════════════════════
-function fmt(n) { return n.toLocaleString(); }
+// ═══════════════════════════════════
+const fmt = n => Number(n).toLocaleString();
+const fmtDate = iso => { const d = new Date(iso); return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); };
+const fmtDT = iso => { const d = new Date(iso); return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short'})+' '+d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}); };
+const uid = () => 'LOG-'+String(dbGet().length+1).padStart(3,'0')+'-'+Date.now().toString(36).slice(-4).toUpperCase();
+const statusBadge = s => {
+  const map = {pending:'b-pending',approved:'b-approved',rejected:'b-rejected',expensed:'b-expensed',invoiced:'b-invoiced',paid:'b-approved'};
+  const lbl = {pending:'Pending Approval',approved:'Approved',rejected:'Rejected',expensed:'Expensed',invoiced:'Invoiced',paid:'Paid'};
+  return `<span class="badge ${map[s]||''}">${lbl[s]||s}</span>`;
+};
+const pipeHTML = status => {
+  const steps = ['Submitted','Approved','Expensed','Invoiced'];
+  const idx = {pending:0,approved:1,expensed:2,invoiced:3}[status]??0;
+  return `<div class="pipeline">${steps.map((s,i)=>`<div class="pipe-step ${i<idx?'done':i===idx?'current':''}"><span class="pipe-step-num">${i<idx?'✓':i+1}</span>${s}</div>`).join('')}</div>`;
+};
 
-function logoSVG(size) {
-  size = size || 36;
-  return `<svg width="${size}" height="${size}" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+function logoSVG(sz) {
+  return `<svg width="${sz}" height="${sz}" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
     <polygon points="8,90 92,10 58,90" fill="#8c0050"/>
     <polygon points="8,90 92,10 36,54" fill="#C4006A"/>
     <polygon points="92,10 58,90 36,54" fill="#e0439a"/>
   </svg>`;
 }
 
-// ═══════════════════════════════════════════
-// VIEWS
-// ═══════════════════════════════════════════
-function viewDashboard() {
+// ═══════════════════════════════════
+// ACTIONS
+// ═══════════════════════════════════
+function handleLogin(e) {
+  e.preventDefault();
+  const uid2 = document.getElementById('uid').value;
+  const pwd = document.getElementById('pwd').value;
+  const user = USERS.find(u => u.id === uid2);
+  if (!user || user.password !== pwd) { set({loginError:'Invalid credentials'}); return; }
+  set({screen:'app', user, loginError:'', view:'dashboard'});
+}
+
+function handleLogout() {
+  set({screen:'login', user:null, loginError:'', view:'dashboard', logClient:null, logDone:false});
+}
+
+function startLog(clientId) {
+  set({view:'log', logClient:clientId, logStep:0, logForm:{serviceId:'',qty:1,employees:[{name:'',date:''}],card:'',notes:''}, logDone:false});
+}
+
+function submitLog() {
+  const client = CLIENTS.find(c=>c.id===S.logClient);
+  const svc = SERVICES.find(s=>s.id===S.logForm.serviceId);
+  if (!svc || !S.logForm.card) { alert('Please fill all fields'); return; }
+  const total = svc.price * S.logForm.qty;
+  const card = CARDS.find(c=>c.id===S.logForm.card);
+  const log = {
+    id: uid(),
+    clientId: client.id, clientName: client.name,
+    serviceId: svc.id, serviceName: svc.label,
+    qty: S.logForm.qty, unitPrice: svc.price, total,
+    card: S.logForm.card, cardLabel: card.label,
+    employees: S.logForm.employees.slice(0, S.logForm.qty),
+    submittedBy: S.user.id, submittedByName: S.user.name,
+    submittedAt: new Date().toISOString(),
+    status:'pending',
+    approvedBy:null, approvedByName:null, approvedAt:null, rejectedReason:null,
+    expensedBy:null, expensedByName:null, expensedAt:null,
+    invoiceId:null, invoicedBy:null, invoicedByName:null, invoicedAt:null,
+    notes: S.logForm.notes
+  };
+  dbAdd(log);
+  set({logDone:true, logStep:3});
+}
+
+function approveLog(id) {
+  dbUpdate(id, {status:'approved', approvedBy:S.user.id, approvedByName:S.user.name, approvedAt:new Date().toISOString()});
+  set({});
+}
+
+function rejectLog(id, reason) {
+  dbUpdate(id, {status:'rejected', rejectedReason:reason, approvedBy:S.user.id, approvedByName:S.user.name, approvedAt:new Date().toISOString()});
+  set({rejectId:null, rejectReason:''});
+}
+
+function expenseLog(id) {
+  dbUpdate(id, {status:'expensed', expensedBy:S.user.id, expensedByName:S.user.name, expensedAt:new Date().toISOString()});
+  set({});
+}
+
+function generateInvoice(id) {
+  const invId = 'INV-'+new Date().getFullYear()+'-'+String(dbGet().filter(l=>l.invoiceId).length+1).padStart(3,'0');
+  dbUpdate(id, {status:'invoiced', invoiceId:invId, invoicedBy:S.user.id, invoicedByName:S.user.name, invoicedAt:new Date().toISOString()});
+  set({invoiceLogId:id});
+}
+
+function updateEmp(idx, field, value) {
+  const emps = [...S.logForm.employees];
+  emps[idx] = {...emps[idx], [field]:value};
+  S.logForm.employees = emps;
+}
+
+function updateQty(val) {
+  const qty = Math.max(1, Math.min(20, parseInt(val)||1));
+  const emps = Array.from({length:qty}, (_,i) => S.logForm.employees[i]||{name:'',date:''});
+  S.logForm = {...S.logForm, qty, employees:emps};
+}
+
+// ═══════════════════════════════════
+// VIEW: Dashboard (AM / TL)
+// ═══════════════════════════════════
+function arStatus(ar, limit) {
+  const pct = limit > 0 ? ar / limit : 0;
+  if (pct >= 1)    return { label:'Follow up required', cls:'b-rejected', color:'var(--red)'    };
+  if (pct >= 0.75) return { label:'Follow up soon',     cls:'b-pending',  color:'var(--orange)' };
+  return                  { label:'Good to service',    cls:'b-approved', color:'var(--green)'  };
+}
+
+function vDashboardAM() {
+  const allLogs = dbGet();
+  const myLogs  = allLogs.filter(l => l.submittedBy === S.user.id);
+
+  // Stats
+  const now        = new Date();
+  const weekAgo    = new Date(now); weekAgo.setDate(now.getDate() - 7);
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const thisWeekCount  = myLogs.filter(l => new Date(l.submittedAt) >= weekAgo).length;
+  const thisMonthCount = myLogs.filter(l => new Date(l.submittedAt) >= monthStart).length;
+  const pendingCount   = myLogs.filter(l => l.status === 'pending').length;
+  const rejectedCount  = myLogs.filter(l => l.status === 'rejected').length;
+
+  // Client list — Rapid first, then RCHBS, alpha within each group
+  const sortedClients = [...CLIENTS].sort((a,b) => {
+    if (a.company !== b.company) return a.company === 'Rapid' ? -1 : 1;
+    return a.name.localeCompare(b.name);
+  });
+
+  const clientRowsHTML = sortedClients.map(c => {
+    const invoicedLogs  = allLogs.filter(l => l.clientId === c.id && l.status === 'invoiced');
+    const ar            = invoicedLogs.reduce((s,l) => s + l.total, 0);
+    const invCount      = invoicedLogs.length;
+    const limit         = c.creditLimit || 0;
+    const st            = arStatus(ar, limit);
+    const pct           = limit > 0 ? Math.min(ar / limit, 1) : 0;
+    const companyColor  = c.company === 'Rapid' ? 'var(--navy)'    : 'var(--magenta)';
+    const companyBg     = c.company === 'Rapid' ? 'var(--navy-lt)' : 'var(--mag-lt)';
+    return `
+      <tr>
+        <td>
+          <div style="font-weight:600;font-size:13px;color:var(--g900)">${c.name}</div>
+          <span class="badge" style="background:${companyBg};color:${companyColor};margin-top:3px">${c.company}</span>
+        </td>
+        <td>
+          <div style="font-weight:700;font-size:13px;color:var(--navy)">QAR ${fmt(ar)}</div>
+          <div style="font-size:10px;color:var(--g500);margin-top:2px">${invCount} unpaid invoice${invCount!==1?'s':''}</div>
+        </td>
+        <td style="color:var(--g700);font-size:12px">QAR ${fmt(limit)}</td>
+        <td>
+          <div style="display:flex;align-items:center;gap:6px">
+            <div class="ar-bar-wrap"><div class="ar-bar-fill" style="width:${Math.round(pct*100)}%;--bc:${st.color}"></div></div>
+            <span class="badge ${st.cls}">${st.label}</span>
+          </div>
+        </td>
+        <td><button class="btn btn-primary btn-xs" onclick="startLog(${c.id})">+ Log</button></td>
+      </tr>`;
+  }).join('');
+
+  // Kanban
+  const kanbanCols = [
+    { title:'Pending Approval', status:'pending',  color:'var(--orange)' },
+    { title:'Ops Processing',   status:'approved', color:'var(--green)'  },
+    { title:'Pending Invoice',  status:'expensed', color:'var(--purple)' },
+    { title:'Invoiced',         status:'invoiced', color:'var(--navy)'   },
+  ];
+
+  const kanbanHTML = kanbanCols.map(col => {
+    const cards = allLogs.filter(l =>
+      l.status === col.status &&
+      (l.submittedBy === S.user.id || S.user.type === 'tl')
+    );
+    const cardsHTML = cards.length === 0
+      ? `<div style="text-align:center;padding:28px 0;color:var(--g500)"><div style="font-size:18px;margin-bottom:5px">○</div><div style="font-size:11px">No items</div></div>`
+      : cards.map(l => {
+          const client = CLIENTS.find(c => c.id === l.clientId);
+          const accent = client?.company === 'Rapid' ? 'var(--navy)' : 'var(--magenta)';
+          return `<div class="k-card" style="--kc:${accent}">
+            <div class="k-card-client">${l.clientName}</div>
+            <div class="k-card-svc">${l.serviceName}</div>
+            <div class="k-card-footer">
+              <span class="k-card-date">${fmtDate(l.submittedAt)}</span>
+              <span class="k-card-amt">QAR ${fmt(l.total)}</span>
+            </div>
+          </div>`;
+        }).join('');
+    return `
+      <div class="kanban-col">
+        <div class="kanban-col-hd">
+          <span class="kanban-col-title" style="color:${col.color}">${col.title}</span>
+          <span class="kanban-count">${cards.length}</span>
+        </div>
+        ${cardsHTML}
+      </div>`;
+  }).join('');
+
   return `
     <div class="stats-row">
-      <div class="stat-card" style="--stat-color:var(--navy)">
-        <div class="stat-label">My Clients</div>
-        <div class="stat-value">${CLIENTS.length}</div>
+      <div class="stat" style="--sc:var(--navy)">
+        <div class="stat-lbl">Clients</div>
+        <div class="stat-val">${CLIENTS.length}</div>
         <div class="stat-sub">Active accounts</div>
       </div>
-      <div class="stat-card" style="--stat-color:var(--magenta)">
-        <div class="stat-label">Services Logged</div>
-        <div class="stat-value">12</div>
-        <div class="stat-sub">This month</div>
+      <div class="stat" style="--sc:var(--green)">
+        <div class="stat-lbl">Services Logged</div>
+        <div class="stat-val">${thisWeekCount}</div>
+        <div class="stat-sub">${thisMonthCount} this month</div>
       </div>
-      <div class="stat-card" style="--stat-color:var(--green)">
-        <div class="stat-label">Pending Approval</div>
-        <div class="stat-value">3</div>
-        <div class="stat-sub">Waiting on Finance</div>
+      <div class="stat" style="--sc:var(--orange)">
+        <div class="stat-lbl">Pending Approval</div>
+        <div class="stat-val">${pendingCount}</div>
+        <div class="stat-sub">Awaiting Elena / TL</div>
+      </div>
+      <div class="stat" style="--sc:var(--red)">
+        <div class="stat-lbl">Elena's Feedback</div>
+        <div class="stat-val">${rejectedCount}</div>
+        <div class="stat-sub">${rejectedCount === 0 ? 'All clear' : 'Need re-submission'}</div>
       </div>
     </div>
 
-    <div class="grid-2">
-      <div class="card">
-        <div class="card-header"><span class="card-title">My Clients</span></div>
-        ${CLIENTS.map(c => `
-          <div class="row-item">
-            <div>
-              <div style="font-weight:600;font-size:13px;color:var(--gray900)">${c.name}</div>
-              <div style="font-size:10px;color:var(--gray500);margin-top:2px">${c.company}</div>
-            </div>
-            <button class="btn btn-primary btn-sm" onclick="setState({selectedClient:${c.id},logStep:0})">Log Service</button>
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-hd">
+        <span class="card-title">Client Accounts</span>
+        <span style="font-size:10px;color:var(--g500)">A/R vs Credit Limit</span>
+      </div>
+      <table class="client-table">
+        <thead><tr>
+          <th>Client</th><th>A/R Balance</th><th>Credit Limit</th><th>Status</th><th></th>
+        </tr></thead>
+        <tbody>${clientRowsHTML}</tbody>
+      </table>
+    </div>
+
+    <div class="card-hd" style="margin-bottom:10px">
+      <span class="card-title" style="font-size:14px">Service Pipeline</span>
+      <span style="font-size:10px;color:var(--g500)">Active service logs by stage · paid services removed automatically</span>
+    </div>
+    <div class="kanban-wrap">${kanbanHTML}</div>`;
+}
+
+// ═══════════════════════════════════
+// VIEW: Log Service
+// ═══════════════════════════════════
+function vLogService() {
+  if (!S.logClient) return `<div style="text-align:center;padding:48px;color:var(--g500)">Select a client to begin</div>`;
+  const client = CLIENTS.find(c=>c.id===S.logClient);
+  const svc = SERVICES.find(s=>s.id===S.logForm.serviceId);
+  const total = svc ? svc.price * S.logForm.qty : 0;
+
+  const steps = ['Service','Employees','Payment','Done'];
+  let stepsHTML = `<div class="stepper">${steps.map((s,i)=>{
+    const done=i<S.logStep, active=i===S.logStep;
+    return `<div class="step ${done?'done':active?'active':''}">
+      <div class="step-circle">${done?'✓':i+1}</div>
+      <div class="step-lbl">${s}</div>
+    </div>`;
+  }).join('')}</div>`;
+
+  let body = '';
+
+  if (S.logStep === 0) {
+    body = `
+      <div class="form-group">
+        <label class="form-label">Service Type</label>
+        <select class="form-input" onchange="S.logForm.serviceId=this.value;render()">
+          <option value="">Choose a service...</option>
+          ${SERVICES.map(s=>`<option value="${s.id}" ${S.logForm.serviceId===s.id?'selected':''}>${s.label} — QAR ${fmt(s.price)}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Number of Employees</label>
+        <input class="form-input" type="number" min="1" max="20" value="${S.logForm.qty}"
+          onchange="updateQty(this.value);render()" style="width:120px">
+      </div>`;
+  }
+
+  if (S.logStep === 1) {
+    body = `
+      <div style="font-size:12px;color:var(--g500);margin-bottom:14px">Enter name &amp; service date for each employee</div>
+      ${S.logForm.employees.map((e,i)=>`
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+          <input class="form-input" type="text" placeholder="Employee ${i+1} name" value="${e.name||''}"
+            oninput="updateEmp(${i},'name',this.value)">
+          <input class="form-input" type="date" value="${e.date||''}"
+            onchange="updateEmp(${i},'date',this.value)">
+        </div>`).join('')}`;
+  }
+
+  if (S.logStep === 2) {
+    body = `
+      <div class="form-group">
+        <label class="form-label">Payment Card</label>
+        <select class="form-input" onchange="S.logForm.card=this.value;render()">
+          <option value="">Select card...</option>
+          ${CARDS.map(c=>`<option value="${c.id}" ${S.logForm.card===c.id?'selected':''}>${c.label}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Total Amount</label>
+        <div class="form-input" style="background:var(--navy-lt);color:var(--navy);font-weight:800;font-size:16px">QAR ${fmt(total)}</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notes (optional)</label>
+        <textarea class="form-input" rows="2" placeholder="Any notes..." oninput="S.logForm.notes=this.value">${S.logForm.notes||''}</textarea>
+      </div>
+      <div style="padding:11px 13px;background:var(--g50);border:1px solid var(--border);border-radius:8px;font-size:12px;color:var(--g700)">
+        📋 Summary: <strong>${svc?.label}</strong> × ${S.logForm.qty} employee(s) = <strong>QAR ${fmt(total)}</strong>
+      </div>`;
+  }
+
+  if (S.logStep === 3) {
+    body = S.logDone
+      ? `<div style="text-align:center;padding:24px">
+          <div style="font-size:48px;margin-bottom:12px">✅</div>
+          <div style="font-weight:800;font-size:16px;color:var(--green);margin-bottom:8px">Service Logged!</div>
+          <div style="font-size:12px;color:var(--g500);line-height:1.8">
+            <strong>${svc?.label}</strong> for <strong>${S.logForm.qty}</strong> employee(s)<br>
+            Total: <strong>QAR ${fmt(total)}</strong> · Card: <strong>${CARDS.find(c=>c.id===S.logForm.card)?.label||''}</strong><br>
+            Status: <span class="badge b-pending">Pending Approval</span><br><br>
+            Elena will receive a notification to review.
           </div>
-        `).join('')}
-      </div>
+          <div style="display:flex;gap:10px;justify-content:center;margin-top:20px">
+            <button class="btn btn-ghost" onclick="set({view:'dashboard',logClient:null,logDone:false})">Back to Dashboard</button>
+            <button class="btn btn-primary" onclick="set({view:'submissions'})">View Submissions</button>
+          </div>
+        </div>`
+      : `<div style="text-align:center;padding:24px;color:var(--g500)">Loading...</div>`;
+  }
 
-      <div class="card">
-        <div class="card-header"><span class="card-title">Quick Stats</span></div>
-        <div class="row-item">
-          <span style="color:var(--gray500);font-size:12px">Services logged today</span>
-          <strong style="color:var(--navy);font-size:14px">2</strong>
-        </div>
-        <div class="row-item">
-          <span style="color:var(--gray500);font-size:12px">Awaiting approval</span>
-          <strong style="color:var(--orange);font-size:14px">1</strong>
-        </div>
-        <div class="row-item">
-          <span style="color:var(--gray500);font-size:12px">Total value (this month)</span>
-          <strong style="color:var(--green);font-size:14px">QAR 18,500</strong>
-        </div>
+  const canNext =
+    (S.logStep===0 && S.logForm.serviceId && S.logForm.qty > 0) ||
+    (S.logStep===1) ||
+    (S.logStep===2 && S.logForm.card);
+
+  return `
+    <button class="btn btn-ghost btn-sm" onclick="set({view:'dashboard',logClient:null})" style="margin-bottom:14px">← Back</button>
+    <div class="card" style="max-width:620px">
+      <div class="card-hd"><span class="card-title" style="font-size:15px">Log Service — ${client.name}</span></div>
+      ${stepsHTML}
+      <div class="fade">${body}</div>
+      ${S.logStep < 3 ? `
+        <div style="display:flex;justify-content:space-between;margin-top:18px;padding-top:14px;border-top:1px solid var(--border)">
+          <button class="btn btn-ghost btn-sm" onclick="set({logStep:Math.max(0,S.logStep-1)})" ${S.logStep===0?'disabled':''}>← Back</button>
+          ${S.logStep < 2
+            ? `<button class="btn btn-primary btn-sm" onclick="set({logStep:S.logStep+1})" ${!canNext?'disabled':''}>Next →</button>`
+            : `<button class="btn btn-success btn-sm" onclick="submitLog()" ${!canNext?'disabled':''}>Submit for Approval →</button>`
+          }
+        </div>` : ''}
+    </div>`;
+}
+
+// ═══════════════════════════════════
+// VIEW: My Submissions
+// ═══════════════════════════════════
+function vSubmissions() {
+  const all = dbGet();
+  const logs = S.user.type === 'am' ? all.filter(l=>l.submittedBy===S.user.id) : all;
+
+  return `
+    <div class="card-hd"><span class="card-title" style="font-size:15px">All Submissions</span>
+      <button class="btn btn-ghost btn-sm" onclick="set({view:'dashboard'})">← Back</button>
+    </div>
+    ${logs.length === 0
+      ? `<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-txt">No submissions yet</div><div class="empty-sub">Log a service from your client list.</div></div>`
+      : logs.map(l => renderLogCard(l, false)).join('')
+    }`;
+}
+
+// ═══════════════════════════════════
+// VIEW: Approval Queue (Elena / TL)
+// ═══════════════════════════════════
+function vApprovals() {
+  const pending = dbGet().filter(l=>l.status==='pending');
+  return `
+    <div style="margin-bottom:16px">
+      <div style="font-size:15px;font-weight:700;color:var(--navy);margin-bottom:4px">Approval Queue</div>
+      <div style="font-size:12px;color:var(--g500)">${pending.length} submission(s) awaiting your review</div>
+    </div>
+    ${pending.length === 0
+      ? `<div class="empty-state"><div class="empty-icon">🎉</div><div class="empty-txt">All clear!</div><div class="empty-sub">No pending submissions.</div></div>`
+      : pending.map(l => renderLogCard(l, true)).join('')
+    }
+
+    ${S.rejectId ? renderRejectModal() : ''}`;
+}
+
+// ═══════════════════════════════════
+// VIEW: Expense Queue (Gabi)
+// ═══════════════════════════════════
+function vExpense() {
+  const approved = dbGet().filter(l=>l.status==='approved');
+  const done = dbGet().filter(l=>l.status==='expensed'||l.status==='invoiced');
+  return `
+    <div style="margin-bottom:16px">
+      <div style="font-size:15px;font-weight:700;color:var(--navy);margin-bottom:4px">Expense Tracker</div>
+      <div style="font-size:12px;color:var(--g500)">${approved.length} item(s) ready to mark as expensed</div>
+    </div>
+
+    ${approved.length > 0 ? `
+      <div style="font-size:11px;font-weight:700;color:var(--g500);text-transform:uppercase;margin-bottom:8px;letter-spacing:.5px">Ready to Expense</div>
+      ${approved.map(l => renderLogCard(l, false, 'expense')).join('')}
+    ` : `<div class="empty-state"><div class="empty-icon">✅</div><div class="empty-txt">Nothing to expense right now</div></div>`}
+
+    ${done.length > 0 ? `
+      <div style="font-size:11px;font-weight:700;color:var(--g500);text-transform:uppercase;margin:16px 0 8px;letter-spacing:.5px">Previously Processed</div>
+      ${done.map(l => renderLogCard(l, false)).join('')}
+    ` : ''}`;
+}
+
+// ═══════════════════════════════════
+// VIEW: Finance Queue (Suleiman / Arlene)
+// ═══════════════════════════════════
+function vFinance() {
+  if (S.invoiceLogId) return vInvoicePreview();
+  const expensed = dbGet().filter(l=>l.status==='expensed');
+  const invoiced = dbGet().filter(l=>l.status==='invoiced');
+  const totalExpensed = expensed.reduce((s,l)=>s+l.total,0);
+
+  return `
+    <div class="stats-row">
+      <div class="stat" style="--sc:var(--purple)">
+        <div class="stat-lbl">Ready to Invoice</div>
+        <div class="stat-val">${expensed.length}</div>
+        <div class="stat-sub">QAR ${fmt(totalExpensed)} total</div>
+      </div>
+      <div class="stat" style="--sc:var(--navy)">
+        <div class="stat-lbl">Invoiced</div>
+        <div class="stat-val">${invoiced.length}</div>
+        <div class="stat-sub">All time</div>
       </div>
     </div>
-  `;
+
+    ${expensed.length > 0 ? `
+      <div style="font-size:11px;font-weight:700;color:var(--g500);text-transform:uppercase;margin-bottom:8px;letter-spacing:.5px">Ready to Invoice</div>
+      ${expensed.map(l => renderLogCard(l, false, 'invoice')).join('')}
+    ` : `<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-txt">Nothing to invoice yet</div><div class="empty-sub">Items will appear here once Gabi marks them as expensed.</div></div>`}
+
+    ${invoiced.length > 0 ? `
+      <div style="font-size:11px;font-weight:700;color:var(--g500);text-transform:uppercase;margin:16px 0 8px;letter-spacing:.5px">Invoiced</div>
+      ${invoiced.map(l => `
+        <div class="log-card">
+          <div class="log-card-top">
+            <div><strong style="font-size:13px">${l.clientName}</strong> · ${l.serviceName} <span style="color:var(--g500);font-size:11px">${l.qty} emp.</span></div>
+            <div style="display:flex;align-items:center;gap:8px">
+              ${statusBadge(l.status)}
+              <button class="btn btn-ghost btn-xs" onclick="set({invoiceLogId:'${l.id}'})">View Invoice</button>
+            </div>
+          </div>
+          <div class="log-meta">
+            <span class="log-meta-item">💰 QAR ${fmt(l.total)}</span>
+            <span class="log-meta-item">🧾 ${l.invoiceId}</span>
+            <span class="log-meta-item">📅 ${fmtDT(l.invoicedAt)}</span>
+            <span class="log-meta-item">👤 ${l.invoicedByName}</span>
+          </div>
+        </div>`).join('')}
+    ` : ''}`;
 }
 
-function viewLogService() {
-  if (!state.selectedClient) return `<div style="padding:40px;text-align:center;color:var(--gray500)">Select a client to begin</div>`;
+// ═══════════════════════════════════
+// VIEW: Invoice Preview
+// ═══════════════════════════════════
+function vInvoicePreview() {
+  const log = dbGet().find(l=>l.id===S.invoiceLogId);
+  if (!log) return '';
+  const now = log.invoicedAt ? new Date(log.invoicedAt) : new Date();
+  const due = new Date(now); due.setDate(due.getDate()+30);
 
-  const client = CLIENTS.find(c => c.id === state.selectedClient);
-  const steps = ["Select Service", "Employee Details", "Payment Info", "Submit"];
-
-  let html = `
-    <button class="btn btn-ghost btn-sm" onclick="setState({selectedClient:null,logStep:0})" style="margin-bottom:16px">← Back</button>
-    <div class="card" style="max-width:680px">
-      <div class="card-header"><span class="card-title" style="font-size:15px">Log Service — ${client.name}</span></div>
-
-      <div class="stepper">`;
-  steps.forEach((s, i) => {
-    const done   = i < state.logStep;
-    const active = i === state.logStep;
-    html += `<div class="step ${done ? 'done' : active ? 'active' : ''}">
-      <div class="step-circle">${done ? '✓' : i + 1}</div>
-      <div class="step-label">${s}</div>
-    </div>`;
-  });
-  html += `</div>`;
-
-  // Step 0: Select Service
-  if (state.logStep === 0) {
-    html += `<div style="padding:16px;border:1.5px solid var(--border);border-radius:10px">
-      <label class="form-label">Service Type</label>
-      <select class="form-input" onchange="setState({logForm:{...state.logForm, service: this.value}})">
-        <option value="">Choose a service...</option>
-        ${SERVICES.map(s => `<option value="${s.id}">${s.label} (QAR ${fmt(s.price)})</option>`).join('')}
-      </select>
-    </div>`;
-  }
-
-  // Step 1: Employee Details
-  if (state.logStep === 1) {
-    html += `<div style="padding:16px;border:1.5px solid var(--border);border-radius:10px">
-      <label class="form-label">Number of Employees</label>
-      <input type="number" class="form-input" value="1" min="1" max="20" onchange="setState({logForm:{...state.logForm, employees: Array(parseInt(this.value)).fill({name:'',date:''})}})" style="margin-bottom:12px">
-      ${state.logForm.employees.map((e, i) => `
-        <div style="margin-bottom:12px">
-          <input class="form-input" type="text" placeholder="Employee ${i+1} name" value="${e.name || ''}" style="margin-bottom:6px">
-          <input class="form-input" type="date" placeholder="Service date" value="${e.date || ''}">
+  return `
+    <button class="btn btn-ghost btn-sm" onclick="set({invoiceLogId:null})" style="margin-bottom:16px">← Back to Finance</button>
+    <div class="invoice-box">
+      <div class="invoice-hd">
+        <div>
+          ${logoSVG(40)}
+          <div style="font-size:18px;font-weight:800;color:var(--navy);margin-top:6px">RCH Business Solutions</div>
+          <div style="font-size:11px;color:var(--g500);margin-top:3px">Doha, Qatar · info@rch.qa</div>
         </div>
-      `).join('')}
-    </div>`;
-  }
+        <div style="text-align:right">
+          <div style="font-size:22px;font-weight:800;color:var(--magenta)">INVOICE</div>
+          <div style="font-size:13px;font-weight:700;color:var(--navy);margin-top:4px">${log.invoiceId||'DRAFT'}</div>
+          <div style="font-size:11px;color:var(--g500);margin-top:6px">
+            Date: ${fmtDate(now.toISOString())}<br>
+            Due: ${fmtDate(due.toISOString())}
+          </div>
+        </div>
+      </div>
 
-  // Step 2: Payment Info
-  if (state.logStep === 2) {
-    const svc = SERVICES.find(s => s.id === state.logForm.service);
-    const total = svc ? svc.price * state.logForm.employees.length : 0;
-    html += `<div style="padding:16px;border:1.5px solid var(--border);border-radius:10px">
-      <label class="form-label">Payment Card</label>
-      <select class="form-input" onchange="setState({logForm:{...state.logForm, card: this.value}})" style="margin-bottom:12px">
-        <option value="">Select card...</option>
-        <option value="rapid1">Rapid CC-1 (xxx1001)</option>
-        <option value="rapid2">Rapid CC-2 (xxx3139)</option>
-        <option value="rchbs">RCHBS CC (xxx5958)</option>
-      </select>
-      <label class="form-label">Total Amount</label>
-      <div class="form-input" style="background:var(--navy-light);color:var(--navy);font-weight:700;font-size:16px">QAR ${fmt(total)}</div>
-      <div style="margin-top:12px;padding:12px;background:var(--gray50);border-radius:8px">
-        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px">
-          <input type="checkbox" onchange="setState({logForm:{...state.logForm, receipt: this.checked}})">
-          <span>Receipt uploaded & verified</span>
-        </label>
+      <div style="padding:14px;background:var(--g50);border-radius:8px;margin-bottom:16px">
+        <div style="font-size:10px;font-weight:700;color:var(--g500);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Bill To</div>
+        <div style="font-size:13px;font-weight:700">${log.clientName}</div>
+        <div style="font-size:11px;color:var(--g500)">${CLIENTS.find(c=>c.id===log.clientId)?.company||''}</div>
+      </div>
+
+      <table class="invoice-table">
+        <thead><tr><th>Description</th><th>Qty</th><th>Unit Price</th><th>Total</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>${log.serviceName}</td>
+            <td>${log.qty}</td>
+            <td>QAR ${fmt(log.unitPrice)}</td>
+            <td>QAR ${fmt(log.total)}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="invoice-total">
+        <div style="font-size:11px;color:var(--g500);margin-bottom:4px">Total Amount Due</div>
+        <div style="font-size:24px;font-weight:800;color:var(--navy)">QAR ${fmt(log.total)}</div>
+      </div>
+
+      <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+        <div style="font-size:10px;color:var(--g500)">Generated by ${log.invoicedByName} · ${fmtDT(log.invoicedAt)}</div>
+        <button class="btn btn-navy btn-sm" onclick="window.print()">🖨 Print / PDF</button>
       </div>
     </div>`;
-  }
-
-  // Step 3: Confirm
-  if (state.logStep === 3) {
-    const svc = SERVICES.find(s => s.id === state.logForm.service);
-    const total = svc ? svc.price * state.logForm.employees.length : 0;
-    html += `<div style="padding:24px;border:2px solid var(--green);border-radius:10px;background:var(--green-lt);text-align:center">
-      <div style="font-size:36px;margin-bottom:10px">✅</div>
-      <div style="font-weight:700;color:var(--green);font-size:16px;margin-bottom:12px">Service Logged Successfully</div>
-      <div style="font-size:12px;color:var(--gray700);line-height:1.8;text-align:left;max-width:400px;margin:0 auto">
-        → <strong>${svc?.label}</strong> for <strong>${state.logForm.employees.length}</strong> employee(s)<br>
-        → Total: <strong>QAR ${fmt(total)}</strong><br>
-        → Payment: <strong>${state.logForm.card}</strong><br>
-        → Status: <strong style="color:var(--orange)">Awaiting approval</strong><br><br>
-        Elena will review and Elena will verify payment via SMS.
-      </div>
-    </div>`;
-  }
-
-  html += `<div style="display:flex;justify-content:space-between;margin-top:20px">
-    <button class="btn btn-ghost btn-sm" onclick="setState({logStep:Math.max(0,state.logStep-1)})" ${state.logStep === 0 ? 'disabled' : ''}>← Back</button>
-    <button class="btn btn-primary btn-sm" onclick="setState({logStep:Math.min(3,state.logStep+1)})" ${state.logStep === 3 ? 'disabled' : ''}>Next →</button>
-  </div></div>`;
-
-  return html;
 }
 
-// ═══════════════════════════════════════════
-// RENDER
-// ═══════════════════════════════════════════
-function render() {
-  const app = document.getElementById('app');
+// ═══════════════════════════════════
+// VIEW: CFO Dashboard
+// ═══════════════════════════════════
+function vCFO() {
+  const all = dbGet();
+  const total = all.filter(l=>l.status!=='rejected').reduce((s,l)=>s+l.total,0);
+  const byStatus = s => all.filter(l=>l.status===s).length;
+  return `
+    <div style="margin-bottom:18px">
+      <div style="font-size:15px;font-weight:700;color:var(--navy)">Management Overview</div>
+      <div style="font-size:12px;color:var(--g500);margin-top:2px">${new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</div>
+    </div>
 
-  if (state.screen === 'login') {
-    app.innerHTML = `
-      <div class="login-screen">
-        <div class="login-container">
-          <div class="login-header">
-            <div class="login-logo">${logoSVG(44)}<span style="font-size:24px;font-weight:800;color:white">RCH</span></div>
-            <h1 class="login-title">Account Manager</h1>
-            <p class="login-subtitle">Log services and manage client accounts</p>
+    <div class="stats-row">
+      <div class="stat" style="--sc:var(--navy)"><div class="stat-lbl">Total Services</div><div class="stat-val">${all.length}</div><div class="stat-sub">All time</div></div>
+      <div class="stat" style="--sc:var(--orange)"><div class="stat-lbl">Pending</div><div class="stat-val">${byStatus('pending')}</div><div class="stat-sub">Awaiting approval</div></div>
+      <div class="stat" style="--sc:var(--green)"><div class="stat-lbl">Total Revenue</div><div class="stat-val">QAR ${fmt(total)}</div><div class="stat-sub">Processed</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-hd"><span class="card-title">Pipeline Status</span></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        ${['pending','approved','expensed','invoiced','rejected'].map(s=>`
+          <div style="background:var(--g50);border-radius:8px;padding:10px 16px;text-align:center;flex:1;min-width:90px">
+            <div style="font-size:20px;font-weight:800;color:var(--navy)">${byStatus(s)}</div>
+            <div style="font-size:10px;text-transform:capitalize;color:var(--g500);margin-top:2px">${s}</div>
+          </div>`).join('')}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hd"><span class="card-title">All Service Logs</span></div>
+      ${all.map(l=>`
+        <div class="row-item">
+          <div>
+            <div style="font-size:12px;font-weight:600">${l.clientName} · ${l.serviceName}</div>
+            <div style="font-size:10px;color:var(--g500);margin-top:2px">${l.qty} emp · QAR ${fmt(l.total)} · ${fmtDate(l.submittedAt)} · by ${l.submittedByName}</div>
+          </div>
+          ${statusBadge(l.status)}
+        </div>`).join('')}
+    </div>`;
+}
+
+// ═══════════════════════════════════
+// SHARED: Log Card
+// ═══════════════════════════════════
+function renderLogCard(l, showActions, action) {
+  const actionsHTML = showActions
+    ? `<div class="log-card-actions">
+        <button class="btn btn-success btn-xs" onclick="approveLog('${l.id}')">✓ Approve</button>
+        <button class="btn btn-danger btn-xs" onclick="set({rejectId:'${l.id}'})">✗ Reject</button>
+      </div>`
+    : action === 'expense'
+      ? `<button class="btn btn-primary btn-xs" onclick="expenseLog('${l.id}')">Mark Expensed</button>`
+      : action === 'invoice'
+        ? `<button class="btn btn-navy btn-xs" onclick="generateInvoice('${l.id}')">Generate Invoice</button>`
+        : '';
+
+  return `
+    <div class="log-card">
+      <div class="log-card-top">
+        <div>
+          <span style="font-weight:700;font-size:13px">${l.clientName}</span>
+          <span style="color:var(--g500);font-size:12px"> · ${l.serviceName}</span>
+          ${statusBadge(l.status)}
+        </div>
+        ${actionsHTML}
+      </div>
+      <div class="log-meta">
+        <span class="log-meta-item">👥 ${l.qty} employee(s)</span>
+        <span class="log-meta-item">💰 QAR ${fmt(l.total)}</span>
+        <span class="log-meta-item">💳 ${l.cardLabel}</span>
+        <span class="log-meta-item">📅 ${fmtDate(l.submittedAt)}</span>
+        <span class="log-meta-item">👤 ${l.submittedByName}</span>
+      </div>
+      ${l.rejectedReason ? `<div style="margin-top:8px;padding:8px 10px;background:var(--red-lt);border-radius:6px;font-size:11px;color:var(--red)">Rejected: ${l.rejectedReason}</div>` : ''}
+    </div>`;
+}
+
+function renderRejectModal() {
+  return `
+    <div style="position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:100" onclick="if(event.target===this)set({rejectId:null})">
+      <div style="background:white;border-radius:14px;padding:28px;width:400px;box-shadow:0 20px 60px rgba(0,0,0,.2)">
+        <div style="font-size:15px;font-weight:700;color:var(--navy);margin-bottom:14px">Reject Submission</div>
+        <div class="form-group">
+          <label class="form-label">Reason for rejection</label>
+          <textarea class="form-input" rows="3" placeholder="Explain why..." oninput="S.rejectReason=this.value">${S.rejectReason}</textarea>
+        </div>
+        <div style="display:flex;gap:10px;justify-content:flex-end">
+          <button class="btn btn-ghost btn-sm" onclick="set({rejectId:null,rejectReason:''})">Cancel</button>
+          <button class="btn btn-danger btn-sm" onclick="rejectLog('${S.rejectId}',S.rejectReason)">Confirm Reject</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ═══════════════════════════════════
+// NAV CONFIG PER ROLE
+// ═══════════════════════════════════
+function getNav(type) {
+  const counts = (() => {
+    const logs = dbGet();
+    return {
+      pending: logs.filter(l=>l.status==='pending').length,
+      approved: logs.filter(l=>l.status==='approved').length,
+      expensed: logs.filter(l=>l.status==='expensed').length,
+    };
+  })();
+
+  const item = (view, icon, label, badge) =>
+    `<div class="nav-item ${S.view===view?'active':''}" onclick="set({view:'${view}',invoiceLogId:null})">
+      <span class="nav-icon">${icon}</span><span>${label}</span>
+      ${badge ? `<span class="nav-badge">${badge}</span>` : ''}
+    </div>`;
+
+  const defs = {
+    am: [
+      item('dashboard','◈','Dashboard',''),
+      item('log','⊕','Log Service',''),
+      item('submissions','📋','My Submissions',''),
+    ],
+    tl: [
+      item('dashboard','◈','Dashboard',''),
+      item('log','⊕','Log Service',''),
+      item('approvals','✓','Approval Queue', counts.pending||''),
+      item('submissions','📋','All Submissions',''),
+    ],
+    expense: [
+      item('expense','💰','Expense Tracker', counts.approved||''),
+    ],
+    finance: [
+      item('finance','🧾','Finance Queue', counts.expensed||''),
+    ],
+    cfo: [
+      item('cfo','📊','Overview',''),
+    ],
+  };
+  return (defs[type]||[]).join('');
+}
+
+function getViewTitle() {
+  const map = {dashboard:'Dashboard',log:'Log Service',submissions:'Submissions',approvals:'Approval Queue',expense:'Expense Tracker',finance:'Finance Queue',cfo:'Management',invoiceLogId:'Invoice'};
+  if (S.invoiceLogId) return 'Invoice Preview';
+  return map[S.view]||'Dashboard';
+}
+
+function renderView() {
+  const t = S.user?.type;
+  if (S.view==='dashboard'  && (t==='am'||t==='tl')) return vDashboardAM();
+  if (S.view==='log')                                  return vLogService();
+  if (S.view==='submissions')                          return vSubmissions();
+  if (S.view==='approvals'  && t==='tl')               return vApprovals();
+  if (S.view==='expense'    && t==='expense')          return vExpense();
+  if (S.view==='finance'    && t==='finance')          return vFinance();
+  if (S.view==='cfo'        && t==='cfo')              return vCFO();
+  // Default landing per type
+  if (t==='expense') return vExpense();
+  if (t==='finance') return vFinance();
+  if (t==='cfo')     return vCFO();
+  return vDashboardAM();
+}
+
+// ═══════════════════════════════════
+// RENDER
+// ═══════════════════════════════════
+function render() {
+  const root = document.getElementById('app');
+
+  if (S.screen === 'login') {
+    root.innerHTML = `
+      <div class="login-wrap">
+        <div class="login-box">
+          <div class="login-hd">
+            <div class="login-logo">${logoSVG(44)}<span style="font-size:26px;font-weight:800;color:white">RCH CRM</span></div>
+            <div style="font-size:14px;color:rgba(255,255,255,.55);margin-top:4px">Service Management Platform</div>
           </div>
           <form class="login-form" onsubmit="handleLogin(event)">
             <h2>Sign In</h2>
             <div class="form-group">
-              <label class="form-label">Username</label>
-              <select id="username" class="form-input" required>
+              <label class="form-label">Account</label>
+              <select id="uid" class="form-input" required>
                 <option value="">Select your account...</option>
-                ${USERS.map(u => `<option value="${u.id}">${u.name} (${u.role})</option>`).join('')}
+                ${USERS.map(u=>`<option value="${u.id}">${u.name} — ${u.role}</option>`).join('')}
               </select>
             </div>
             <div class="form-group">
               <label class="form-label">Password</label>
-              <input type="password" id="password" class="form-input" placeholder="••••••" required>
+              <input type="password" id="pwd" class="form-input" placeholder="••••••••" required>
             </div>
-            ${state.loginError ? `<div class="login-error">❌ ${state.loginError}</div>` : ''}
-            <button type="submit" class="login-btn">Sign In</button>
-            <div class="login-hint">Demo password: <strong>rch2026</strong></div>
+            ${S.loginError ? `<div class="login-err">⚠ ${S.loginError}</div>` : ''}
+            <button type="submit" class="btn btn-primary" style="width:100%;margin-top:6px;padding:12px;font-size:14px">Sign In</button>
+            <div class="login-hint">Demo password for all accounts: <strong>rch2026</strong></div>
           </form>
         </div>
       </div>`;
     return;
   }
 
-  // Main app
-  const views = {
-    dashboard: viewDashboard,
-    log: viewLogService,
-  };
-  const currentView = state.selectedClient ? 'log' : 'dashboard';
-
-  app.innerHTML = `
+  root.innerHTML = `
     <div class="app">
       <div class="sidebar">
-        <div class="sidebar-brand">
-          <div class="brand-logo">${logoSVG(32)}<div class="brand-wordmark"><div class="brand-rch">RCH</div><div class="brand-sub">CRM System</div></div></div>
+        <div class="sb-brand">
+          ${logoSVG(30)}
+          <div><div class="brand-rch">RCH</div><div class="brand-sub">CRM System</div></div>
         </div>
-        <div class="sidebar-nav">
-          <div class="nav-item ${!state.selectedClient ? 'active' : ''}" onclick="setState({selectedClient:null,logStep:0})">
-            <span class="nav-icon">◈</span><span>Dashboard</span>
-          </div>
-          <div class="nav-item ${state.selectedClient ? 'active' : ''}" onclick="setState({selectedClient:CLIENTS[0].id,logStep:0})">
-            <span class="nav-icon">⊕</span><span>Log Service</span>
+        <div class="sb-nav">
+          ${getNav(S.user.type)}
+          <div style="height:1px;background:rgba(255,255,255,.07);margin:12px 8px"></div>
+          <div class="nav-item" onclick="dbReset();set({})" style="font-size:11px;color:rgba(255,255,255,.25)">
+            <span class="nav-icon">↺</span><span>Reset Demo Data</span>
           </div>
         </div>
-        <div class="sidebar-footer">
+        <div class="sb-footer">
           <div class="user-row">
-            <div class="user-avatar">${state.user.avatar}</div>
-            <div>
-              <div class="user-name">${state.user.name}</div>
-              <div class="user-role">${state.user.role}</div>
-            </div>
+            <div class="u-avatar">${S.user.avatar}</div>
+            <div><div class="u-name">${S.user.name}</div><div class="u-role">${S.user.role}</div></div>
           </div>
           <button class="logout-btn" onclick="handleLogout()">Logout</button>
         </div>
       </div>
       <div class="main">
         <div class="topbar">
-          <div class="topbar-left">
-            <div class="topbar-title">${currentView === 'log' ? 'Log Service' : 'Dashboard'}</div>
-            <div class="topbar-sub">Thursday, 6 March 2026</div>
+          <div>
+            <div class="tb-title">${getViewTitle()}</div>
+            <div class="tb-sub">${new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</div>
           </div>
         </div>
-        <div class="content"><div class="fade-in">${views[currentView]()}</div></div>
+        <div class="content"><div class="fade">${renderView()}</div></div>
       </div>
     </div>`;
 }
 
+// boot
 render();
 </script>
 </body>
