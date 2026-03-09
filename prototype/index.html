@@ -400,6 +400,8 @@ let S = {
   rejectReason: '',
   // invoice preview
   invoiceLogId: null,
+  // editing
+  editingLogId: null,
 };
 
 function set(patch) {
@@ -449,7 +451,7 @@ function handleLogout() {
 }
 
 function startLog(clientId) {
-  set({view:'log', logClient:clientId, logStep:0, logForm:{serviceId:'',qty:1,employees:[{name:'',date:''}],card:'',notes:''}, logDone:false});
+  set({view:'log', logClient:clientId, logStep:0, logForm:{serviceId:'',qty:1,employees:[{name:'',date:''}],card:'',notes:''}, logDone:false, editingLogId:null});
 }
 
 function submitLog() {
@@ -458,6 +460,22 @@ function submitLog() {
   if (!svc || !S.logForm.card) { alert('Please fill all fields'); return; }
   const total = svc.price * S.logForm.qty;
   const card = CARDS.find(c=>c.id===S.logForm.card);
+
+  if (S.editingLogId) {
+    dbUpdate(S.editingLogId, {
+      serviceId: svc.id, serviceName: svc.label,
+      qty: S.logForm.qty, unitPrice: svc.price, total,
+      card: S.logForm.card, cardLabel: card.label,
+      employees: S.logForm.employees.slice(0, S.logForm.qty),
+      submittedAt: new Date().toISOString(),
+      status:'ops_pending',
+      approvedBy:null, approvedByName:null, approvedAt:null, rejectedReason:null,
+      notes: S.logForm.notes
+    });
+    set({logDone:true, logStep:3, editingLogId:null});
+    return;
+  }
+
   const log = {
     id: uid(),
     clientId: client.id, clientName: client.name,
@@ -515,16 +533,37 @@ function updateQty(val) {
   S.logForm = {...S.logForm, qty, employees:emps};
 }
 
+function editLog(id) {
+  const log = dbGet().find(l => l.id === id);
+  if (!log) return;
+  set({
+    view:'log',
+    logClient: log.clientId,
+    logStep: 0,
+    logForm: {
+      serviceId: log.serviceId,
+      qty: log.qty,
+      employees: log.employees.slice(),
+      card: log.card,
+      notes: log.notes || ''
+    },
+    logDone: false,
+    editingLogId: id
+  });
+}
+
+function deleteLog(id) {
+  const log = dbGet().find(l => l.id === id);
+  if (!log) return;
+  if (!confirm(`Delete "${log.serviceName}" for ${log.clientName}?`)) return;
+  const logs = dbGet().filter(l => l.id !== id);
+  dbSave(logs);
+  set({});
+}
+
 // ═══════════════════════════════════
 // VIEW: Dashboard (AM / TL)
 // ═══════════════════════════════════
-function arStatus(ar, limit) {
-  const pct = limit > 0 ? ar / limit : 0;
-  if (pct >= 1)    return { label:'Follow up required', cls:'b-rejected', color:'var(--red)'    };
-  if (pct >= 0.75) return { label:'Follow up soon',     cls:'b-pending',  color:'var(--orange)' };
-  return                  { label:'Good to service',    cls:'b-approved', color:'var(--green)'  };
-}
-
 function vDashboardAM() {
   const allLogs = dbGet();
   const myLogs  = allLogs.filter(l => l.submittedBy === S.user.id);
@@ -538,45 +577,10 @@ function vDashboardAM() {
   const pendingCount   = myLogs.filter(l => l.status === 'pending').length;
   const rejectedCount  = myLogs.filter(l => l.status === 'rejected').length;
 
-  // Client list — grouped by company: Rapid first, then RCHBS
-  const rapidClients = [...CLIENTS].filter(c => c.company === 'Rapid').sort((a,b) => a.name.localeCompare(b.name));
-  const rchbsClients = [...CLIENTS].filter(c => c.company === 'RCHBS').sort((a,b) => a.name.localeCompare(b.name));
-
-  const buildClientRows = (clients) => clients.map(c => {
-    const invoicedLogs  = allLogs.filter(l => l.clientId === c.id && l.status === 'invoiced');
-    const ar            = invoicedLogs.reduce((s,l) => s + l.total, 0);
-    const invCount      = invoicedLogs.length;
-    const limit         = c.creditLimit || 0;
-    const st            = arStatus(ar, limit);
-    const pct           = limit > 0 ? Math.min(ar / limit, 1) : 0;
-    const blocked       = pct >= 1;
-    return `
-      <tr>
-        <td>
-          <div style="font-weight:600;font-size:13px;color:var(--g900)">${c.name}</div>
-          <div style="font-size:10px;color:var(--g500);margin-top:2px">${c.contact}</div>
-        </td>
-        <td>
-          <div style="font-weight:700;font-size:13px;color:var(--navy)">QAR ${fmt(ar)}</div>
-          <div style="font-size:10px;color:var(--g500);margin-top:2px">${invCount} unpaid invoice${invCount!==1?'s':''}</div>
-        </td>
-        <td style="color:var(--g700);font-size:12px">QAR ${fmt(limit)}</td>
-        <td>
-          <div style="display:flex;align-items:center;gap:6px">
-            <div class="ar-bar-wrap"><div class="ar-bar-fill" style="width:${Math.round(pct*100)}%;--bc:${st.color}"></div></div>
-            <span style="font-size:10px;font-weight:600;color:${st.color}">${Math.round(pct*100)}%</span>
-          </div>
-        </td>
-        <td>
-          ${blocked
-            ? `<span class="badge b-rejected" style="font-size:9px">Follow Up Required</span>`
-            : pct >= 0.75
-              ? `<span class="badge b-pending" style="font-size:9px">Follow Up Soon</span>`
-              : `<button class="btn btn-primary btn-xs" onclick="startLog(${c.id})">+ Log Service</button>`
-          }
-        </td>
-      </tr>`;
-  }).join('');
+  // History — sorted newest first
+  const historyLogs = (S.user.type === 'am' ? myLogs : allLogs).slice().sort((a,b) => new Date(b.submittedAt) - new Date(a.submittedAt));
+  const canEdit = l => ['ops_pending','rejected'].includes(l.status);
+  const canDelete = l => ['ops_pending','pending','rejected'].includes(l.status);
 
   // Kanban — services removed from board once client pays
   const kanbanCols = [
@@ -642,7 +646,7 @@ function vDashboardAM() {
     </div>
 
     <div style="display:flex;gap:10px;margin-bottom:16px">
-      <button class="btn btn-primary" onclick="set({view:'log',logClient:null,logStep:0,logForm:{serviceId:'',qty:1,employees:[{name:'',date:''}],card:'',notes:''},logDone:false})" style="gap:6px">
+      <button class="btn btn-primary" onclick="set({view:'log',logClient:null,logStep:0,logForm:{serviceId:'',qty:1,employees:[{name:'',date:''}],card:'',notes:''},logDone:false,editingLogId:null})" style="gap:6px">
         <span style="font-size:15px">⊕</span> Log New Service
       </button>
       <button class="btn btn-ghost" onclick="set({view:'submissions'})" style="gap:6px">
@@ -650,30 +654,51 @@ function vDashboardAM() {
       </button>
     </div>
 
-    <div class="card" style="margin-bottom:10px">
-      <div class="card-hd">
-        <span class="card-title">Rapid Clearing House</span>
-        <span class="badge" style="background:var(--navy-lt);color:var(--navy)">${rapidClients.length} clients</span>
-      </div>
-      <table class="client-table">
-        <thead><tr>
-          <th>Client</th><th>A/R Balance</th><th>Limit</th><th>Usage</th><th></th>
-        </tr></thead>
-        <tbody>${buildClientRows(rapidClients)}</tbody>
-      </table>
-    </div>
-
     <div class="card" style="margin-bottom:20px">
       <div class="card-hd">
-        <span class="card-title">RCHBS</span>
-        <span class="badge" style="background:var(--mag-lt);color:var(--magenta)">${rchbsClients.length} clients</span>
+        <span class="card-title">Recent Activity</span>
+        <span class="badge" style="background:var(--navy-lt);color:var(--navy)">${historyLogs.length} entries</span>
       </div>
-      <table class="client-table">
-        <thead><tr>
-          <th>Client</th><th>A/R Balance</th><th>Limit</th><th>Usage</th><th></th>
-        </tr></thead>
-        <tbody>${buildClientRows(rchbsClients)}</tbody>
-      </table>
+      ${historyLogs.length === 0
+        ? `<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-txt">No activity yet</div><div class="empty-sub">Log your first service to get started.</div></div>`
+        : `<table class="client-table">
+          <thead><tr>
+            <th>Date</th><th>Client</th><th>Service</th><th>Emp.</th><th>Amount</th><th>Status</th><th style="text-align:right">Actions</th>
+          </tr></thead>
+          <tbody>${historyLogs.map(l => {
+            const editBtn = canEdit(l)
+              ? `<button class="btn btn-ghost btn-xs" onclick="editLog('${l.id}')" title="Edit">✎ Edit</button>`
+              : '';
+            const deleteBtn = canDelete(l)
+              ? `<button class="btn btn-xs" style="background:var(--red-lt);color:var(--red)" onclick="deleteLog('${l.id}')" title="Delete">✕</button>`
+              : '';
+            return `<tr>
+              <td style="font-size:11px;color:var(--g500);white-space:nowrap">${fmtDate(l.submittedAt)}</td>
+              <td>
+                <div style="font-weight:600;font-size:12px">${l.clientName}</div>
+              </td>
+              <td style="font-size:12px">${l.serviceName}</td>
+              <td style="font-size:12px;text-align:center">${l.qty}</td>
+              <td style="font-weight:700;font-size:12px;color:var(--navy)">QAR ${fmt(l.total)}</td>
+              <td>${statusBadge(l.status)}</td>
+              <td style="text-align:right">
+                <div style="display:flex;gap:4px;justify-content:flex-end">
+                  ${editBtn}${deleteBtn}
+                </div>
+              </td>
+            </tr>`;
+          }).join('')}</tbody>
+        </table>`
+      }
+      ${historyLogs.some(l => l.rejectedReason) ? `
+        <div style="margin-top:12px;padding:10px 14px;background:var(--red-lt);border-radius:8px;border:1px solid rgba(192,39,45,.15)">
+          <div style="font-size:10px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Needs Attention</div>
+          ${historyLogs.filter(l=>l.rejectedReason && l.status==='rejected').map(l => `
+            <div style="font-size:11px;color:var(--g700);margin-bottom:4px">
+              <strong>${l.clientName}</strong> · ${l.serviceName}: <span style="color:var(--red)">${l.rejectedReason}</span>
+              <button class="btn btn-xs" style="background:var(--red);color:white;margin-left:6px" onclick="editLog('${l.id}')">Re-submit</button>
+            </div>`).join('')}
+        </div>` : ''}
     </div>
 
     <div class="card-hd" style="margin-bottom:10px">
@@ -790,7 +815,7 @@ function vLogService() {
     body = S.logDone
       ? `<div style="text-align:center;padding:24px">
           <div style="font-size:48px;margin-bottom:12px">✅</div>
-          <div style="font-weight:800;font-size:16px;color:var(--green);margin-bottom:8px">Service Logged!</div>
+          <div style="font-weight:800;font-size:16px;color:var(--green);margin-bottom:8px">${S.editingLogId ? 'Service Updated!' : 'Service Logged!'}</div>
           <div style="font-size:12px;color:var(--g500);line-height:1.8">
             <strong>${svc?.label}</strong> for <strong>${S.logForm.qty}</strong> employee(s)<br>
             Total: <strong>QAR ${fmt(total)}</strong> · Card: <strong>${CARDS.find(c=>c.id===S.logForm.card)?.label||''}</strong><br>
@@ -813,7 +838,7 @@ function vLogService() {
   return `
     <button class="btn btn-ghost btn-sm" onclick="set({view:'dashboard',logClient:null})" style="margin-bottom:14px">← Back</button>
     <div class="card" style="max-width:620px">
-      <div class="card-hd"><span class="card-title" style="font-size:15px">Log Service — ${client.name}</span></div>
+      <div class="card-hd"><span class="card-title" style="font-size:15px">${S.editingLogId ? 'Edit' : 'Log'} Service — ${client.name}</span></div>
       ${stepsHTML}
       <div class="fade">${body}</div>
       ${S.logStep < 3 ? `
