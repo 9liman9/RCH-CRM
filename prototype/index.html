@@ -150,13 +150,6 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .fade{animation:fadeIn .2s ease}
 @keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
 
-/* Pipeline strip */
-.pipeline{display:flex;gap:0;margin-bottom:22px;border-radius:10px;overflow:hidden;border:1px solid var(--border)}
-.pipe-step{flex:1;padding:10px 6px;text-align:center;font-size:10px;font-weight:600;background:var(--g100);color:var(--g500);border-right:1px solid var(--border);transition:all .2s}
-.pipe-step:last-child{border-right:none}
-.pipe-step.done{background:var(--green-lt);color:var(--green)}
-.pipe-step.current{background:var(--navy);color:white}
-.pipe-step-num{font-size:14px;font-weight:800;display:block;margin-bottom:2px}
 
 .empty-state{text-align:center;padding:48px 20px;color:var(--g500)}
 .empty-icon{font-size:36px;margin-bottom:10px}
@@ -231,7 +224,7 @@ const CARDS = [
 // ═══════════════════════════════════
 // DATABASE (localStorage)
 // ═══════════════════════════════════
-const DB_KEY = 'rch_logs_v4';
+const DB_KEY = 'rch_logs_v5';
 
 const SEED = [
   {
@@ -418,11 +411,6 @@ const statusBadge = s => {
   const map = {ops_pending:'b-ops',pending:'b-pending',approved:'b-approved',rejected:'b-rejected',expensed:'b-expensed',invoiced:'b-invoiced',paid:'b-approved'};
   const lbl = {ops_pending:'With OPs',pending:'Pending Approval',approved:'Approved',rejected:'Rejected',expensed:'Expensed',invoiced:'Invoiced',paid:'Paid'};
   return `<span class="badge ${map[s]||''}">${lbl[s]||s}</span>`;
-};
-const pipeHTML = status => {
-  const steps = ['With OPs','Approval','Expensed','Invoiced'];
-  const idx = {ops_pending:0,pending:1,approved:2,expensed:2,invoiced:3}[status]??0;
-  return `<div class="pipeline">${steps.map((s,i)=>`<div class="pipe-step ${i<idx?'done':i===idx?'current':''}"><span class="pipe-step-num">${i<idx?'✓':i+1}</span>${s}</div>`).join('')}</div>`;
 };
 
 function logoSVG(sz) {
@@ -844,7 +832,7 @@ function vExpense() {
 }
 
 // ═══════════════════════════════════
-// VIEW: Finance Queue (Suleiman / Arlene)
+// VIEW: Invoice Queue (Suleiman / Arlene)
 // ═══════════════════════════════════
 function vFinance() {
   if (S.invoiceLogId) return vInvoicePreview();
@@ -869,7 +857,7 @@ function vFinance() {
     ${expensed.length > 0 ? `
       <div style="font-size:11px;font-weight:700;color:var(--g500);text-transform:uppercase;margin-bottom:8px;letter-spacing:.5px">Ready to Invoice</div>
       ${expensed.map(l => renderLogCard(l, false, 'invoice')).join('')}
-    ` : `<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-txt">Nothing to invoice yet</div><div class="empty-sub">Items will appear here once Gabi marks them as expensed.</div></div>`}
+    ` : `<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-txt">Nothing to invoice yet</div><div class="empty-sub">Items will appear here once expenses are recorded.</div></div>`}
 
     ${invoiced.length > 0 ? `
       <div style="font-size:11px;font-weight:700;color:var(--g500);text-transform:uppercase;margin:16px 0 8px;letter-spacing:.5px">Invoiced</div>
@@ -902,7 +890,7 @@ function vInvoicePreview() {
   const due = new Date(now); due.setDate(due.getDate()+30);
 
   return `
-    <button class="btn btn-ghost btn-sm" onclick="set({invoiceLogId:null})" style="margin-bottom:16px">← Back to Finance</button>
+    <button class="btn btn-ghost btn-sm" onclick="set({invoiceLogId:null})" style="margin-bottom:16px">← Back to Invoice Queue</button>
     <div class="invoice-box">
       <div class="invoice-hd">
         <div>
@@ -1328,7 +1316,7 @@ function vAcctMgrDashboard() {
     <div class="card">
       <div class="card-hd">
         <span class="card-title">Client Receivables</span>
-        <span style="font-size:11px;color:var(--g500)">Click any client to view invoices</span>
+        <span style="font-size:11px;color:var(--g500)">Outstanding balances by client</span>
       </div>
       ${Object.keys(clientReceivables).length === 0
         ? `<div style="text-align:center;padding:20px;color:var(--g500);font-size:12px">No outstanding receivables</div>`
@@ -1361,7 +1349,7 @@ function vAcctMgrDashboard() {
     <div class="card">
       <div class="card-hd">
         <span class="card-title">Recent Activity</span>
-        <button class="btn btn-ghost btn-xs" onclick="set({view:'finance'})">Finance Queue →</button>
+        <button class="btn btn-ghost btn-xs" onclick="set({view:'finance'})">Invoice Queue →</button>
       </div>
       ${all.sort((a,b) => new Date(b.submittedAt) - new Date(a.submittedAt)).slice(0, 8).map(l => `
         <div class="row-item">
