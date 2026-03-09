@@ -641,6 +641,15 @@ function vDashboardAM() {
       </div>
     </div>
 
+    <div style="display:flex;gap:10px;margin-bottom:16px">
+      <button class="btn btn-primary" onclick="set({view:'log',logClient:null,logStep:0,logForm:{serviceId:'',qty:1,employees:[{name:'',date:''}],card:'',notes:''},logDone:false})" style="gap:6px">
+        <span style="font-size:15px">⊕</span> Log New Service
+      </button>
+      <button class="btn btn-ghost" onclick="set({view:'submissions'})" style="gap:6px">
+        <span style="font-size:14px">📋</span> View All Submissions
+      </button>
+    </div>
+
     <div class="card" style="margin-bottom:10px">
       <div class="card-hd">
         <span class="card-title">Rapid Clearing House</span>
@@ -678,7 +687,40 @@ function vDashboardAM() {
 // VIEW: Log Service
 // ═══════════════════════════════════
 function vLogService() {
-  if (!S.logClient) return `<div style="text-align:center;padding:48px;color:var(--g500)">Select a client to begin</div>`;
+  if (!S.logClient) {
+    const rapidC = [...CLIENTS].filter(c => c.company === 'Rapid').sort((a,b) => a.name.localeCompare(b.name));
+    const rchbsC = [...CLIENTS].filter(c => c.company === 'RCHBS').sort((a,b) => a.name.localeCompare(b.name));
+    const allLogs = dbGet();
+    const clientRow = (c) => {
+      const ar = allLogs.filter(l => l.clientId === c.id && l.status === 'invoiced').reduce((s,l) => s + l.total, 0);
+      const limit = c.creditLimit || 0;
+      const pct = limit > 0 ? Math.min(ar / limit, 1) : 0;
+      const blocked = pct >= 1;
+      return `<div class="log-pick-client ${blocked ? 'blocked' : ''}" onclick="${blocked ? '' : `startLog(${c.id})`}" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border:1px solid var(--border);border-radius:8px;cursor:${blocked?'not-allowed':'pointer'};background:${blocked?'var(--red-lt)':'var(--white)'};transition:box-shadow .15s"
+        ${blocked ? '' : 'onmouseover="this.style.boxShadow=\'0 2px 8px rgba(0,0,0,.08)\';this.style.borderColor=\'var(--navy)\'" onmouseout="this.style.boxShadow=\'none\';this.style.borderColor=\'var(--border)\'"'}>
+        <div>
+          <div style="font-weight:600;font-size:13px;color:${blocked?'var(--g500)':'var(--g900)'}">${c.name}</div>
+          <div style="font-size:10px;color:var(--g500);margin-top:2px">${c.contact}</div>
+        </div>
+        <div style="text-align:right">
+          ${blocked
+            ? `<span class="badge b-rejected" style="font-size:9px">At Limit</span>`
+            : `<span style="font-size:11px;color:var(--navy);font-weight:600">Select →</span>`
+          }
+        </div>
+      </div>`;
+    };
+    return `
+      <button class="btn btn-ghost btn-sm" onclick="set({view:'dashboard'})" style="margin-bottom:14px">← Back</button>
+      <div class="card" style="max-width:620px">
+        <div class="card-hd"><span class="card-title" style="font-size:15px">Log Service — Select Client</span></div>
+        <div style="font-size:12px;color:var(--g500);margin-bottom:14px">Choose a client to log a service for</div>
+        <div style="font-size:11px;font-weight:700;color:var(--g500);text-transform:uppercase;margin-bottom:8px;letter-spacing:.5px">Rapid Clearing House</div>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:16px">${rapidC.map(clientRow).join('')}</div>
+        <div style="font-size:11px;font-weight:700;color:var(--g500);text-transform:uppercase;margin-bottom:8px;letter-spacing:.5px">RCHBS</div>
+        <div style="display:flex;flex-direction:column;gap:6px">${rchbsC.map(clientRow).join('')}</div>
+      </div>`;
+  }
   const client = CLIENTS.find(c=>c.id===S.logClient);
   const svc = SERVICES.find(s=>s.id===S.logForm.serviceId);
   const total = svc ? svc.price * S.logForm.qty : 0;
