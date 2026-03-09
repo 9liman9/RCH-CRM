@@ -196,8 +196,8 @@ const USERS = [
   { id:'violetta', name:'Violetta A.', role:'Account Manager',      password:'rch2026', avatar:'VA', type:'am'      },
   { id:'elena',    name:'Elena F.',    role:'Team Leader',           password:'rch2026', avatar:'EF', type:'tl'      },
   { id:'gabi',     name:'Gabi M.',     role:'Expense Tracker',       password:'rch2026', avatar:'GM', type:'expense' },
-  { id:'suleiman', name:'Suleiman M.', role:'Accountant',            password:'rch2026', avatar:'SM', type:'finance' },
-  { id:'arlene',   name:'Arlene D.',   role:'Accounting Manager',    password:'rch2026', avatar:'AD', type:'finance' },
+  { id:'suleiman', name:'Suleiman M.', role:'Accountant',            password:'rch2026', avatar:'SM', type:'accountant' },
+  { id:'arlene',   name:'Arlene D.',   role:'Accounting Manager',    password:'rch2026', avatar:'AD', type:'acct_mgr' },
   { id:'mohamad',  name:'Mohamad J.',  role:'CFO',                   password:'rch2026', avatar:'MJ', type:'cfo'    },
 ];
 
@@ -223,9 +223,9 @@ const SERVICES = [
 ];
 
 const CARDS = [
-  { id:'rapid1', label:'Rapid CC-1 (xxx1001)'  },
-  { id:'rapid2', label:'Rapid CC-2 (xxx3139)'  },
-  { id:'rchbs',  label:'RCHBS CC (xxx5958)'    },
+  { id:'rapid1', label:'Rapid CC-1 (xxx1001)', company:'Rapid', limit:50000 },
+  { id:'rapid2', label:'Rapid CC-2 (xxx3139)', company:'Rapid', limit:30000 },
+  { id:'rchbs',  label:'RCHBS CC (xxx5958)',   company:'RCHBS', limit:25000 },
 ];
 
 // ═══════════════════════════════════
@@ -500,7 +500,7 @@ function expenseLog(id) {
 function generateInvoice(id) {
   const invId = 'INV-'+new Date().getFullYear()+'-'+String(dbGet().filter(l=>l.invoiceId).length+1).padStart(3,'0');
   dbUpdate(id, {status:'invoiced', invoiceId:invId, invoicedBy:S.user.id, invoicedByName:S.user.name, invoicedAt:new Date().toISOString()});
-  set({invoiceLogId:id});
+  set({view:'finance', invoiceLogId:id});
 }
 
 function updateEmp(idx, field, value) {
@@ -790,7 +790,7 @@ function vLogService() {
 // ═══════════════════════════════════
 function vSubmissions() {
   const all = dbGet();
-  const logs = S.user.type === 'am' ? all.filter(l=>l.submittedBy===S.user.id) : all;
+  const logs = S.user.type === 'am' ? all.filter(l => l.submittedBy === S.user.id) : all;
 
   return `
     <div class="card-hd"><span class="card-title" style="font-size:15px">All Submissions</span>
@@ -951,6 +951,430 @@ function vInvoicePreview() {
 }
 
 // ═══════════════════════════════════
+// VIEW: Accountant Dashboard (Suleiman)
+// ═══════════════════════════════════
+function vAccountantDashboard() {
+  const all = dbGet();
+  const now = new Date();
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+  const expensed = all.filter(l => l.status === 'expensed');
+  const invoiced = all.filter(l => l.status === 'invoiced');
+  const invoicedThisMonth = invoiced.filter(l => new Date(l.invoicedAt) >= monthStart);
+  const totalReceivables = invoiced.reduce((s, l) => s + l.total, 0);
+  const totalExpensed = expensed.reduce((s, l) => s + l.total, 0);
+  const invoicedThisMonthTotal = invoicedThisMonth.reduce((s, l) => s + l.total, 0);
+
+  // Card spending
+  const activeCards = all.filter(l => l.status !== 'rejected');
+  const cardSpending = CARDS.map(c => {
+    const spent = activeCards.filter(l => l.card === c.id).reduce((s, l) => s + l.total, 0);
+    const pct = c.limit > 0 ? Math.min(spent / c.limit, 1) : 0;
+    return { ...c, spent, pct };
+  });
+  const totalCardSpent = cardSpending.reduce((s, c) => s + c.spent, 0);
+
+  // Aging: days since expensed but not invoiced
+  const agingItems = expensed.map(l => {
+    const expDate = new Date(l.expensedAt);
+    const days = Math.floor((now - expDate) / (1000 * 60 * 60 * 24));
+    return { ...l, ageDays: days };
+  }).sort((a, b) => b.ageDays - a.ageDays);
+
+  // Thursday invoice schedule
+  const today = now.getDay(); // 0=Sun
+  const daysToThurs = (4 - today + 7) % 7 || 7;
+  const nextThursday = new Date(now);
+  nextThursday.setDate(now.getDate() + daysToThurs);
+  const isThursday = today === 4;
+
+  return `
+    <div style="margin-bottom:18px">
+      <div style="font-size:15px;font-weight:700;color:var(--navy)">Accountant Dashboard</div>
+      <div style="font-size:12px;color:var(--g500);margin-top:2px">${now.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}${isThursday ? ' · <span style="color:var(--magenta);font-weight:600">Invoice Day</span>' : ''}</div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat" style="--sc:var(--purple)">
+        <div class="stat-lbl">Ready to Invoice</div>
+        <div class="stat-val">${expensed.length}</div>
+        <div class="stat-sub">QAR ${fmt(totalExpensed)} pending</div>
+      </div>
+      <div class="stat" style="--sc:var(--green)">
+        <div class="stat-lbl">Invoiced This Month</div>
+        <div class="stat-val">${invoicedThisMonth.length}</div>
+        <div class="stat-sub">QAR ${fmt(invoicedThisMonthTotal)}</div>
+      </div>
+      <div class="stat" style="--sc:var(--navy)">
+        <div class="stat-lbl">Total Receivables</div>
+        <div class="stat-val">QAR ${fmt(totalReceivables)}</div>
+        <div class="stat-sub">${invoiced.length} outstanding invoice${invoiced.length !== 1 ? 's' : ''}</div>
+      </div>
+      <div class="stat" style="--sc:var(--orange)">
+        <div class="stat-lbl">Card Spending</div>
+        <div class="stat-val">QAR ${fmt(totalCardSpent)}</div>
+        <div class="stat-sub">Across ${CARDS.length} cards</div>
+      </div>
+    </div>
+
+    ${isThursday ? `
+      <div style="background:linear-gradient(135deg,var(--magenta),var(--mag-dk));color:white;border-radius:12px;padding:16px 20px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div style="font-size:14px;font-weight:700">It's Thursday — Invoice Day</div>
+          <div style="font-size:12px;opacity:.8;margin-top:2px">${expensed.length} service${expensed.length !== 1 ? 's' : ''} ready to invoice · QAR ${fmt(totalExpensed)} total</div>
+        </div>
+        <button class="btn" style="background:white;color:var(--magenta);font-weight:700" onclick="set({view:'finance'})">Start Invoicing →</button>
+      </div>
+    ` : `
+      <div style="background:var(--navy-lt);border-radius:12px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div style="font-size:12px;font-weight:600;color:var(--navy)">Next Invoice Day: ${nextThursday.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'})}</div>
+          <div style="font-size:11px;color:var(--g500);margin-top:2px">${expensed.length} service${expensed.length !== 1 ? 's' : ''} queued · ${daysToThurs} day${daysToThurs !== 1 ? 's' : ''} away</div>
+        </div>
+        ${expensed.length > 0 ? `<button class="btn btn-navy btn-sm" onclick="set({view:'finance'})">View Queue</button>` : ''}
+      </div>
+    `}
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-hd">
+          <span class="card-title">Uninvoiced Services</span>
+          <span class="badge" style="background:var(--purple-lt);color:var(--purple)">${agingItems.length} items</span>
+        </div>
+        ${agingItems.length === 0
+          ? `<div class="empty-state" style="padding:24px"><div class="empty-icon">✅</div><div class="empty-txt">All caught up</div><div class="empty-sub">No services waiting to be invoiced</div></div>`
+          : agingItems.map(l => `
+            <div class="row-item">
+              <div style="flex:1">
+                <div style="font-size:12px;font-weight:600">${l.clientName}</div>
+                <div style="font-size:11px;color:var(--g500);margin-top:1px">${l.serviceName} · ${l.qty} emp · QAR ${fmt(l.total)}</div>
+              </div>
+              <div style="text-align:right;display:flex;align-items:center;gap:8px">
+                <span class="badge ${l.ageDays > 5 ? 'b-rejected' : l.ageDays > 2 ? 'b-pending' : 'b-approved'}">${l.ageDays}d ago</span>
+                <button class="btn btn-navy btn-xs" onclick="generateInvoice('${l.id}')">Invoice</button>
+              </div>
+            </div>`).join('')
+        }
+      </div>
+
+      <div class="card">
+        <div class="card-hd">
+          <span class="card-title">Card Spending</span>
+        </div>
+        ${cardSpending.map(c => `
+          <div style="margin-bottom:14px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+              <div>
+                <span style="font-size:12px;font-weight:600">${c.label}</span>
+                <span class="badge" style="background:${c.company === 'Rapid' ? 'var(--navy-lt)' : 'var(--mag-lt)'};color:${c.company === 'Rapid' ? 'var(--navy)' : 'var(--magenta)'};font-size:9px;margin-left:6px">${c.company}</span>
+              </div>
+              <span style="font-size:11px;font-weight:700;color:${c.pct >= 0.9 ? 'var(--red)' : c.pct >= 0.7 ? 'var(--orange)' : 'var(--navy)'}">QAR ${fmt(c.spent)} / ${fmt(c.limit)}</span>
+            </div>
+            <div style="height:6px;background:var(--g100);border-radius:3px;overflow:hidden">
+              <div style="height:100%;width:${Math.round(c.pct * 100)}%;background:${c.pct >= 0.9 ? 'var(--red)' : c.pct >= 0.7 ? 'var(--orange)' : 'var(--green)'};border-radius:3px;transition:width .3s"></div>
+            </div>
+          </div>`).join('')}
+        <div style="padding-top:10px;border-top:1px solid var(--g100);display:flex;justify-content:space-between">
+          <span style="font-size:11px;font-weight:600;color:var(--g500)">Total across all cards</span>
+          <span style="font-size:12px;font-weight:700;color:var(--navy)">QAR ${fmt(totalCardSpent)}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hd">
+        <span class="card-title">Receivables by Client</span>
+        <span style="font-size:11px;color:var(--g500)">Outstanding invoiced amounts</span>
+      </div>
+      ${invoiced.length === 0
+        ? `<div style="text-align:center;padding:20px;color:var(--g500);font-size:12px">No outstanding receivables</div>`
+        : (() => {
+          const byClient = {};
+          invoiced.forEach(l => {
+            if (!byClient[l.clientId]) byClient[l.clientId] = { name: l.clientName, total: 0, count: 0, company: CLIENTS.find(c=>c.id===l.clientId)?.company||'' };
+            byClient[l.clientId].total += l.total;
+            byClient[l.clientId].count++;
+          });
+          return `<table class="client-table">
+            <thead><tr><th>Client</th><th>Company</th><th>Invoices</th><th>Amount Due</th></tr></thead>
+            <tbody>${Object.values(byClient).sort((a,b) => b.total - a.total).map(c => `
+              <tr>
+                <td style="font-weight:600">${c.name}</td>
+                <td><span class="badge" style="background:${c.company==='Rapid'?'var(--navy-lt)':'var(--mag-lt)'};color:${c.company==='Rapid'?'var(--navy)':'var(--magenta)'}">${c.company}</span></td>
+                <td>${c.count}</td>
+                <td style="font-weight:700;color:var(--navy)">QAR ${fmt(c.total)}</td>
+              </tr>`).join('')}
+            </tbody>
+          </table>`;
+        })()
+      }
+    </div>
+
+    <div class="card">
+      <div class="card-hd">
+        <span class="card-title">Recent Invoices</span>
+        <button class="btn btn-ghost btn-xs" onclick="set({view:'finance'})">View All →</button>
+      </div>
+      ${invoiced.length === 0
+        ? `<div style="text-align:center;padding:20px;color:var(--g500);font-size:12px">No invoices generated yet</div>`
+        : invoiced.sort((a,b) => new Date(b.invoicedAt) - new Date(a.invoicedAt)).slice(0, 5).map(l => `
+          <div class="row-item">
+            <div style="flex:1">
+              <div style="display:flex;align-items:center;gap:8px">
+                <span style="font-size:12px;font-weight:700;color:var(--magenta)">${l.invoiceId}</span>
+                <span style="font-size:12px;font-weight:600">${l.clientName}</span>
+              </div>
+              <div style="font-size:11px;color:var(--g500);margin-top:1px">${l.serviceName} · ${l.qty} emp · ${fmtDate(l.invoicedAt)} · by ${l.invoicedByName}</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-size:13px;font-weight:700;color:var(--navy)">QAR ${fmt(l.total)}</span>
+              <button class="btn btn-ghost btn-xs" onclick="set({view:'finance',invoiceLogId:'${l.id}'})">View</button>
+            </div>
+          </div>`).join('')
+      }
+    </div>`;
+}
+
+// ═══════════════════════════════════
+// VIEW: Accounting Manager Dashboard (Arlene)
+// ═══════════════════════════════════
+function vAcctMgrDashboard() {
+  const all = dbGet();
+  const now = new Date();
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const prevMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+
+  const expensed = all.filter(l => l.status === 'expensed');
+  const invoiced = all.filter(l => l.status === 'invoiced');
+  const pending = all.filter(l => l.status === 'pending');
+  const approved = all.filter(l => l.status === 'approved');
+  const rejected = all.filter(l => l.status === 'rejected');
+  const totalReceivables = invoiced.reduce((s, l) => s + l.total, 0);
+  const totalExpensed = expensed.reduce((s, l) => s + l.total, 0);
+  const invoicedThisMonth = invoiced.filter(l => new Date(l.invoicedAt) >= monthStart);
+  const invoicedThisMonthTotal = invoicedThisMonth.reduce((s, l) => s + l.total, 0);
+  const invoicedPrevMonth = invoiced.filter(l => { const d = new Date(l.invoicedAt); return d >= prevMonthStart && d < monthStart; });
+  const invoicedPrevMonthTotal = invoicedPrevMonth.reduce((s, l) => s + l.total, 0);
+
+  // Pipeline counts
+  const pipeline = [
+    { label: 'With OPs', count: all.filter(l=>l.status==='ops_pending').length, color: '#0369a1', bg: '#e0f2fe' },
+    { label: 'Pending Approval', count: pending.length, color: 'var(--orange)', bg: 'var(--orange-lt)' },
+    { label: 'Approved', count: approved.length, color: 'var(--green)', bg: 'var(--green-lt)' },
+    { label: 'Expensed', count: expensed.length, color: 'var(--purple)', bg: 'var(--purple-lt)' },
+    { label: 'Invoiced', count: invoiced.length, color: 'var(--navy)', bg: 'var(--navy-lt)' },
+    { label: 'Rejected', count: rejected.length, color: 'var(--red)', bg: 'var(--red-lt)' },
+  ];
+
+  // Card spending
+  const activeCards = all.filter(l => l.status !== 'rejected');
+  const cardSpending = CARDS.map(c => {
+    const spent = activeCards.filter(l => l.card === c.id).reduce((s, l) => s + l.total, 0);
+    const pct = c.limit > 0 ? Math.min(spent / c.limit, 1) : 0;
+    return { ...c, spent, pct };
+  });
+
+  // Revenue by company
+  const rapidRevenue = invoiced.filter(l => CLIENTS.find(c=>c.id===l.clientId)?.company === 'Rapid').reduce((s,l) => s + l.total, 0);
+  const rchbsRevenue = invoiced.filter(l => CLIENTS.find(c=>c.id===l.clientId)?.company === 'RCHBS').reduce((s,l) => s + l.total, 0);
+
+  // Aging buckets for receivables
+  const agingBuckets = { current: 0, days30: 0, days60: 0, over60: 0 };
+  invoiced.forEach(l => {
+    const days = Math.floor((now - new Date(l.invoicedAt)) / (1000 * 60 * 60 * 24));
+    if (days <= 15) agingBuckets.current += l.total;
+    else if (days <= 30) agingBuckets.days30 += l.total;
+    else if (days <= 60) agingBuckets.days60 += l.total;
+    else agingBuckets.over60 += l.total;
+  });
+
+  // Thursday
+  const today = now.getDay();
+  const isThursday = today === 4;
+  const daysToThurs = (4 - today + 7) % 7 || 7;
+  const nextThursday = new Date(now);
+  nextThursday.setDate(now.getDate() + daysToThurs);
+
+  // Receivables by client
+  const clientReceivables = {};
+  invoiced.forEach(l => {
+    if (!clientReceivables[l.clientId]) {
+      const cl = CLIENTS.find(c => c.id === l.clientId);
+      clientReceivables[l.clientId] = { name: l.clientName, company: cl?.company || '', limit: cl?.creditLimit || 0, total: 0, count: 0, oldestDays: 0 };
+    }
+    clientReceivables[l.clientId].total += l.total;
+    clientReceivables[l.clientId].count++;
+    const days = Math.floor((now - new Date(l.invoicedAt)) / (1000 * 60 * 60 * 24));
+    clientReceivables[l.clientId].oldestDays = Math.max(clientReceivables[l.clientId].oldestDays, days);
+  });
+
+  return `
+    <div style="margin-bottom:18px">
+      <div style="font-size:15px;font-weight:700;color:var(--navy)">Accounting Manager Dashboard</div>
+      <div style="font-size:12px;color:var(--g500);margin-top:2px">${now.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}${isThursday ? ' · <span style="color:var(--magenta);font-weight:600">Invoice Day</span>' : ''}</div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat" style="--sc:var(--navy)">
+        <div class="stat-lbl">Total Receivables</div>
+        <div class="stat-val">QAR ${fmt(totalReceivables)}</div>
+        <div class="stat-sub">${invoiced.length} outstanding</div>
+      </div>
+      <div class="stat" style="--sc:var(--green)">
+        <div class="stat-lbl">Invoiced This Month</div>
+        <div class="stat-val">QAR ${fmt(invoicedThisMonthTotal)}</div>
+        <div class="stat-sub">${invoicedThisMonth.length} invoices · ${invoicedPrevMonthTotal > 0 ? (invoicedThisMonthTotal >= invoicedPrevMonthTotal ? '<span style="color:var(--green)">▲</span>' : '<span style="color:var(--red)">▼</span>') + ' vs last month' : 'first month'}</div>
+      </div>
+      <div class="stat" style="--sc:var(--purple)">
+        <div class="stat-lbl">Pending Invoice</div>
+        <div class="stat-val">${expensed.length}</div>
+        <div class="stat-sub">QAR ${fmt(totalExpensed)} queued</div>
+      </div>
+      <div class="stat" style="--sc:var(--orange)">
+        <div class="stat-lbl">Needs Attention</div>
+        <div class="stat-val">${pending.length + rejected.length}</div>
+        <div class="stat-sub">${pending.length} pending · ${rejected.length} rejected</div>
+      </div>
+    </div>
+
+    ${isThursday ? `
+      <div style="background:linear-gradient(135deg,var(--magenta),var(--mag-dk));color:white;border-radius:12px;padding:16px 20px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div style="font-size:14px;font-weight:700">It's Thursday — Invoice Day</div>
+          <div style="font-size:12px;opacity:.8;margin-top:2px">${expensed.length} service${expensed.length !== 1 ? 's' : ''} ready · QAR ${fmt(totalExpensed)} total</div>
+        </div>
+        <button class="btn" style="background:white;color:var(--magenta);font-weight:700" onclick="set({view:'finance'})">Start Invoicing →</button>
+      </div>
+    ` : ''}
+
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-hd"><span class="card-title">Service Pipeline</span></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        ${pipeline.map(p => `
+          <div style="background:${p.bg};border-radius:10px;padding:12px 16px;text-align:center;flex:1;min-width:100px">
+            <div style="font-size:22px;font-weight:800;color:${p.color}">${p.count}</div>
+            <div style="font-size:10px;color:${p.color};font-weight:600;margin-top:2px">${p.label}</div>
+          </div>`).join('')}
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-hd">
+          <span class="card-title">Receivables Aging</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+          <div style="background:var(--green-lt);border-radius:8px;padding:12px;text-align:center">
+            <div style="font-size:10px;font-weight:600;color:var(--green);margin-bottom:2px">0–15 DAYS</div>
+            <div style="font-size:16px;font-weight:800;color:var(--green)">QAR ${fmt(agingBuckets.current)}</div>
+          </div>
+          <div style="background:var(--orange-lt);border-radius:8px;padding:12px;text-align:center">
+            <div style="font-size:10px;font-weight:600;color:var(--orange);margin-bottom:2px">16–30 DAYS</div>
+            <div style="font-size:16px;font-weight:800;color:var(--orange)">QAR ${fmt(agingBuckets.days30)}</div>
+          </div>
+          <div style="background:var(--red-lt);border-radius:8px;padding:12px;text-align:center">
+            <div style="font-size:10px;font-weight:600;color:var(--red);margin-bottom:2px">31–60 DAYS</div>
+            <div style="font-size:16px;font-weight:800;color:var(--red)">QAR ${fmt(agingBuckets.days60)}</div>
+          </div>
+          <div style="background:var(--purple-lt);border-radius:8px;padding:12px;text-align:center">
+            <div style="font-size:10px;font-weight:600;color:var(--purple);margin-bottom:2px">60+ DAYS</div>
+            <div style="font-size:16px;font-weight:800;color:var(--purple)">QAR ${fmt(agingBuckets.over60)}</div>
+          </div>
+        </div>
+        <div style="padding-top:10px;border-top:1px solid var(--g100);display:flex;justify-content:space-between">
+          <span style="font-size:11px;font-weight:600;color:var(--g500)">Total outstanding</span>
+          <span style="font-size:13px;font-weight:700;color:var(--navy)">QAR ${fmt(totalReceivables)}</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-hd">
+          <span class="card-title">Revenue by Company</span>
+        </div>
+        <div style="margin-bottom:16px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <span style="font-size:12px;font-weight:600;color:var(--navy)">Rapid Clearing House</span>
+            <span style="font-size:13px;font-weight:700;color:var(--navy)">QAR ${fmt(rapidRevenue)}</span>
+          </div>
+          <div style="height:8px;background:var(--g100);border-radius:4px;overflow:hidden">
+            <div style="height:100%;width:${totalReceivables > 0 ? Math.round(rapidRevenue/totalReceivables*100) : 0}%;background:var(--navy);border-radius:4px"></div>
+          </div>
+        </div>
+        <div style="margin-bottom:16px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <span style="font-size:12px;font-weight:600;color:var(--magenta)">RCHBS</span>
+            <span style="font-size:13px;font-weight:700;color:var(--magenta)">QAR ${fmt(rchbsRevenue)}</span>
+          </div>
+          <div style="height:8px;background:var(--g100);border-radius:4px;overflow:hidden">
+            <div style="height:100%;width:${totalReceivables > 0 ? Math.round(rchbsRevenue/totalReceivables*100) : 0}%;background:var(--magenta);border-radius:4px"></div>
+          </div>
+        </div>
+        <div style="padding-top:12px;border-top:1px solid var(--g100)">
+          <div class="card-hd" style="margin-bottom:10px"><span class="card-title" style="font-size:11px">Card Utilization</span></div>
+          ${cardSpending.map(c => `
+            <div style="margin-bottom:8px">
+              <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px">
+                <span style="color:var(--g700)">${c.label}</span>
+                <span style="font-weight:600;color:${c.pct >= 0.9 ? 'var(--red)' : 'var(--g700)'}">${Math.round(c.pct*100)}%</span>
+              </div>
+              <div style="height:4px;background:var(--g100);border-radius:2px;overflow:hidden">
+                <div style="height:100%;width:${Math.round(c.pct*100)}%;background:${c.pct >= 0.9 ? 'var(--red)' : c.pct >= 0.7 ? 'var(--orange)' : 'var(--green)'};border-radius:2px"></div>
+              </div>
+            </div>`).join('')}
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hd">
+        <span class="card-title">Client Receivables</span>
+        <span style="font-size:11px;color:var(--g500)">Click any client to view invoices</span>
+      </div>
+      ${Object.keys(clientReceivables).length === 0
+        ? `<div style="text-align:center;padding:20px;color:var(--g500);font-size:12px">No outstanding receivables</div>`
+        : `<table class="client-table">
+          <thead><tr><th>Client</th><th>Company</th><th>Credit Limit</th><th>Outstanding</th><th>Utilization</th><th>Oldest</th><th>Status</th></tr></thead>
+          <tbody>${Object.values(clientReceivables).sort((a,b) => b.total - a.total).map(c => {
+            const utilPct = c.limit > 0 ? Math.min(c.total / c.limit, 1) : 0;
+            const statusCls = utilPct >= 1 ? 'b-rejected' : utilPct >= 0.75 ? 'b-pending' : 'b-approved';
+            const statusLbl = utilPct >= 1 ? 'Over Limit' : utilPct >= 0.75 ? 'Near Limit' : 'Healthy';
+            return `<tr>
+              <td style="font-weight:600">${c.name}</td>
+              <td><span class="badge" style="background:${c.company==='Rapid'?'var(--navy-lt)':'var(--mag-lt)'};color:${c.company==='Rapid'?'var(--navy)':'var(--magenta)'}">${c.company}</span></td>
+              <td>QAR ${fmt(c.limit)}</td>
+              <td style="font-weight:700;color:var(--navy)">QAR ${fmt(c.total)} <span style="font-size:10px;font-weight:400;color:var(--g500)">(${c.count})</span></td>
+              <td>
+                <div style="display:flex;align-items:center;gap:6px">
+                  <div class="ar-bar-wrap"><div class="ar-bar-fill" style="width:${Math.round(utilPct*100)}%;--bc:${utilPct>=1?'var(--red)':utilPct>=0.75?'var(--orange)':'var(--green)'}"></div></div>
+                  <span style="font-size:10px;font-weight:600">${Math.round(utilPct*100)}%</span>
+                </div>
+              </td>
+              <td style="font-size:11px;color:${c.oldestDays > 30 ? 'var(--red)' : 'var(--g700)'}">${c.oldestDays}d</td>
+              <td><span class="badge ${statusCls}">${statusLbl}</span></td>
+            </tr>`;
+          }).join('')}
+          </tbody>
+        </table>`
+      }
+    </div>
+
+    <div class="card">
+      <div class="card-hd">
+        <span class="card-title">Recent Activity</span>
+        <button class="btn btn-ghost btn-xs" onclick="set({view:'finance'})">Finance Queue →</button>
+      </div>
+      ${all.sort((a,b) => new Date(b.submittedAt) - new Date(a.submittedAt)).slice(0, 8).map(l => `
+        <div class="row-item">
+          <div style="flex:1">
+            <div style="font-size:12px;font-weight:600">${l.clientName} · ${l.serviceName}</div>
+            <div style="font-size:10px;color:var(--g500);margin-top:2px">${l.qty} emp · QAR ${fmt(l.total)} · ${fmtDate(l.submittedAt)} · by ${l.submittedByName}</div>
+          </div>
+          ${statusBadge(l.status)}
+        </div>`).join('')}
+    </div>`;
+}
+
+// ═══════════════════════════════════
 // VIEW: CFO Dashboard
 // ═══════════════════════════════════
 function vCFO() {
@@ -1081,8 +1505,15 @@ function getNav(type) {
     expense: [
       item('expense','💰','Expense Tracker', counts.approved||''),
     ],
-    finance: [
-      item('finance','🧾','Finance Queue', counts.expensed||''),
+    accountant: [
+      item('dashboard','◈','Dashboard',''),
+      item('finance','🧾','Invoice Queue', counts.expensed||''),
+      item('submissions','📋','All Submissions',''),
+    ],
+    acct_mgr: [
+      item('dashboard','◈','Dashboard',''),
+      item('finance','🧾','Invoice Queue', counts.expensed||''),
+      item('submissions','📋','All Submissions',''),
     ],
     cfo: [
       item('cfo','📊','Overview',''),
@@ -1092,24 +1523,27 @@ function getNav(type) {
 }
 
 function getViewTitle() {
-  const map = {dashboard:'Dashboard',log:'Log Service',submissions:'Submissions',approvals:'Approval Queue',expense:'Expense Tracker',finance:'Finance Queue',cfo:'Management',invoiceLogId:'Invoice'};
+  const map = {dashboard:'Dashboard',log:'Log Service',submissions:'Submissions',approvals:'Approval Queue',expense:'Expense Tracker',finance:'Invoice Queue',cfo:'Management',invoiceLogId:'Invoice'};
   if (S.invoiceLogId) return 'Invoice Preview';
   return map[S.view]||'Dashboard';
 }
 
 function renderView() {
   const t = S.user?.type;
-  if (S.view==='dashboard'  && (t==='am'||t==='tl')) return vDashboardAM();
-  if (S.view==='log')                                  return vLogService();
-  if (S.view==='submissions')                          return vSubmissions();
-  if (S.view==='approvals'  && t==='tl')               return vApprovals();
-  if (S.view==='expense'    && t==='expense')          return vExpense();
-  if (S.view==='finance'    && t==='finance')          return vFinance();
-  if (S.view==='cfo'        && t==='cfo')              return vCFO();
+  if (S.view==='dashboard'  && (t==='am'||t==='tl'))        return vDashboardAM();
+  if (S.view==='dashboard'  && t==='accountant')             return vAccountantDashboard();
+  if (S.view==='dashboard'  && t==='acct_mgr')              return vAcctMgrDashboard();
+  if (S.view==='log')                                        return vLogService();
+  if (S.view==='submissions')                                return vSubmissions();
+  if (S.view==='approvals'  && t==='tl')                     return vApprovals();
+  if (S.view==='expense'    && t==='expense')                return vExpense();
+  if (S.view==='finance'    && (t==='accountant'||t==='acct_mgr')) return vFinance();
+  if (S.view==='cfo'        && t==='cfo')                   return vCFO();
   // Default landing per type
-  if (t==='expense') return vExpense();
-  if (t==='finance') return vFinance();
-  if (t==='cfo')     return vCFO();
+  if (t==='expense')    return vExpense();
+  if (t==='accountant') return vAccountantDashboard();
+  if (t==='acct_mgr')   return vAcctMgrDashboard();
+  if (t==='cfo')        return vCFO();
   return vDashboardAM();
 }
 
