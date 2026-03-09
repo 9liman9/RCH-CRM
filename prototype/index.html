@@ -204,14 +204,25 @@ const USERS = [
 // ═══════════════════════════════════
 // REFERENCE DATA
 // ═══════════════════════════════════
-const CLIENTS = [
-  { id:1, name:'ABB Qatar',              company:'Rapid', contact:'Sarah Al-Mansour', creditLimit:8000  },
-  { id:2, name:'Acrogym Sport Center',   company:'Rapid', contact:'Kirill Bazhanov',  creditLimit:20000 },
-  { id:3, name:'Seaquest Services',      company:'RCHBS', contact:'Ahmad Siregar',    creditLimit:3000  },
-  { id:4, name:'EY Qatar',              company:'Rapid', contact:'Finance Dept',     creditLimit:75000 },
-  { id:5, name:'Hitachi Energy',         company:'Rapid', contact:'HR Dept',          creditLimit:2000  },
-  { id:6, name:'Property Finder Qatar', company:'RCHBS', contact:'Ops Team',         creditLimit:25000 },
+const CLIENTS_SEED = [
+  { id:1, name:'ABB Qatar',              company:'Rapid', contact:'Sarah Al-Mansour', email:'sarah@abbqatar.qa',       phone:'+974 4412 3001', type:'retainer', creditLimit:8000  },
+  { id:2, name:'Acrogym Sport Center',   company:'Rapid', contact:'Kirill Bazhanov',  email:'kirill@acrogym.qa',       phone:'+974 5501 8822', type:'per-job',  creditLimit:20000 },
+  { id:3, name:'Seaquest Services',      company:'RCHBS', contact:'Ahmad Siregar',    email:'ahmad@seaquest.qa',       phone:'+974 3309 1145', type:'retainer', creditLimit:3000  },
+  { id:4, name:'EY Qatar',              company:'Rapid', contact:'Finance Dept',     email:'finance@ey.qa',           phone:'+974 4497 0000', type:'retainer', creditLimit:75000 },
+  { id:5, name:'Hitachi Energy',         company:'Rapid', contact:'HR Dept',          email:'hr@hitachienergy.qa',     phone:'+974 4410 5500', type:'per-job',  creditLimit:2000  },
+  { id:6, name:'Property Finder Qatar', company:'RCHBS', contact:'Ops Team',         email:'ops@propertyfinder.qa',   phone:'+974 4421 7700', type:'per-job',  creditLimit:25000 },
 ];
+
+const CLIENTS_DB_KEY = 'rch_clients_v1';
+function clientsLoad() { try { const r = localStorage.getItem(CLIENTS_DB_KEY); return r ? JSON.parse(r) : null; } catch(e) { return null; } }
+function clientsSave(c) { localStorage.setItem(CLIENTS_DB_KEY, JSON.stringify(c)); }
+function clientsGet() { let c = clientsLoad(); if (!c) { c = CLIENTS_SEED.map(x=>({...x})); clientsSave(c); } return c; }
+function clientUpdate(id, patch) { const cl = clientsGet(); const i = cl.findIndex(c=>c.id===id); if(i!==-1){Object.assign(cl[i],patch);clientsSave(cl);} return cl; }
+function clientAdd(c) { const cl = clientsGet(); cl.push(c); clientsSave(cl); }
+function clientsReset() { localStorage.removeItem(CLIENTS_DB_KEY); }
+
+// Live accessor — always returns current client list
+let CLIENTS = clientsGet();
 
 const SERVICES = [
   { id:'qid',     label:'QID Renewal',                  price:1220 },
@@ -380,6 +391,8 @@ function dbAdd(log) {
 
 function dbReset() {
   localStorage.removeItem(DB_KEY);
+  clientsReset();
+  CLIENTS = clientsGet();
 }
 
 // ═══════════════════════════════════
@@ -402,10 +415,17 @@ let S = {
   invoiceLogId: null,
   // editing
   editingLogId: null,
+  // clients view
+  clientsTab: 'Rapid',
+  editingClientId: null,
+  editClientForm: null,
+  addingClient: false,
+  newClientForm: { name:'', company:'Rapid', contact:'', email:'', phone:'', type:'per-job', creditLimit:5000 },
 };
 
 function set(patch) {
   Object.assign(S, patch);
+  CLIENTS = clientsGet();
   render();
 }
 
@@ -706,6 +726,148 @@ function vDashboardAM() {
       <span style="font-size:10px;color:var(--g500)">Active service logs by stage · paid services removed automatically</span>
     </div>
     <div class="kanban-wrap">${kanbanHTML}</div>`;
+}
+
+// ═══════════════════════════════════
+// VIEW: Clients
+// ═══════════════════════════════════
+function startEditClient(id) {
+  const c = CLIENTS.find(x=>x.id===id);
+  if (!c) return;
+  set({ editingClientId:id, editClientForm:{...c} });
+}
+
+function saveEditClient() {
+  if (!S.editClientForm) return;
+  const f = S.editClientForm;
+  clientUpdate(f.id, { name:f.name, contact:f.contact, email:f.email, phone:f.phone, type:f.type, creditLimit:Number(f.creditLimit)||0 });
+  set({ editingClientId:null, editClientForm:null });
+}
+
+function cancelEditClient() {
+  set({ editingClientId:null, editClientForm:null });
+}
+
+function saveNewClient() {
+  const f = S.newClientForm;
+  if (!f.name.trim()) { alert('Client name is required'); return; }
+  const nextId = Math.max(...clientsGet().map(c=>c.id), 0) + 1;
+  clientAdd({ id:nextId, name:f.name.trim(), company:f.company, contact:f.contact.trim(), email:f.email.trim(), phone:f.phone.trim(), type:f.type, creditLimit:Number(f.creditLimit)||0 });
+  set({ addingClient:false, newClientForm:{ name:'', company:S.clientsTab, contact:'', email:'', phone:'', type:'per-job', creditLimit:5000 } });
+}
+
+function vClients() {
+  const allLogs = dbGet();
+  const tab = S.clientsTab;
+  const clients = CLIENTS.filter(c => c.company === tab).sort((a,b) => a.name.localeCompare(b.name));
+
+  const rapidCount = CLIENTS.filter(c=>c.company==='Rapid').length;
+  const rchbsCount = CLIENTS.filter(c=>c.company==='RCHBS').length;
+
+  const tabBtn = (label, count, company) => `
+    <button class="btn ${tab===company ? 'btn-navy' : 'btn-ghost'} btn-sm" onclick="set({clientsTab:'${company}',editingClientId:null})" style="gap:4px">
+      ${label} <span style="font-size:10px;opacity:.7">(${count})</span>
+    </button>`;
+
+  const tableRows = clients.map(c => {
+    const logs = allLogs.filter(l => l.clientId === c.id);
+    const invoicedTotal = logs.filter(l=>l.status==='invoiced').reduce((s,l)=>s+l.total, 0);
+    const totalSpend = logs.filter(l=>l.status!=='rejected').reduce((s,l)=>s+l.total, 0);
+    const serviceCount = logs.length;
+    const pct = c.creditLimit > 0 ? Math.min(invoicedTotal / c.creditLimit, 1) : 0;
+    const barColor = pct >= 1 ? 'var(--red)' : pct >= 0.75 ? 'var(--orange)' : 'var(--green)';
+
+    if (S.editingClientId === c.id && S.editClientForm) {
+      const f = S.editClientForm;
+      return `<tr style="background:var(--navy-lt)">
+        <td><input class="form-input" style="padding:5px 8px;font-size:12px" value="${f.name}" oninput="S.editClientForm.name=this.value"></td>
+        <td><input class="form-input" style="padding:5px 8px;font-size:12px" value="${f.contact}" oninput="S.editClientForm.contact=this.value"></td>
+        <td><input class="form-input" style="padding:5px 8px;font-size:12px" value="${f.email}" oninput="S.editClientForm.email=this.value"></td>
+        <td><input class="form-input" style="padding:5px 8px;font-size:12px" value="${f.phone}" oninput="S.editClientForm.phone=this.value"></td>
+        <td>
+          <select class="form-input" style="padding:5px 8px;font-size:12px" onchange="S.editClientForm.type=this.value;render()">
+            <option value="retainer" ${f.type==='retainer'?'selected':''}>Retainer</option>
+            <option value="per-job" ${f.type==='per-job'?'selected':''}>Per-Job</option>
+          </select>
+        </td>
+        <td><input class="form-input" style="padding:5px 8px;font-size:12px;width:90px" type="number" value="${f.creditLimit}" oninput="S.editClientForm.creditLimit=this.value"></td>
+        <td style="font-size:12px;color:var(--g500)" colspan="2">—</td>
+        <td style="text-align:right">
+          <div style="display:flex;gap:4px;justify-content:flex-end">
+            <button class="btn btn-success btn-xs" onclick="saveEditClient()">Save</button>
+            <button class="btn btn-ghost btn-xs" onclick="cancelEditClient()">Cancel</button>
+          </div>
+        </td>
+      </tr>`;
+    }
+
+    return `<tr>
+      <td><div style="font-weight:600;font-size:12px">${c.name}</div></td>
+      <td style="font-size:12px">${c.contact}</td>
+      <td style="font-size:11px;color:var(--g500)">${c.email||'—'}</td>
+      <td style="font-size:11px;color:var(--g500);white-space:nowrap">${c.phone||'—'}</td>
+      <td><span class="badge ${c.type==='retainer'?'b-invoiced':'b-ops'}" style="font-size:9px">${c.type==='retainer'?'Retainer':'Per-Job'}</span></td>
+      <td style="font-size:12px;color:var(--g700)">QAR ${fmt(c.creditLimit)}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:6px">
+          <div style="width:60px;height:5px;background:var(--g100);border-radius:3px">
+            <div style="height:100%;border-radius:3px;background:${barColor};width:${Math.round(pct*100)}%"></div>
+          </div>
+          <span style="font-size:10px;font-weight:600;color:${barColor}">${Math.round(pct*100)}%</span>
+        </div>
+        <div style="font-size:10px;color:var(--g500);margin-top:2px">QAR ${fmt(invoicedTotal)} / ${fmt(c.creditLimit)}</div>
+      </td>
+      <td style="font-size:12px;text-align:center;color:var(--g700)">${serviceCount}</td>
+      <td style="text-align:right">
+        <button class="btn btn-ghost btn-xs" onclick="startEditClient(${c.id})">✎ Edit</button>
+      </td>
+    </tr>`;
+  }).join('');
+
+  // Add client form (inline row at top of table)
+  const addRow = S.addingClient ? `<tr style="background:var(--green-lt)">
+    <td><input class="form-input" style="padding:5px 8px;font-size:12px" placeholder="Company name" value="${S.newClientForm.name}" oninput="S.newClientForm.name=this.value"></td>
+    <td><input class="form-input" style="padding:5px 8px;font-size:12px" placeholder="Contact person" value="${S.newClientForm.contact}" oninput="S.newClientForm.contact=this.value"></td>
+    <td><input class="form-input" style="padding:5px 8px;font-size:12px" placeholder="Email" value="${S.newClientForm.email}" oninput="S.newClientForm.email=this.value"></td>
+    <td><input class="form-input" style="padding:5px 8px;font-size:12px" placeholder="Phone" value="${S.newClientForm.phone}" oninput="S.newClientForm.phone=this.value"></td>
+    <td>
+      <select class="form-input" style="padding:5px 8px;font-size:12px" onchange="S.newClientForm.type=this.value;render()">
+        <option value="per-job" ${S.newClientForm.type==='per-job'?'selected':''}>Per-Job</option>
+        <option value="retainer" ${S.newClientForm.type==='retainer'?'selected':''}>Retainer</option>
+      </select>
+    </td>
+    <td><input class="form-input" style="padding:5px 8px;font-size:12px;width:90px" type="number" placeholder="Limit" value="${S.newClientForm.creditLimit}" oninput="S.newClientForm.creditLimit=this.value"></td>
+    <td colspan="2" style="font-size:10px;color:var(--g500)">New</td>
+    <td style="text-align:right">
+      <div style="display:flex;gap:4px;justify-content:flex-end">
+        <button class="btn btn-success btn-xs" onclick="saveNewClient()">Add</button>
+        <button class="btn btn-ghost btn-xs" onclick="set({addingClient:false})">Cancel</button>
+      </div>
+    </td>
+  </tr>` : '';
+
+  return `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div style="display:flex;gap:6px">
+        ${tabBtn('Rapid Clearing House', rapidCount, 'Rapid')}
+        ${tabBtn('RCHBS', rchbsCount, 'RCHBS')}
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="set({addingClient:true,newClientForm:{name:'',company:'${tab}',contact:'',email:'',phone:'',type:'per-job',creditLimit:5000}})" style="gap:4px">
+        <span style="font-size:14px">+</span> Add Client
+      </button>
+    </div>
+
+    <div class="card" style="overflow-x:auto">
+      <table class="client-table" style="min-width:900px">
+        <thead><tr>
+          <th>Client</th><th>Contact</th><th>Email</th><th>Phone</th><th>Type</th><th>Limit</th><th>A/R Usage</th><th style="text-align:center">Services</th><th style="text-align:right">Actions</th>
+        </tr></thead>
+        <tbody>
+          ${addRow}
+          ${tableRows}
+        </tbody>
+      </table>
+    </div>`;
 }
 
 // ═══════════════════════════════════
@@ -1136,11 +1298,13 @@ function getNav(type) {
   const defs = {
     am: [
       item('dashboard','◈','Dashboard',''),
+      item('clients','👥','Clients',''),
       item('log','⊕','Log Service',''),
       item('submissions','📋','My Submissions',''),
     ],
     tl: [
       item('dashboard','◈','Dashboard',''),
+      item('clients','👥','Clients',''),
       item('log','⊕','Log Service',''),
       item('approvals','✓','Approval Queue', counts.pending||''),
       item('submissions','📋','All Submissions',''),
@@ -1159,7 +1323,7 @@ function getNav(type) {
 }
 
 function getViewTitle() {
-  const map = {dashboard:'Dashboard',log:'Log Service',submissions:'Submissions',approvals:'Approval Queue',expense:'Expense Tracker',finance:'Finance Queue',cfo:'Management',invoiceLogId:'Invoice'};
+  const map = {dashboard:'Dashboard',clients:'Clients',log:'Log Service',submissions:'Submissions',approvals:'Approval Queue',expense:'Expense Tracker',finance:'Finance Queue',cfo:'Management',invoiceLogId:'Invoice'};
   if (S.invoiceLogId) return 'Invoice Preview';
   return map[S.view]||'Dashboard';
 }
@@ -1167,6 +1331,7 @@ function getViewTitle() {
 function renderView() {
   const t = S.user?.type;
   if (S.view==='dashboard'  && (t==='am'||t==='tl')) return vDashboardAM();
+  if (S.view==='clients'   && (t==='am'||t==='tl')) return vClients();
   if (S.view==='log')                                  return vLogService();
   if (S.view==='submissions')                          return vSubmissions();
   if (S.view==='approvals'  && t==='tl')               return vApprovals();
