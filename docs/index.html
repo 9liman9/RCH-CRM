@@ -230,11 +230,27 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .inv-footer-meta{font-size:10px;color:var(--g500);margin-top:5px;display:flex;align-items:center;justify-content:center;gap:8px}
 .inv-actions{display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding-top:12px;border-top:1px solid var(--border)}
 
+/* ── Document Viewer (inline PDF-like pages) ── */
+.doc-viewer{background:#525659;padding:24px 16px;border-radius:12px;min-height:400px}
+.doc-viewer-toolbar{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;margin-bottom:20px;background:rgba(0,0,0,.35);border-radius:8px;color:white;font-size:13px;font-weight:500;position:sticky;top:0;z-index:10}
+.doc-viewer-toolbar button{background:rgba(255,255,255,.15);color:white;border:none;padding:6px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .14s;display:inline-flex;align-items:center;gap:5px}
+.doc-viewer-toolbar button:hover{background:rgba(255,255,255,.25)}
+.doc-page{width:210mm;min-height:297mm;margin:0 auto 24px;background:white;box-shadow:0 4px 24px rgba(0,0,0,.35);padding:32px 36px;position:relative;box-sizing:border-box}
+.doc-page .inv-wrap{border:none;border-radius:0;max-width:100%;padding:0;margin:0;box-shadow:none}
+.doc-page-number{position:absolute;bottom:14px;right:20px;font-size:10px;color:var(--g500);font-weight:500}
+.doc-page-receipt{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:20px}
+.doc-page-receipt-header{width:100%;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid var(--navy)}
+.doc-page-receipt img{max-width:100%;max-height:240mm;object-fit:contain;border:1px solid var(--border);border-radius:6px}
+.doc-page-receipt object,.doc-page-receipt iframe{width:100%;height:250mm;border:1px solid var(--border);border-radius:6px}
+
 @media print {
-  .sidebar,.topbar,.inv-actions,.no-print{display:none!important}
+  .sidebar,.topbar,.inv-actions,.no-print,.doc-viewer-toolbar{display:none!important}
   .main{overflow:visible!important}
-  .content{padding:10px!important;overflow:visible!important}
-  .inv-wrap{border:none;border-radius:0;max-width:100%;padding:10px;box-shadow:none}
+  .content{padding:0!important;overflow:visible!important}
+  .doc-viewer{background:white!important;padding:0!important;border-radius:0!important}
+  .doc-page{box-shadow:none!important;margin:0!important;padding:10px!important;page-break-after:always;min-height:auto}
+  .doc-page:last-child{page-break-after:auto}
+  .doc-page .inv-wrap{border:none;border-radius:0;max-width:100%;padding:0;box-shadow:none}
   .content > .fade{animation:none}
   body,html{background:white}
   .receipt-print-page{display:block!important;page-break-before:always;padding:20px;min-height:200px}
@@ -263,32 +279,32 @@ const USERS = [
 // ═══════════════════════════════════
 const CLIENTS_SEED = [
   // ── Rapid Clearing House clients ──────────────────────────────────────────
-  { id:1,  name:'ABB Qatar WLL',               company:'Rapid', contact:'Ahmed Al-Mannai',   email:'accounts@abb.com.qa',         phone:'+974 4455 1001', type:'retainer', creditLimit:15000, assignedTo:'violetta' },
-  { id:2,  name:'EY Qatar',                    company:'Rapid', contact:'Sara Al-Emadi',     email:'info@qa.ey.com',              phone:'+974 4457 4200', type:'retainer', creditLimit:20000, assignedTo:'violetta' },
-  { id:3,  name:'Hitachi Qatar WLL',           company:'Rapid', contact:'Khalid Al-Sulaiti', email:'qatar@hitachi.com',           phone:'+974 4431 0050', type:'per-job',  creditLimit:10000, assignedTo:'violetta' },
-  { id:4,  name:'Industries Qatar QSC',        company:'Rapid', contact:'Faisal Al-Kuwari',  email:'info@iq.com.qa',              phone:'+974 4496 5500', type:'retainer', creditLimit:25000, assignedTo:'violetta' },
-  { id:5,  name:'Vodafone Qatar PSC',          company:'Rapid', contact:'Reem Al-Ansari',    email:'corporate@vodafone.com.qa',   phone:'+974 7777 0000', type:'retainer', creditLimit:18000, assignedTo:'violetta' },
-  { id:6,  name:'Al Meera Consumer Goods',     company:'Rapid', contact:'Mohammed Al-Hajri', email:'hr@almeera.com.qa',           phone:'+974 4012 3456', type:'retainer', creditLimit:12000, assignedTo:'violetta' },
-  { id:7,  name:'Qatar Steel Company WLL',     company:'Rapid', contact:'Saif Al-Sada',      email:'admin@qatarsteel.com.qa',     phone:'+974 4477 2255', type:'retainer', creditLimit:20000, assignedTo:'violetta' },
-  { id:8,  name:'Property Finder Qatar',       company:'Rapid', contact:'Layla Al-Dossari',  email:'ops@propertyfinder.qa',       phone:'+974 4465 1234', type:'per-job',  creditLimit:8000,  assignedTo:'vongai'   },
-  { id:9,  name:'Acrogym Qatar',               company:'Rapid', contact:'Nadia Beshir',      email:'info@acrogym.qa',             phone:'+974 5556 7890', type:'per-job',  creditLimit:5000,  assignedTo:'violetta' },
-  { id:10, name:'Ooredoo Qatar PSC',           company:'Rapid', contact:'Tariq Al-Kaabi',    email:'corporate@ooredoo.com.qa',    phone:'+974 4466 0000', type:'retainer', creditLimit:22000, assignedTo:'vongai'   },
-  { id:11, name:'Gulf International Bank',     company:'Rapid', contact:'Hana Al-Muftah',    email:'hr@gibonline.com',            phone:'+974 4496 3000', type:'retainer', creditLimit:16000, assignedTo:'violetta' },
-  { id:12, name:'Lulu Hypermarket Qatar WLL',  company:'Rapid', contact:'Priya Nair',        email:'hr.qatar@luluhypermarket.com',phone:'+974 4432 8800', type:'retainer', creditLimit:14000, assignedTo:'violetta' },
-  { id:13, name:'Milaha (Qatar Navigation)',   company:'Rapid', contact:'Jaber Al-Marri',    email:'crewing@milaha.com',          phone:'+974 4445 3888', type:'retainer', creditLimit:19000, assignedTo:'vongai'   },
+  { id:1,  name:'ABB Qatar WLL',               company:'Rapid', contact:'Ahmed Al-Mannai',   email:'accounts@abb.com.qa',         phone:'+974 4455 1001', type:'retainer', creditLimit:15000, assignedTo:'violetta', address:'Al Sadd Street, Tower 25, Floor 8', city:'Doha', country:'Qatar', poBox:'22177', tin:'300051234', crNumber:'45678', vatNumber:'' },
+  { id:2,  name:'EY Qatar',                    company:'Rapid', contact:'Sara Al-Emadi',     email:'info@qa.ey.com',              phone:'+974 4457 4200', type:'retainer', creditLimit:20000, assignedTo:'violetta', address:'Tornado Tower, Floor 23, West Bay', city:'Doha', country:'Qatar', poBox:'164', tin:'300098712', crNumber:'36741', vatNumber:'' },
+  { id:3,  name:'Hitachi Qatar WLL',           company:'Rapid', contact:'Khalid Al-Sulaiti', email:'qatar@hitachi.com',           phone:'+974 4431 0050', type:'per-job',  creditLimit:10000, assignedTo:'violetta', address:'Salwa Road, Building 42, Floor 3', city:'Doha', country:'Qatar', poBox:'9122', tin:'300045678', crNumber:'52341', vatNumber:'' },
+  { id:4,  name:'Industries Qatar QSC',        company:'Rapid', contact:'Faisal Al-Kuwari',  email:'info@iq.com.qa',              phone:'+974 4496 5500', type:'retainer', creditLimit:25000, assignedTo:'violetta', address:'Grand Hamad Street, IQ Tower', city:'Doha', country:'Qatar', poBox:'3212', tin:'300012345', crNumber:'8765', vatNumber:'' },
+  { id:5,  name:'Vodafone Qatar PSC',          company:'Rapid', contact:'Reem Al-Ansari',    email:'corporate@vodafone.com.qa',   phone:'+974 7777 0000', type:'retainer', creditLimit:18000, assignedTo:'violetta', address:'West Bay, Al Dafna Tower, Floor 12', city:'Doha', country:'Qatar', poBox:'27727', tin:'300067890', crNumber:'44590', vatNumber:'' },
+  { id:6,  name:'Al Meera Consumer Goods',     company:'Rapid', contact:'Mohammed Al-Hajri', email:'hr@almeera.com.qa',           phone:'+974 4012 3456', type:'retainer', creditLimit:12000, assignedTo:'violetta', address:'C Ring Road, Al Meera HQ', city:'Doha', country:'Qatar', poBox:'9521', tin:'300033456', crNumber:'28901', vatNumber:'' },
+  { id:7,  name:'Qatar Steel Company WLL',     company:'Rapid', contact:'Saif Al-Sada',      email:'admin@qatarsteel.com.qa',     phone:'+974 4477 2255', type:'retainer', creditLimit:20000, assignedTo:'violetta', address:'Mesaieed Industrial City', city:'Mesaieed', country:'Qatar', poBox:'50090', tin:'300078901', crNumber:'12345', vatNumber:'' },
+  { id:8,  name:'Property Finder Qatar',       company:'Rapid', contact:'Layla Al-Dossari',  email:'ops@propertyfinder.qa',       phone:'+974 4465 1234', type:'per-job',  creditLimit:8000,  assignedTo:'vongai',   address:'The Pearl, Tower 1, Floor 5', city:'Doha', country:'Qatar', poBox:'31100', tin:'', crNumber:'67890', vatNumber:'' },
+  { id:9,  name:'Acrogym Qatar',               company:'Rapid', contact:'Nadia Beshir',      email:'info@acrogym.qa',             phone:'+974 5556 7890', type:'per-job',  creditLimit:5000,  assignedTo:'violetta', address:'Lusail Boulevard, Sports Complex', city:'Lusail', country:'Qatar', poBox:'', tin:'', crNumber:'71234', vatNumber:'' },
+  { id:10, name:'Ooredoo Qatar PSC',           company:'Rapid', contact:'Tariq Al-Kaabi',    email:'corporate@ooredoo.com.qa',    phone:'+974 4466 0000', type:'retainer', creditLimit:22000, assignedTo:'vongai',   address:'West Bay, Ooredoo Tower', city:'Doha', country:'Qatar', poBox:'217', tin:'300055555', crNumber:'23456', vatNumber:'' },
+  { id:11, name:'Gulf International Bank',     company:'Rapid', contact:'Hana Al-Muftah',    email:'hr@gibonline.com',            phone:'+974 4496 3000', type:'retainer', creditLimit:16000, assignedTo:'violetta', address:'QFC Tower 1, Floor 19, West Bay', city:'Doha', country:'Qatar', poBox:'1017', tin:'300044444', crNumber:'34567', vatNumber:'' },
+  { id:12, name:'Lulu Hypermarket Qatar WLL',  company:'Rapid', contact:'Priya Nair',        email:'hr.qatar@luluhypermarket.com',phone:'+974 4432 8800', type:'retainer', creditLimit:14000, assignedTo:'violetta', address:'D Ring Road, Lulu HQ Building', city:'Doha', country:'Qatar', poBox:'7450', tin:'300066666', crNumber:'56789', vatNumber:'' },
+  { id:13, name:'Milaha (Qatar Navigation)',   company:'Rapid', contact:'Jaber Al-Marri',    email:'crewing@milaha.com',          phone:'+974 4445 3888', type:'retainer', creditLimit:19000, assignedTo:'vongai',   address:'Old Salata, Milaha Tower', city:'Doha', country:'Qatar', poBox:'153', tin:'300077777', crNumber:'6890', vatNumber:'' },
   // ── RCH Business Solutions clients ───────────────────────────────────────
-  { id:14, name:'Seaquest Qatar',              company:'RCHBS', contact:'James O\'Brien',    email:'admin@seaquest.qa',           phone:'+974 4455 2002', type:'per-job',  creditLimit:9000,  assignedTo:'vongai'   },
-  { id:15, name:'QatarEnergy',                 company:'RCHBS', contact:'Ali Al-Mohannadi',  email:'govt.affairs@qatarenergy.qa', phone:'+974 4449 0000', type:'retainer', creditLimit:30000, assignedTo:'violetta' },
-  { id:16, name:'Hamad Medical Corporation',   company:'RCHBS', contact:'Dr. Nour Al-Said',  email:'admin@hamad.qa',              phone:'+974 4439 4444', type:'retainer', creditLimit:25000, assignedTo:'vongai'   },
-  { id:17, name:'Nakilat QSC',                 company:'RCHBS', contact:'Ibrahim Al-Buainain',email:'hr@nakilat.com',            phone:'+974 4426 9511', type:'retainer', creditLimit:20000, assignedTo:'violetta' },
-  { id:18, name:'KAHRAMAA',                    company:'RCHBS', contact:'Yousef Al-Jaber',   email:'procurement@km.com.qa',       phone:'+974 4464 4444', type:'retainer', creditLimit:22000, assignedTo:'vongai'   },
-  { id:19, name:'QAPCO',                       company:'RCHBS', contact:'Hamad Al-Mohannadi',email:'admin@qapco.com.qa',          phone:'+974 4476 6800', type:'retainer', creditLimit:18000, assignedTo:'vongai'   },
-  { id:20, name:'Mesaieed Petrochemical',      company:'RCHBS', contact:'Salem Al-Rumaihi',  email:'info@mphc.com.qa',            phone:'+974 4477 0555', type:'retainer', creditLimit:20000, assignedTo:'vongai'   },
-  { id:21, name:'Mannai Corporation',          company:'RCHBS', contact:'George Varghese',   email:'hr@mannai.com.qa',            phone:'+974 4455 7700', type:'per-job',  creditLimit:11000, assignedTo:'vongai'   },
-  { id:22, name:'Barwa Real Estate',           company:'RCHBS', contact:'Fatima Al-Kuwari',  email:'admin@barwa.com.qa',          phone:'+974 4014 4440', type:'retainer', creditLimit:13000, assignedTo:'vongai'   },
-  { id:23, name:'HBK Contracting Company',     company:'RCHBS', contact:'Mohammed Al-Khulaifi',email:'projects@hbk.com.qa',      phone:'+974 4455 6600', type:'per-job',  creditLimit:15000, assignedTo:'vongai'   },
-  { id:24, name:'Ezdan Holding Group',         company:'RCHBS', contact:'Rashed Al-Qubaisi', email:'hr@ezdan.qa',                 phone:'+974 4455 3300', type:'retainer', creditLimit:12000, assignedTo:'vongai'   },
-  { id:25, name:'Salini Qatar WLL',            company:'RCHBS', contact:'Marco Rossi',       email:'admin@saliniqa.com',          phone:'+974 4444 9900', type:'per-job',  creditLimit:8000,  assignedTo:'vongai'   },
+  { id:14, name:'Seaquest Qatar',              company:'RCHBS', contact:'James O\'Brien',    email:'admin@seaquest.qa',           phone:'+974 4455 2002', type:'per-job',  creditLimit:9000,  assignedTo:'vongai',   address:'Ras Laffan Industrial City, Gate 2', city:'Ras Laffan', country:'Qatar', poBox:'50500', tin:'', crNumber:'78901', vatNumber:'' },
+  { id:15, name:'QatarEnergy',                 company:'RCHBS', contact:'Ali Al-Mohannadi',  email:'govt.affairs@qatarenergy.qa', phone:'+974 4449 0000', type:'retainer', creditLimit:30000, assignedTo:'violetta', address:'QatarEnergy Tower, West Bay', city:'Doha', country:'Qatar', poBox:'3212', tin:'300011111', crNumber:'1234', vatNumber:'' },
+  { id:16, name:'Hamad Medical Corporation',   company:'RCHBS', contact:'Dr. Nour Al-Said',  email:'admin@hamad.qa',              phone:'+974 4439 4444', type:'retainer', creditLimit:25000, assignedTo:'vongai',   address:'Hamad General Hospital, Al Rayyan Rd', city:'Doha', country:'Qatar', poBox:'3050', tin:'300022222', crNumber:'9012', vatNumber:'' },
+  { id:17, name:'Nakilat QSC',                 company:'RCHBS', contact:'Ibrahim Al-Buainain',email:'hr@nakilat.com',            phone:'+974 4426 9511', type:'retainer', creditLimit:20000, assignedTo:'violetta', address:'Lusail, Nakilat Tower', city:'Lusail', country:'Qatar', poBox:'22271', tin:'300033333', crNumber:'3456', vatNumber:'' },
+  { id:18, name:'KAHRAMAA',                    company:'RCHBS', contact:'Yousef Al-Jaber',   email:'procurement@km.com.qa',       phone:'+974 4464 4444', type:'retainer', creditLimit:22000, assignedTo:'vongai',   address:'Zone 46, Street 900, Building 4', city:'Doha', country:'Qatar', poBox:'41', tin:'300099999', crNumber:'5678', vatNumber:'' },
+  { id:19, name:'QAPCO',                       company:'RCHBS', contact:'Hamad Al-Mohannadi',email:'admin@qapco.com.qa',          phone:'+974 4476 6800', type:'retainer', creditLimit:18000, assignedTo:'vongai',   address:'Mesaieed Industrial City, QAPCO Complex', city:'Mesaieed', country:'Qatar', poBox:'756', tin:'300088888', crNumber:'6789', vatNumber:'' },
+  { id:20, name:'Mesaieed Petrochemical',      company:'RCHBS', contact:'Salem Al-Rumaihi',  email:'info@mphc.com.qa',            phone:'+974 4477 0555', type:'retainer', creditLimit:20000, assignedTo:'vongai',   address:'Mesaieed Industrial City', city:'Mesaieed', country:'Qatar', poBox:'50080', tin:'', crNumber:'7890', vatNumber:'' },
+  { id:21, name:'Mannai Corporation',          company:'RCHBS', contact:'George Varghese',   email:'hr@mannai.com.qa',            phone:'+974 4455 7700', type:'per-job',  creditLimit:11000, assignedTo:'vongai',   address:'C Ring Road, Mannai HQ', city:'Doha', country:'Qatar', poBox:'76', tin:'300055550', crNumber:'2345', vatNumber:'' },
+  { id:22, name:'Barwa Real Estate',           company:'RCHBS', contact:'Fatima Al-Kuwari',  email:'admin@barwa.com.qa',          phone:'+974 4014 4440', type:'retainer', creditLimit:13000, assignedTo:'vongai',   address:'Barwa Tower, Dafna Area', city:'Doha', country:'Qatar', poBox:'27777', tin:'300044440', crNumber:'3456', vatNumber:'' },
+  { id:23, name:'HBK Contracting Company',     company:'RCHBS', contact:'Mohammed Al-Khulaifi',email:'projects@hbk.com.qa',      phone:'+974 4455 6600', type:'per-job',  creditLimit:15000, assignedTo:'vongai',   address:'Salwa Industrial Area, Street 36', city:'Doha', country:'Qatar', poBox:'5770', tin:'', crNumber:'4567', vatNumber:'' },
+  { id:24, name:'Ezdan Holding Group',         company:'RCHBS', contact:'Rashed Al-Qubaisi', email:'hr@ezdan.qa',                 phone:'+974 4455 3300', type:'retainer', creditLimit:12000, assignedTo:'vongai',   address:'Ezdan Tower, West Bay', city:'Doha', country:'Qatar', poBox:'15055', tin:'300066660', crNumber:'5678', vatNumber:'' },
+  { id:25, name:'Salini Qatar WLL',            company:'RCHBS', contact:'Marco Rossi',       email:'admin@saliniqa.com',          phone:'+974 4444 9900', type:'per-job',  creditLimit:8000,  assignedTo:'vongai',   address:'New Industrial Area, Street 1', city:'Doha', country:'Qatar', poBox:'40300', tin:'', crNumber:'8901', vatNumber:'' },
 ];
 
 const CLIENTS_DB_KEY = 'rch_clients_v2';
@@ -453,7 +469,55 @@ function isGatePassService(serviceId) {
 // ═══════════════════════════════════
 const DB_KEY = 'rch_logs_v6';
 
-const SEED = []
+const SEED = [
+  // ── Violetta's clients ──────────────────────────────────────────────────
+  // ABB Qatar (id:1, Rapid) — expensed, ready to invoice
+  {id:'SEED-V01',clientId:1,clientName:'ABB Qatar WLL',serviceId:'cr-renewal',serviceName:'CR Renewal (incl. Chamber of Commerce)',qty:1,unitPrice:1000,total:1000,rchFee:1000,card:'rapid1',cardLabel:'Rapid CC-1 (xxx1001)',paymentMethod:'card',govFee:250,receiptRef:'',receiptGroupId:'',buCode:'',costCenter:'',serviceLine:'',department:'',employees:[],submittedBy:'violetta',submittedByName:'Violetta A.',submittedAt:'2026-02-25T09:00:00.000Z',requestId:'REQ-SEED-V01',provider:'Rapid',status:'expensed',approvedBy:'elena',approvedByName:'Elena F.',approvedAt:'2026-02-25T14:00:00.000Z',rejectedReason:null,expensedBy:'gabi',expensedByName:'Gabi M.',expensedAt:'2026-02-26T10:00:00.000Z',invoiceId:null,invoicedBy:null,invoicedByName:null,invoicedAt:null,notes:''},
+  {id:'SEED-V02',clientId:1,clientName:'ABB Qatar WLL',serviceId:'work-visa',serviceName:'Work Visa',qty:2,unitPrice:350,total:700,rchFee:350,card:'rapid1',cardLabel:'Rapid CC-1 (xxx1001)',paymentMethod:'card',govFee:400,receiptRef:'',receiptGroupId:'',buCode:'ENG',costCenter:'CC-101',serviceLine:'',department:'',employees:[{name:'Rajesh Kumar',date:'2026-02-24',buCode:'ENG',costCenter:'CC-101'},{name:'Li Wei',date:'2026-02-24',buCode:'ENG',costCenter:'CC-101'}],submittedBy:'violetta',submittedByName:'Violetta A.',submittedAt:'2026-02-24T08:30:00.000Z',requestId:'REQ-SEED-V01',provider:'Rapid',status:'expensed',approvedBy:'elena',approvedByName:'Elena F.',approvedAt:'2026-02-25T14:00:00.000Z',rejectedReason:null,expensedBy:'gabi',expensedByName:'Gabi M.',expensedAt:'2026-02-26T10:00:00.000Z',invoiceId:null,invoicedBy:null,invoicedByName:null,invoicedAt:null,notes:''},
+
+  // EY Qatar (id:2, Rapid) — invoiced (demo invoice INV/RCH/2026/1001)
+  {id:'SEED-V03',clientId:2,clientName:'EY Qatar',serviceId:'ml-renewal',serviceName:'Municipality License Renewal',qty:1,unitPrice:3500,total:3500,rchFee:3500,card:'rapid1',cardLabel:'Rapid CC-1 (xxx1001)',paymentMethod:'card',govFee:1200,receiptRef:'',receiptGroupId:'',buCode:'',costCenter:'',serviceLine:'',department:'',employees:[],submittedBy:'violetta',submittedByName:'Violetta A.',submittedAt:'2026-02-10T09:00:00.000Z',requestId:'REQ-SEED-V03',provider:'Rapid',status:'invoiced',approvedBy:'elena',approvedByName:'Elena F.',approvedAt:'2026-02-11T10:00:00.000Z',rejectedReason:null,expensedBy:'gabi',expensedByName:'Gabi M.',expensedAt:'2026-02-12T09:00:00.000Z',invoiceId:'INV/RCH/2026/1001',invoicedBy:'suleiman',invoicedByName:'Suleiman M.',invoicedAt:'2026-02-15T11:00:00.000Z',notes:''},
+  {id:'SEED-V04',clientId:2,clientName:'EY Qatar',serviceId:'qid-renewal-1yr',serviceName:'QID Renewal – 1 Year',qty:3,unitPrice:350,total:1050,rchFee:350,card:'rapid1',cardLabel:'Rapid CC-1 (xxx1001)',paymentMethod:'card',govFee:300,receiptRef:'',receiptGroupId:'',buCode:'',costCenter:'',serviceLine:'',department:'Assurance',employees:[{name:'Mark Johnson',date:'2026-02-09',buCode:'',costCenter:''},{name:'Aisha Al-Thani',date:'2026-02-09',buCode:'',costCenter:''},{name:'Tom Wilson',date:'2026-02-10',buCode:'',costCenter:''}],submittedBy:'violetta',submittedByName:'Violetta A.',submittedAt:'2026-02-09T08:00:00.000Z',requestId:'REQ-SEED-V03',provider:'Rapid',status:'invoiced',approvedBy:'elena',approvedByName:'Elena F.',approvedAt:'2026-02-11T10:00:00.000Z',rejectedReason:null,expensedBy:'gabi',expensedByName:'Gabi M.',expensedAt:'2026-02-12T09:00:00.000Z',invoiceId:'INV/RCH/2026/1001',invoicedBy:'suleiman',invoicedByName:'Suleiman M.',invoicedAt:'2026-02-15T11:00:00.000Z',notes:''},
+
+  // Industries Qatar (id:4, Rapid) — pending approval
+  {id:'SEED-V05',clientId:4,clientName:'Industries Qatar QSC',serviceId:'work-permit',serviceName:'Work Permit Issuance',qty:1,unitPrice:500,total:500,rchFee:500,card:'',cardLabel:'',paymentMethod:'',govFee:0,receiptRef:'',receiptGroupId:'',buCode:'OPS',costCenter:'CC-200',serviceLine:'',department:'',employees:[{name:'Ahmad Raza',date:'2026-03-05',buCode:'OPS',costCenter:'CC-200'}],submittedBy:'violetta',submittedByName:'Violetta A.',submittedAt:'2026-03-05T10:00:00.000Z',requestId:'REQ-SEED-V05',provider:'Rapid',status:'pending',approvedBy:null,approvedByName:null,approvedAt:null,rejectedReason:null,expensedBy:null,expensedByName:null,expensedAt:null,invoiceId:null,invoicedBy:null,invoicedByName:null,invoicedAt:null,notes:''},
+  {id:'SEED-V06',clientId:4,clientName:'Industries Qatar QSC',serviceId:'medical-test',serviceName:'Medical Test',qty:1,unitPrice:350,total:350,rchFee:350,card:'',cardLabel:'',paymentMethod:'',govFee:0,receiptRef:'',receiptGroupId:'',buCode:'OPS',costCenter:'CC-200',serviceLine:'',department:'',employees:[{name:'Ahmad Raza',date:'2026-03-05',buCode:'OPS',costCenter:'CC-200'}],submittedBy:'violetta',submittedByName:'Violetta A.',submittedAt:'2026-03-05T10:00:00.000Z',requestId:'REQ-SEED-V05',provider:'Rapid',status:'pending',approvedBy:null,approvedByName:null,approvedAt:null,rejectedReason:null,expensedBy:null,expensedByName:null,expensedAt:null,invoiceId:null,invoicedBy:null,invoicedByName:null,invoicedAt:null,notes:''},
+
+  // QatarEnergy (id:15, RCHBS) — approved
+  {id:'SEED-V07',clientId:15,clientName:'QatarEnergy',serviceId:'labor-quota-new',serviceName:'Labor Quota New Approval',qty:1,unitPrice:500,total:500,rchFee:500,card:'rchbs',cardLabel:'RCHBS CC (xxx5958)',paymentMethod:'card',govFee:150,receiptRef:'',receiptGroupId:'',buCode:'',costCenter:'',serviceLine:'',department:'',employees:[],submittedBy:'violetta',submittedByName:'Violetta A.',submittedAt:'2026-03-01T09:00:00.000Z',requestId:'REQ-SEED-V07',provider:'RCHBS',status:'approved',approvedBy:'elena',approvedByName:'Elena F.',approvedAt:'2026-03-02T11:00:00.000Z',rejectedReason:null,expensedBy:null,expensedByName:null,expensedAt:null,invoiceId:null,invoicedBy:null,invoicedByName:null,invoicedAt:null,notes:''},
+  {id:'SEED-V08',clientId:15,clientName:'QatarEnergy',serviceId:'gate-offshore',serviceName:'Offshore Gate Passes',qty:1,unitPrice:350,total:350,rchFee:350,card:'rchbs',cardLabel:'RCHBS CC (xxx5958)',paymentMethod:'card',govFee:100,receiptRef:'',receiptGroupId:'',buCode:'',costCenter:'',serviceLine:'',department:'',employees:[],submittedBy:'violetta',submittedByName:'Violetta A.',submittedAt:'2026-03-01T09:00:00.000Z',requestId:'REQ-SEED-V07',provider:'RCHBS',status:'approved',approvedBy:'elena',approvedByName:'Elena F.',approvedAt:'2026-03-02T11:00:00.000Z',rejectedReason:null,expensedBy:null,expensedByName:null,expensedAt:null,invoiceId:null,invoicedBy:null,invoicedByName:null,invoicedAt:null,notes:''},
+
+  // Vodafone (id:5, Rapid) — pending
+  {id:'SEED-V09',clientId:5,clientName:'Vodafone Qatar PSC',serviceId:'dl-convert',serviceName:'Driving License (Countries That Can Convert)',qty:2,unitPrice:350,total:700,rchFee:350,card:'',cardLabel:'',paymentMethod:'',govFee:0,receiptRef:'',receiptGroupId:'',buCode:'HR',costCenter:'',serviceLine:'',department:'',employees:[{name:'John Smith',date:'2026-03-07',buCode:'HR',costCenter:''},{name:'Maria Garcia',date:'2026-03-07',buCode:'HR',costCenter:''}],submittedBy:'violetta',submittedByName:'Violetta A.',submittedAt:'2026-03-07T08:30:00.000Z',requestId:'REQ-SEED-V09',provider:'Rapid',status:'pending',approvedBy:null,approvedByName:null,approvedAt:null,rejectedReason:null,expensedBy:null,expensedByName:null,expensedAt:null,invoiceId:null,invoicedBy:null,invoicedByName:null,invoicedAt:null,notes:''},
+
+  // Hitachi (id:3, Rapid) — invoiced: LARGE DEMO (12 QID renewals + 7 HMC renewals = 19 services)
+  {id:'SEED-V10',clientId:3,clientName:'Hitachi Qatar WLL',serviceId:'qid-renewal-1yr',serviceName:'QID Renewal – 1 Year',qty:12,unitPrice:350,total:4200,rchFee:350,card:'rapid1',cardLabel:'Rapid CC-1 (xxx1001)',paymentMethod:'card',govFee:1200,receiptRef:'',receiptGroupId:'',buCode:'',costCenter:'',serviceLine:'',department:'',employees:[{name:'Tanaka Yuki',date:'2026-02-15',buCode:'',costCenter:''},{name:'Sato Kenji',date:'2026-02-15',buCode:'',costCenter:''},{name:'Yamamoto Ren',date:'2026-02-16',buCode:'',costCenter:''},{name:'Nakamura Hiro',date:'2026-02-16',buCode:'',costCenter:''},{name:'Patel Vikram',date:'2026-02-17',buCode:'',costCenter:''},{name:'Singh Arjun',date:'2026-02-17',buCode:'',costCenter:''},{name:'Kim Soo-Jin',date:'2026-02-18',buCode:'',costCenter:''},{name:'Chen Wei',date:'2026-02-18',buCode:'',costCenter:''},{name:'Ali Hassan',date:'2026-02-19',buCode:'',costCenter:''},{name:'Rahman Farhan',date:'2026-02-19',buCode:'',costCenter:''},{name:'Santos Miguel',date:'2026-02-20',buCode:'',costCenter:''},{name:'Cruz Felipe',date:'2026-02-20',buCode:'',costCenter:''}],submittedBy:'violetta',submittedByName:'Violetta A.',submittedAt:'2026-02-14T08:00:00.000Z',requestId:'REQ-SEED-V10',provider:'Rapid',status:'invoiced',approvedBy:'elena',approvedByName:'Elena F.',approvedAt:'2026-02-18T10:00:00.000Z',rejectedReason:null,expensedBy:'gabi',expensedByName:'Gabi M.',expensedAt:'2026-02-20T09:00:00.000Z',invoiceId:'INV/RCH/2026/1002',invoicedBy:'suleiman',invoicedByName:'Suleiman M.',invoicedAt:'2026-02-22T11:00:00.000Z',notes:''},
+  {id:'SEED-V11',clientId:3,clientName:'Hitachi Qatar WLL',serviceId:'health-card',serviceName:'Health Card Issuance / Renewal',qty:7,unitPrice:350,total:2450,rchFee:350,card:'rapid1',cardLabel:'Rapid CC-1 (xxx1001)',paymentMethod:'card',govFee:700,receiptRef:'',receiptGroupId:'',buCode:'',costCenter:'',serviceLine:'',department:'',employees:[{name:'Tanaka Yuki',date:'2026-02-15',buCode:'',costCenter:''},{name:'Sato Kenji',date:'2026-02-15',buCode:'',costCenter:''},{name:'Patel Vikram',date:'2026-02-17',buCode:'',costCenter:''},{name:'Singh Arjun',date:'2026-02-17',buCode:'',costCenter:''},{name:'Kim Soo-Jin',date:'2026-02-18',buCode:'',costCenter:''},{name:'Chen Wei',date:'2026-02-18',buCode:'',costCenter:''},{name:'Ali Hassan',date:'2026-02-19',buCode:'',costCenter:''}],submittedBy:'violetta',submittedByName:'Violetta A.',submittedAt:'2026-02-14T08:00:00.000Z',requestId:'REQ-SEED-V10',provider:'Rapid',status:'invoiced',approvedBy:'elena',approvedByName:'Elena F.',approvedAt:'2026-02-18T10:00:00.000Z',rejectedReason:null,expensedBy:'gabi',expensedByName:'Gabi M.',expensedAt:'2026-02-20T09:00:00.000Z',invoiceId:'INV/RCH/2026/1002',invoicedBy:'suleiman',invoicedByName:'Suleiman M.',invoicedAt:'2026-02-22T11:00:00.000Z',notes:''},
+
+  // ── Vongai's clients ────────────────────────────────────────────────────
+  // Ooredoo (id:10, Rapid) — expensed
+  {id:'SEED-G01',clientId:10,clientName:'Ooredoo Qatar PSC',serviceId:'cr-renewal',serviceName:'CR Renewal (incl. Chamber of Commerce)',qty:1,unitPrice:1000,total:1000,rchFee:1000,card:'rapid2',cardLabel:'Rapid CC-2 (xxx3139)',paymentMethod:'card',govFee:250,receiptRef:'',receiptGroupId:'',buCode:'',costCenter:'',serviceLine:'',department:'',employees:[],submittedBy:'vongai',submittedByName:'Vongai K.',submittedAt:'2026-02-28T09:00:00.000Z',requestId:'REQ-SEED-G01',provider:'Rapid',status:'expensed',approvedBy:'elena',approvedByName:'Elena F.',approvedAt:'2026-03-01T10:00:00.000Z',rejectedReason:null,expensedBy:'gabi',expensedByName:'Gabi M.',expensedAt:'2026-03-02T09:00:00.000Z',invoiceId:null,invoicedBy:null,invoicedByName:null,invoicedAt:null,notes:''},
+  {id:'SEED-G02',clientId:10,clientName:'Ooredoo Qatar PSC',serviceId:'cc-renewal',serviceName:'Computer Card (CC) Renewal',qty:1,unitPrice:500,total:500,rchFee:500,card:'rapid2',cardLabel:'Rapid CC-2 (xxx3139)',paymentMethod:'card',govFee:100,receiptRef:'',receiptGroupId:'',buCode:'',costCenter:'',serviceLine:'',department:'',employees:[],submittedBy:'vongai',submittedByName:'Vongai K.',submittedAt:'2026-02-28T09:00:00.000Z',requestId:'REQ-SEED-G01',provider:'Rapid',status:'expensed',approvedBy:'elena',approvedByName:'Elena F.',approvedAt:'2026-03-01T10:00:00.000Z',rejectedReason:null,expensedBy:'gabi',expensedByName:'Gabi M.',expensedAt:'2026-03-02T09:00:00.000Z',invoiceId:null,invoicedBy:null,invoicedByName:null,invoicedAt:null,notes:''},
+
+  // Seaquest (id:14, RCHBS) — am_completing
+  {id:'SEED-G03',clientId:14,clientName:'Seaquest Qatar',serviceId:'work-visa',serviceName:'Work Visa',qty:1,unitPrice:200,total:200,rchFee:200,card:'',cardLabel:'',paymentMethod:'',govFee:0,receiptRef:'',receiptGroupId:'',buCode:'',costCenter:'',serviceLine:'',department:'',employees:[{name:'Patrick O\'Connor',date:'2026-03-06',buCode:'',costCenter:''}],submittedBy:'vongai',submittedByName:'Vongai K.',submittedAt:'2026-03-06T08:00:00.000Z',requestId:'REQ-SEED-G03',provider:'RCHBS',status:'am_completing',approvedBy:null,approvedByName:null,approvedAt:null,rejectedReason:null,expensedBy:null,expensedByName:null,expensedAt:null,invoiceId:null,invoicedBy:null,invoicedByName:null,invoicedAt:null,notes:''},
+  {id:'SEED-G04',clientId:14,clientName:'Seaquest Qatar',serviceId:'fingerprint',serviceName:'Fingerprint',qty:1,unitPrice:200,total:200,rchFee:200,card:'',cardLabel:'',paymentMethod:'',govFee:0,receiptRef:'',receiptGroupId:'',buCode:'',costCenter:'',serviceLine:'',department:'',employees:[{name:'Patrick O\'Connor',date:'2026-03-06',buCode:'',costCenter:''}],submittedBy:'vongai',submittedByName:'Vongai K.',submittedAt:'2026-03-06T08:00:00.000Z',requestId:'REQ-SEED-G03',provider:'RCHBS',status:'am_completing',approvedBy:null,approvedByName:null,approvedAt:null,rejectedReason:null,expensedBy:null,expensedByName:null,expensedAt:null,invoiceId:null,invoicedBy:null,invoicedByName:null,invoicedAt:null,notes:''},
+  {id:'SEED-G05',clientId:14,clientName:'Seaquest Qatar',serviceId:'qid-issuance',serviceName:'QID Card Issuance',qty:1,unitPrice:200,total:200,rchFee:200,card:'',cardLabel:'',paymentMethod:'',govFee:0,receiptRef:'',receiptGroupId:'',buCode:'',costCenter:'',serviceLine:'',department:'',employees:[{name:'Patrick O\'Connor',date:'2026-03-06',buCode:'',costCenter:''}],submittedBy:'vongai',submittedByName:'Vongai K.',submittedAt:'2026-03-06T08:00:00.000Z',requestId:'REQ-SEED-G03',provider:'RCHBS',status:'am_completing',approvedBy:null,approvedByName:null,approvedAt:null,rejectedReason:null,expensedBy:null,expensedByName:null,expensedAt:null,invoiceId:null,invoicedBy:null,invoicedByName:null,invoicedAt:null,notes:''},
+
+  // KAHRAMAA (id:18, RCHBS) — expensed
+  {id:'SEED-G06',clientId:18,clientName:'KAHRAMAA',serviceId:'qid-renewal-1yr',serviceName:'QID Renewal – 1 Year',qty:2,unitPrice:200,total:400,rchFee:200,card:'rchbs',cardLabel:'RCHBS CC (xxx5958)',paymentMethod:'card',govFee:200,receiptRef:'',receiptGroupId:'',buCode:'',costCenter:'',serviceLine:'',department:'',employees:[{name:'Nasser Al-Marri',date:'2026-02-27',buCode:'',costCenter:''},{name:'Saleh Al-Dosari',date:'2026-02-27',buCode:'',costCenter:''}],submittedBy:'vongai',submittedByName:'Vongai K.',submittedAt:'2026-02-27T09:00:00.000Z',requestId:'REQ-SEED-G06',provider:'RCHBS',status:'expensed',approvedBy:'elena',approvedByName:'Elena F.',approvedAt:'2026-02-28T10:00:00.000Z',rejectedReason:null,expensedBy:'gabi',expensedByName:'Gabi M.',expensedAt:'2026-03-01T09:00:00.000Z',invoiceId:null,invoicedBy:null,invoicedByName:null,invoicedAt:null,notes:''},
+  {id:'SEED-G07',clientId:18,clientName:'KAHRAMAA',serviceId:'health-card',serviceName:'Health Card Issuance / Renewal',qty:1,unitPrice:200,total:200,rchFee:200,card:'rchbs',cardLabel:'RCHBS CC (xxx5958)',paymentMethod:'card',govFee:100,receiptRef:'',receiptGroupId:'',buCode:'',costCenter:'',serviceLine:'',department:'',employees:[{name:'Nasser Al-Marri',date:'2026-02-27',buCode:'',costCenter:''}],submittedBy:'vongai',submittedByName:'Vongai K.',submittedAt:'2026-02-27T09:00:00.000Z',requestId:'REQ-SEED-G06',provider:'RCHBS',status:'expensed',approvedBy:'elena',approvedByName:'Elena F.',approvedAt:'2026-02-28T10:00:00.000Z',rejectedReason:null,expensedBy:'gabi',expensedByName:'Gabi M.',expensedAt:'2026-03-01T09:00:00.000Z',invoiceId:null,invoicedBy:null,invoicedByName:null,invoicedAt:null,notes:''},
+
+  // Hamad Medical (id:16, RCHBS) — ops_pending
+  {id:'SEED-G08',clientId:16,clientName:'Hamad Medical Corporation',serviceId:'rp-cancel',serviceName:'RP Cancelation – Employee',qty:1,unitPrice:200,total:200,rchFee:200,card:'',cardLabel:'',paymentMethod:'',govFee:0,receiptRef:'',receiptGroupId:'',buCode:'',costCenter:'',serviceLine:'',department:'',employees:[{name:'Maria Santos',date:'2026-03-09',buCode:'',costCenter:''}],submittedBy:'vongai',submittedByName:'Vongai K.',submittedAt:'2026-03-09T08:00:00.000Z',requestId:'REQ-SEED-G08',provider:'RCHBS',status:'ops_pending',approvedBy:null,approvedByName:null,approvedAt:null,rejectedReason:null,expensedBy:null,expensedByName:null,expensedAt:null,invoiceId:null,invoicedBy:null,invoicedByName:null,invoicedAt:null,notes:''},
+  {id:'SEED-G09',clientId:16,clientName:'Hamad Medical Corporation',serviceId:'transfer-sponsor',serviceName:'Transfer of Sponsorship (Approval)',qty:1,unitPrice:500,total:500,rchFee:500,card:'',cardLabel:'',paymentMethod:'',govFee:0,receiptRef:'',receiptGroupId:'',buCode:'',costCenter:'',serviceLine:'',department:'',employees:[{name:'James Lee',date:'2026-03-09',buCode:'',costCenter:''}],submittedBy:'vongai',submittedByName:'Vongai K.',submittedAt:'2026-03-09T08:00:00.000Z',requestId:'REQ-SEED-G08',provider:'RCHBS',status:'ops_pending',approvedBy:null,approvedByName:null,approvedAt:null,rejectedReason:null,expensedBy:null,expensedByName:null,expensedAt:null,invoiceId:null,invoicedBy:null,invoicedByName:null,invoicedAt:null,notes:''},
+
+  // Nakilat (id:17, RCHBS) — approved (Violetta's RCHBS client)
+  {id:'SEED-V12',clientId:17,clientName:'Nakilat QSC',serviceId:'emp-contract-attest',serviceName:'Employment Contract Attestation',qty:1,unitPrice:200,total:200,rchFee:200,card:'rchbs',cardLabel:'RCHBS CC (xxx5958)',paymentMethod:'card',govFee:50,receiptRef:'',receiptGroupId:'',buCode:'',costCenter:'',serviceLine:'',department:'',employees:[],submittedBy:'violetta',submittedByName:'Violetta A.',submittedAt:'2026-03-03T09:00:00.000Z',requestId:'REQ-SEED-V12',provider:'RCHBS',status:'approved',approvedBy:'elena',approvedByName:'Elena F.',approvedAt:'2026-03-04T10:00:00.000Z',rejectedReason:null,expensedBy:null,expensedByName:null,expensedAt:null,invoiceId:null,invoicedBy:null,invoicedByName:null,invoicedAt:null,notes:''},
+
+  // Milaha (id:13, Rapid, Vongai) — approved
+  {id:'SEED-G10',clientId:13,clientName:'Milaha (Qatar Navigation)',serviceId:'qid-renewal-23yr',serviceName:'QID Renewal – 2 / 3 Years',qty:2,unitPrice:500,total:1000,rchFee:500,card:'rapid2',cardLabel:'Rapid CC-2 (xxx3139)',paymentMethod:'card',govFee:400,receiptRef:'',receiptGroupId:'',buCode:'',costCenter:'',serviceLine:'',department:'',employees:[{name:'Roberto Diaz',date:'2026-03-04',buCode:'',costCenter:''},{name:'Sanjay Patel',date:'2026-03-04',buCode:'',costCenter:''}],submittedBy:'vongai',submittedByName:'Vongai K.',submittedAt:'2026-03-04T09:00:00.000Z',requestId:'REQ-SEED-G10',provider:'Rapid',status:'approved',approvedBy:'elena',approvedByName:'Elena F.',approvedAt:'2026-03-05T10:00:00.000Z',rejectedReason:null,expensedBy:null,expensedByName:null,expensedAt:null,invoiceId:null,invoicedBy:null,invoicedByName:null,invoicedAt:null,notes:''},
+]
 
 function dbLoad() {
   try {
@@ -558,7 +622,7 @@ let S = {
   editingClientId: null,
   editClientForm: null,
   addingClient: false,
-  newClientForm: { name:'', company:'Rapid', contact:'', email:'', phone:'', type:'per-job', creditLimit:5000 },
+  newClientForm: { name:'', company:'Rapid', contact:'', email:'', phone:'', type:'per-job', creditLimit:5000, address:'', city:'Doha', country:'Qatar', poBox:'', tin:'', crNumber:'', vatNumber:'' },
   // receipt upload (completion flow)
   uploadedReceipts: [],   // [{id, fileName, base64, mimeType}]
   // AM dashboard accordion
@@ -662,13 +726,13 @@ function handleLogout() {
 function initNewService() {
   set({
     view:'log', logStep:0, logClient:null, logProvider:null,
-    logServices:[{serviceId:'',qty:1,unitPrice:'',employees:[{name:'',date:'',buCode:'',costCenter:''}],serviceLine:'',department:''}],
+    logServices:[{serviceId:'',qty:1,unitPrice:'',employees:[{name:'',date:new Date().toISOString().split('T')[0],buCode:'',costCenter:''}],serviceLine:'',department:''}],
     logDone:false, editingLogId:null
   });
 }
 
 function addServiceRow() {
-  S.logServices.push({serviceId:'',qty:1,unitPrice:'',employees:[{name:'',date:'',buCode:'',costCenter:''}],serviceLine:'',department:''});
+  S.logServices.push({serviceId:'',qty:1,unitPrice:'',employees:[{name:'',date:new Date().toISOString().split('T')[0],buCode:'',costCenter:''}],serviceLine:'',department:''});
   render();
 }
 
@@ -688,7 +752,7 @@ function updateServiceField(idx, field, value) {
   if (field === 'qty') {
     const qty = Math.max(1, Math.min(20, parseInt(value)||1));
     svc.qty = qty;
-    svc.employees = Array.from({length:qty}, (_,i) => svc.employees[i]||{name:'',date:'',buCode:'',costCenter:''});
+    svc.employees = Array.from({length:qty}, (_,i) => svc.employees[i]||{name:'',date:new Date().toISOString().split('T')[0],buCode:'',costCenter:''});
   }
   render();
 }
@@ -1259,7 +1323,7 @@ function startEditClient(id) {
 function saveEditClient() {
   if (!S.editClientForm) return;
   const f = S.editClientForm;
-  clientUpdate(f.id, { name:f.name, contact:f.contact, email:f.email, phone:f.phone, type:f.type, creditLimit:Number(f.creditLimit)||0, assignedTo:f.assignedTo });
+  clientUpdate(f.id, { name:f.name, contact:f.contact, email:f.email, phone:f.phone, type:f.type, creditLimit:Number(f.creditLimit)||0, assignedTo:f.assignedTo, address:f.address||'', city:f.city||'', country:f.country||'', poBox:f.poBox||'', tin:f.tin||'', crNumber:f.crNumber||'', vatNumber:f.vatNumber||'' });
   set({ editingClientId:null, editClientForm:null });
 }
 
@@ -1277,8 +1341,8 @@ function saveNewClient() {
   const f = S.newClientForm;
   if (!f.name.trim()) { alert('Client name is required'); return; }
   const nextId = Math.max(...clientsGet().map(c=>c.id), 0) + 1;
-  clientAdd({ id:nextId, name:f.name.trim(), company:f.company, contact:f.contact.trim(), email:f.email.trim(), phone:f.phone.trim(), type:f.type, creditLimit:Number(f.creditLimit)||0, assignedTo:f.assignedTo||'violetta' });
-  set({ addingClient:false, newClientForm:{ name:'', company:S.clientsTab, contact:'', email:'', phone:'', type:'per-job', creditLimit:5000 } });
+  clientAdd({ id:nextId, name:f.name.trim(), company:f.company, contact:f.contact.trim(), email:f.email.trim(), phone:f.phone.trim(), type:f.type, creditLimit:Number(f.creditLimit)||0, assignedTo:f.assignedTo||'violetta', address:f.address||'', city:f.city||'Doha', country:f.country||'Qatar', poBox:f.poBox||'', tin:f.tin||'', crNumber:f.crNumber||'', vatNumber:f.vatNumber||'' });
+  set({ addingClient:false, newClientForm:{ name:'', company:S.clientsTab, contact:'', email:'', phone:'', type:'per-job', creditLimit:5000, address:'', city:'Doha', country:'Qatar', poBox:'', tin:'', crNumber:'', vatNumber:'' } });
 }
 
 function vClients() {
@@ -1308,6 +1372,7 @@ function vClients() {
 
     if (S.editingClientId === c.id && S.editClientForm) {
       const f = S.editClientForm;
+      const totalCols = S.user.type!=='am' ? 10 : 9;
       return `<tr style="background:var(--navy-lt)">
         <td><input class="form-input" style="padding:5px 8px;font-size:12px" value="${f.name}" oninput="S.editClientForm.name=this.value"></td>
         <td><input class="form-input" style="padding:5px 8px;font-size:12px" value="${f.contact}" oninput="S.editClientForm.contact=this.value"></td>
@@ -1328,6 +1393,22 @@ function vClients() {
           <div style="display:flex;gap:4px;justify-content:flex-end">
             <button class="btn btn-success btn-xs" onclick="saveEditClient()">Save</button>
             <button class="btn btn-ghost btn-xs" onclick="cancelEditClient()">Cancel</button>
+          </div>
+        </td>
+      </tr>
+      <tr style="background:var(--navy-lt)">
+        <td colspan="${totalCols}" style="padding:6px 10px">
+          <div style="font-size:10px;font-weight:700;color:var(--navy);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Address & Tax Details</div>
+          <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:6px;margin-bottom:6px">
+            <input class="form-input" style="padding:5px 8px;font-size:11px" placeholder="Street address" value="${f.address||''}" oninput="S.editClientForm.address=this.value">
+            <input class="form-input" style="padding:5px 8px;font-size:11px" placeholder="City" value="${f.city||''}" oninput="S.editClientForm.city=this.value">
+            <input class="form-input" style="padding:5px 8px;font-size:11px" placeholder="Country" value="${f.country||''}" oninput="S.editClientForm.country=this.value">
+            <input class="form-input" style="padding:5px 8px;font-size:11px" placeholder="P.O. Box" value="${f.poBox||''}" oninput="S.editClientForm.poBox=this.value">
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
+            <input class="form-input" style="padding:5px 8px;font-size:11px" placeholder="TIN (Tax ID)" value="${f.tin||''}" oninput="S.editClientForm.tin=this.value">
+            <input class="form-input" style="padding:5px 8px;font-size:11px" placeholder="CR Number" value="${f.crNumber||''}" oninput="S.editClientForm.crNumber=this.value">
+            <input class="form-input" style="padding:5px 8px;font-size:11px" placeholder="VAT Number" value="${f.vatNumber||''}" oninput="S.editClientForm.vatNumber=this.value">
           </div>
         </td>
       </tr>`;
@@ -1394,6 +1475,22 @@ function vClients() {
         <button class="btn btn-ghost btn-xs" onclick="set({addingClient:false})">Cancel</button>
       </div>
     </td>
+  </tr>
+  <tr style="background:var(--green-lt)">
+    <td colspan="${S.user.type!=='am' ? 10 : 9}" style="padding:6px 10px">
+      <div style="font-size:10px;font-weight:700;color:var(--green);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Address & Tax Details</div>
+      <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:6px;margin-bottom:6px">
+        <input class="form-input" style="padding:5px 8px;font-size:11px" placeholder="Street address" value="${S.newClientForm.address||''}" oninput="S.newClientForm.address=this.value">
+        <input class="form-input" style="padding:5px 8px;font-size:11px" placeholder="City" value="${S.newClientForm.city||'Doha'}" oninput="S.newClientForm.city=this.value">
+        <input class="form-input" style="padding:5px 8px;font-size:11px" placeholder="Country" value="${S.newClientForm.country||'Qatar'}" oninput="S.newClientForm.country=this.value">
+        <input class="form-input" style="padding:5px 8px;font-size:11px" placeholder="P.O. Box" value="${S.newClientForm.poBox||''}" oninput="S.newClientForm.poBox=this.value">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
+        <input class="form-input" style="padding:5px 8px;font-size:11px" placeholder="TIN (Tax ID)" value="${S.newClientForm.tin||''}" oninput="S.newClientForm.tin=this.value">
+        <input class="form-input" style="padding:5px 8px;font-size:11px" placeholder="CR Number" value="${S.newClientForm.crNumber||''}" oninput="S.newClientForm.crNumber=this.value">
+        <input class="form-input" style="padding:5px 8px;font-size:11px" placeholder="VAT Number" value="${S.newClientForm.vatNumber||''}" oninput="S.newClientForm.vatNumber=this.value">
+      </div>
+    </td>
   </tr>` : '';
 
   return `
@@ -1402,7 +1499,7 @@ function vClients() {
         ${tabBtn('Rapid Clearing House', rapidCount, 'Rapid')}
         ${tabBtn('RCHBS', rchbsCount, 'RCHBS')}
       </div>
-      <button class="btn btn-primary btn-sm" onclick="set({addingClient:true,newClientForm:{name:'',company:'${tab}',contact:'',email:'',phone:'',type:'per-job',creditLimit:5000}})" style="gap:4px">
+      <button class="btn btn-primary btn-sm" onclick="set({addingClient:true,newClientForm:{name:'',company:'${tab}',contact:'',email:'',phone:'',type:'per-job',creditLimit:5000,address:'',city:'Doha',country:'Qatar',poBox:'',tin:'',crNumber:'',vatNumber:''}})" style="gap:4px">
         <span style="font-size:14px">+</span> Add Client
       </button>
     </div>
@@ -2366,195 +2463,209 @@ function vInvoicePreview() {
     }
   });
 
+  // Collect all receipt attachments for additional pages
+  const allReceipts = [];
+  const seen = new Set();
+  logs.forEach(l => {
+    getReceiptsForLog(l.id).forEach(r => {
+      if (!seen.has(r.id)) { seen.add(r.id); allReceipts.push({...r, logName: l.serviceName, clientName: l.clientName}); }
+    });
+  });
+  const totalPages = 1 + allReceipts.length;
+
+  // Look up client for address/tax details
+  const client = CLIENTS.find(c => c.id === invoice.clientId) || {};
+
+  // Build client info lines (only show fields that have values)
+  const clientLocParts = [];
+  if (client.city || client.country) clientLocParts.push(`${client.city||'Doha'}, ${client.country||'Qatar'}`);
+  if (client.poBox) clientLocParts.push(`P.O. Box ${client.poBox}`);
+  const clientLocLine = clientLocParts.length ? clientLocParts.join(' · ') : 'Doha, Qatar';
+
+  const taxParts = [];
+  if (client.tin) taxParts.push('TIN: ' + client.tin);
+  if (client.crNumber) taxParts.push('CR: ' + client.crNumber);
+  if (client.vatNumber) taxParts.push('VAT: ' + client.vatNumber);
+
   return `
-    <button class="btn btn-ghost btn-sm no-print" onclick="set({invoiceId:null})" style="margin-bottom:16px">← Back to Invoice Queue</button>
-    <div class="inv-wrap">
-
-      <!-- Header -->
-      <div class="inv-header">
-        <div>
-          ${logoImg(52)}
-          <div class="inv-co-name">${co.name}</div>
-          <div class="inv-co-info">CR No. ${co.cr} &nbsp;·&nbsp; Authorised Capital QAR ${co.capital}</div>
-          <div class="inv-co-info">${co.address}</div>
-          <div class="inv-co-info">T ${co.phone} &nbsp;·&nbsp; ${co.website}</div>
+    <!-- Document Viewer -->
+    <div class="doc-viewer">
+      <div class="doc-viewer-toolbar no-print">
+        <div style="display:flex;align-items:center;gap:12px">
+          <button onclick="set({invoiceId:null})">← Back</button>
+          <span style="font-weight:700">${invoice.id}</span>
+          <span style="opacity:.6;font-size:12px">${invoice.clientName}</span>
         </div>
-        <div>
-          <div class="inv-title">INVOICE</div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <span style="font-size:12px;opacity:.6">${totalPages} page${totalPages>1?'s':''}</span>
+          <span style="font-size:12px;opacity:.6">QAR ${fmt(invoice.grandTotal)}</span>
+          ${['accountant','acct_mgr'].includes(S.user?.type) ? `<button onclick="S.amendingInvoice=!S.amendingInvoice;S.amendedFees={};render()">✎ Amend</button>` : ''}
+          <button onclick="window.print()" style="background:rgba(255,255,255,.22)">Print / PDF</button>
         </div>
       </div>
 
-      <hr class="inv-divider">
+      <!-- Page 1: Invoice -->
+      <div class="doc-page">
+        <div class="inv-wrap">
 
-      <!-- Client + Ref -->
-      <div class="inv-meta-row">
-        <div>
-          <div class="inv-client-lbl">Client Name:</div>
-          <div class="inv-client-name">${invoice.clientName}</div>
-          <div class="inv-client-sub">Doha, Qatar</div>
-        </div>
-        <div class="inv-ref-side">
-          <table class="inv-ref-tbl">
-            <tr><td>Date:</td><td>${fmtInvDate(invoice.createdAt)}</td></tr>
-            <tr><td>Ref. No.:</td><td>${invoice.id}</td></tr>
-            <tr><td>Due Date:</td><td>${fmtInvDate(dueDate.toISOString())}</td></tr>
+          <!-- Header -->
+          <div class="inv-header">
+            <div>
+              ${logoImg(52)}
+              <div class="inv-co-name">${co.name}</div>
+              <div class="inv-co-info">CR No. ${co.cr} &nbsp;·&nbsp; Authorised Capital QAR ${co.capital}</div>
+              <div class="inv-co-info">${co.address}</div>
+              <div class="inv-co-info">T ${co.phone} &nbsp;·&nbsp; ${co.website}</div>
+            </div>
+            <div>
+              <div class="inv-title">INVOICE</div>
+            </div>
+          </div>
+
+          <hr class="inv-divider">
+
+          <!-- Client + Ref -->
+          <div class="inv-meta-row">
+            <div>
+              <div class="inv-client-lbl">Client Name:</div>
+              <div class="inv-client-name">${invoice.clientName}</div>
+              ${client.address ? `<div class="inv-client-sub">${client.address}</div>` : ''}
+              <div class="inv-client-sub">${clientLocLine}</div>
+              ${taxParts.length ? `<div class="inv-client-sub" style="margin-top:3px;font-size:10px;color:var(--g500)">${taxParts.join(' &nbsp;·&nbsp; ')}</div>` : ''}
+            </div>
+            <div class="inv-ref-side">
+              <table class="inv-ref-tbl">
+                <tr><td>Date:</td><td>${fmtInvDate(invoice.createdAt)}</td></tr>
+                <tr><td>Ref. No.:</td><td>${invoice.id}</td></tr>
+                <tr><td>Due Date:</td><td>${fmtInvDate(dueDate.toISOString())}</td></tr>
+              </table>
+            </div>
+          </div>
+
+          <!-- Line Items Table -->
+          <table class="inv-tbl">
+            <thead>
+              <tr>
+                <th style="width:38%">Description</th>
+                <th>Date</th>
+                <th class="r">Govt. Fees</th>
+                <th class="r">Prof. Fees</th>
+                <th class="r">Total (QAR)</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${lineItems.map(li => `
+                <tr>
+                  <td>
+                    <div>${li.desc}</div>
+                    ${li.buCc ? `<div style="font-size:10px;color:var(--g500);margin-top:2px">${li.buCc}</div>` : ''}
+                  </td>
+                  <td style="white-space:nowrap;color:var(--g700)">${li.date}</td>
+                  <td class="r" style="color:${li.govFee>0?'var(--g900)':'var(--g300)'}">
+                    ${li.govFee > 0 ? fmt(li.govFee) : '—'}
+                  </td>
+                  <td class="r">${fmt(li.profFee)}</td>
+                  <td class="r" style="font-weight:600">${fmt(li.total)}</td>
+                </tr>`).join('')}
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="2" style="font-size:12px;letter-spacing:.5px">TOTAL</td>
+                <td class="r" style="color:${invoice.totalGovFee>0?'var(--g900)':'var(--g300)'}">
+                  ${invoice.totalGovFee > 0 ? fmt(invoice.totalGovFee) : '—'}
+                </td>
+                <td class="r">${fmt(invoice.totalProfFee)}</td>
+                <td class="r" style="font-size:14px;color:var(--navy)">${fmt(invoice.grandTotal)}</td>
+              </tr>
+              <tr class="inv-words-row">
+                <td colspan="4">Amount in Words:</td>
+                <td class="r">${numToWords(invoice.grandTotal)} QAR</td>
+              </tr>
+            </tfoot>
           </table>
-        </div>
-      </div>
 
-      <!-- Line Items Table -->
-      <table class="inv-tbl">
-        <thead>
-          <tr>
-            <th style="width:38%">Description</th>
-            <th>Date</th>
-            <th class="r">Govt. Fees</th>
-            <th class="r">Prof. Fees</th>
-            <th class="r">Total (QAR)</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${lineItems.map(li => `
-            <tr>
-              <td>
-                <div>${li.desc}</div>
-                ${li.buCc ? `<div style="font-size:10px;color:var(--g500);margin-top:2px">${li.buCc}</div>` : ''}
-              </td>
-              <td style="white-space:nowrap;color:var(--g700)">${li.date}</td>
-              <td class="r" style="color:${li.govFee>0?'var(--g900)':'var(--g300)'}">
-                ${li.govFee > 0 ? fmt(li.govFee) : '—'}
-              </td>
-              <td class="r">${fmt(li.profFee)}</td>
-              <td class="r" style="font-weight:600">${fmt(li.total)}</td>
-            </tr>`).join('')}
-        </tbody>
-        <tfoot>
-          <tr>
-            <td colspan="2" style="font-size:12px;letter-spacing:.5px">TOTAL</td>
-            <td class="r" style="color:${invoice.totalGovFee>0?'var(--g900)':'var(--g300)'}">
-              ${invoice.totalGovFee > 0 ? fmt(invoice.totalGovFee) : '—'}
-            </td>
-            <td class="r">${fmt(invoice.totalProfFee)}</td>
-            <td class="r" style="font-size:14px;color:var(--navy)">${fmt(invoice.grandTotal)}</td>
-          </tr>
-          <tr class="inv-words-row">
-            <td colspan="4">Amount in Words:</td>
-            <td class="r">${numToWords(invoice.grandTotal)} QAR</td>
-          </tr>
-        </tfoot>
-      </table>
+          <!-- Payment Details -->
+          <div class="inv-section">
+            <div class="inv-section-hd">Payment Details</div>
+            <table class="inv-bank-tbl">
+              <tr><td>Bank Name:</td><td>${co.bank}</td></tr>
+              <tr><td>Account Name:</td><td>${co.accountName}</td></tr>
+              <tr><td>Account No.:</td><td>${co.accountNo}</td></tr>
+              <tr><td>IBAN:</td><td>${co.iban}</td></tr>
+              <tr><td>Swift Code:</td><td>${co.swift}</td></tr>
+              <tr><td>Bank Address:</td><td>${co.branch}</td></tr>
+            </table>
+          </div>
 
-      <!-- Payment Details -->
-      <div class="inv-section">
-        <div class="inv-section-hd">Payment Details</div>
-        <table class="inv-bank-tbl">
-          <tr><td>Bank Name:</td><td>${co.bank}</td></tr>
-          <tr><td>Account Name:</td><td>${co.accountName}</td></tr>
-          <tr><td>Account No.:</td><td>${co.accountNo}</td></tr>
-          <tr><td>IBAN:</td><td>${co.iban}</td></tr>
-          <tr><td>Swift Code:</td><td>${co.swift}</td></tr>
-          <tr><td>Bank Address:</td><td>${co.branch}</td></tr>
-        </table>
-      </div>
-
-      <!-- Notes -->
-      <div class="inv-section">
-        <div class="inv-section-hd">Notes</div>
-        <div class="inv-notes-list">
-          <div>a) Bank transfer charges to be borne by the client/beneficiary.</div>
-          <div>b) All Payments received are NON-REFUNDABLE.</div>
-        </div>
-      </div>
-
-      <!-- Attached Government Receipts — shown as additional pages -->
-      ${(() => {
-        const allReceipts = [];
-        const seen = new Set();
-        logs.forEach(l => {
-          getReceiptsForLog(l.id).forEach(r => {
-            if (!seen.has(r.id)) { seen.add(r.id); allReceipts.push({...r, logName: l.serviceName, clientName: l.clientName}); }
-          });
-        });
-        if (!allReceipts.length) return '';
-        // Preview (non-print): show thumbnails inline
-        const previewHtml = `
-          <div class="inv-section no-print">
-            <div class="inv-section-hd">Attached Receipts (${allReceipts.length}) — will print as Page${allReceipts.length>1?'s':''} ${[...Array(allReceipts.length).keys()].map(i=>i+2).join(', ')}</div>
-            <div style="display:flex;gap:10px;flex-wrap:wrap">
-              ${allReceipts.map((r,i) => r.mimeType.startsWith('image/') ? `
-                <div style="text-align:center">
-                  <div style="font-size:9px;font-weight:700;color:var(--g500);margin-bottom:3px;text-transform:uppercase">Page ${i+2}</div>
-                  <img src="${r.base64}" style="width:120px;height:90px;object-fit:cover;border-radius:6px;border:1px solid var(--border);display:block;margin-bottom:3px">
-                  <span style="font-size:10px;color:var(--g500)">${r.fileName}</span>
-                </div>
-              ` : `
-                <div style="text-align:center">
-                  <div style="font-size:9px;font-weight:700;color:var(--g500);margin-bottom:3px;text-transform:uppercase">Page ${i+2}</div>
-                  <a href="${r.base64}" download="${r.fileName}" style="display:flex;align-items:center;gap:6px;padding:8px 12px;background:var(--g50);border:1px solid var(--border);border-radius:8px;text-decoration:none;font-size:12px;color:var(--navy)">
-                    📄 ${r.fileName}
-                  </a>
-                </div>
-              `).join('')}
+          <!-- Notes -->
+          <div class="inv-section">
+            <div class="inv-section-hd">Notes</div>
+            <div class="inv-notes-list">
+              <div>a) Bank transfer charges to be borne by the client/beneficiary.</div>
+              <div>b) All Payments received are NON-REFUNDABLE.</div>
             </div>
-          </div>`;
-        // Print pages: one per receipt, each on a new page
-        const printPages = allReceipts.map((r,i) => `
-          <div class="receipt-print-page">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid var(--navy)">
-              <div>
-                <div style="font-size:13px;font-weight:800;color:var(--navy)">${co.name}</div>
-                <div style="font-size:11px;color:var(--g700)">${invoice.id} · ${r.clientName}</div>
-              </div>
-              <div style="text-align:right">
-                <div style="font-size:22px;font-weight:900;color:var(--magenta)">Page ${i+2}</div>
-                <div style="font-size:10px;color:var(--g500)">of ${allReceipts.length+1}</div>
-              </div>
-            </div>
-            <div style="font-size:11px;font-weight:700;color:var(--g500);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">
-              Attached Receipt — ${r.logName}
-            </div>
-            <div style="font-size:11px;color:var(--g700);margin-bottom:8px">📎 ${r.fileName}</div>
-            ${r.mimeType.startsWith('image/') ? `
-              <img src="${r.base64}" style="max-width:100%;max-height:700px;object-fit:contain;border:1px solid var(--border);border-radius:6px">
-            ` : `
-              <div style="padding:20px;background:var(--g50);border:1px solid var(--border);border-radius:8px;text-align:center;font-size:13px;color:var(--g700)">
-                📄 PDF attachment: ${r.fileName}<br>
-                <span style="font-size:11px;color:var(--g500)">Open and print separately if needed</span>
-              </div>
-            `}
-          </div>`).join('');
-        return previewHtml + printPages;
-      })()}
+          </div>
 
-      <!-- Footer -->
-      <div class="inv-footer-wrap">
-        <div class="inv-footer-thanks">Would Like to Thank You for Your Business</div>
-        <div class="inv-footer-meta">
-          ${logoImg(18)}
-          <span>CR ${co.cr}</span>
-          <span>·</span>
-          <span>${co.email}</span>
-          <span>·</span>
-          <span>${co.website}</span>
+          <!-- Footer -->
+          <div class="inv-footer-wrap">
+            <div class="inv-footer-thanks">Would Like to Thank You for Your Business</div>
+            <div class="inv-footer-meta">
+              ${logoImg(18)}
+              <span>CR ${co.cr}</span>
+              <span>·</span>
+              <span>${co.email}</span>
+              <span>·</span>
+              <span>${co.website}</span>
+            </div>
+          </div>
+
         </div>
+        <div class="doc-page-number">Page 1 of ${totalPages}</div>
       </div>
 
-      <!-- Actions (hidden on print) -->
-      <div class="inv-actions no-print">
-        <div style="font-size:10px;color:var(--g500)">Generated by ${invoice.createdByName} · ${fmtDT(invoice.createdAt)}${invoice.amendments&&invoice.amendments.length>0?' · '+invoice.amendments.length+' amendment(s)':''}</div>
-        <div style="display:flex;gap:8px">
-          ${['accountant','acct_mgr'].includes(S.user?.type) ? `<button class="btn btn-ghost btn-sm" onclick="S.amendingInvoice=!S.amendingInvoice;S.amendedFees={};render()">✎ Amend Invoice</button>` : ''}
-          <button class="btn btn-navy btn-sm" onclick="window.print()">🖨 Print / PDF</button>
+      <!-- Pages 2+: Attached Government Receipts -->
+      ${allReceipts.map((r, i) => `
+        <div class="doc-page doc-page-receipt">
+          <div class="doc-page-receipt-header">
+            <div>
+              <div style="font-size:13px;font-weight:800;color:var(--navy)">${co.name}</div>
+              <div style="font-size:11px;color:var(--g700)">${invoice.id} · ${r.clientName}</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-size:18px;font-weight:900;color:var(--magenta)">Page ${i+2}</div>
+              <div style="font-size:10px;color:var(--g500)">of ${totalPages}</div>
+            </div>
+          </div>
+          <div style="font-size:11px;font-weight:700;color:var(--g500);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">
+            Attached Receipt — ${r.logName}
+          </div>
+          <div style="font-size:11px;color:var(--g700);margin-bottom:12px">${r.fileName}</div>
+          ${r.mimeType.startsWith('image/')
+            ? `<img src="${r.base64}" style="max-width:100%;max-height:240mm;object-fit:contain;border:1px solid var(--border);border-radius:6px">`
+            : r.mimeType === 'application/pdf'
+              ? `<object data="${r.base64}" type="application/pdf" style="width:100%;height:250mm;border:1px solid var(--border);border-radius:6px">
+                  <iframe src="${r.base64}" style="width:100%;height:250mm;border:none"></iframe>
+                </object>`
+              : `<div style="padding:30px;background:var(--g50);border:1px solid var(--border);border-radius:8px;text-align:center;font-size:13px;color:var(--g700)">
+                  Attachment: ${r.fileName}
+                </div>`
+          }
+          <div class="doc-page-number">Page ${i+2} of ${totalPages}</div>
         </div>
+      `).join('')}
+
+      <!-- Actions & Amendments (below the viewer) -->
+      <div class="no-print" style="margin-top:4px;padding:12px 16px;background:rgba(0,0,0,.2);border-radius:8px;color:rgba(255,255,255,.6);font-size:10px">
+        Generated by ${invoice.createdByName} · ${fmtDT(invoice.createdAt)}${invoice.amendments&&invoice.amendments.length>0?' · '+invoice.amendments.length+' amendment(s)':''}
       </div>
 
       ${S.amendingInvoice ? `
-        <div class="no-print" style="margin-top:16px;padding:16px;background:var(--navy-lt);border-radius:12px;border:2px solid var(--navy)">
+        <div class="no-print" style="margin-top:16px;padding:16px;background:white;border-radius:12px;border:2px solid var(--navy)">
           <div style="font-size:13px;font-weight:700;color:var(--navy);margin-bottom:12px">Amend Invoice — Override Fees</div>
           ${logs.map((l,i) => {
             const override = S.amendedFees[l.id] || {};
             return `
-              <div style="margin-bottom:10px;padding:10px;background:white;border-radius:8px;border:1px solid var(--border)">
+              <div style="margin-bottom:10px;padding:10px;background:var(--g50);border-radius:8px;border:1px solid var(--border)">
                 <div style="font-size:12px;font-weight:700;margin-bottom:8px">${l.serviceName} × ${l.qty}</div>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
                   <div>
@@ -2576,6 +2687,7 @@ function vInvoicePreview() {
           </div>
         </div>
       ` : ''}
+
     </div>`;
 }
 
