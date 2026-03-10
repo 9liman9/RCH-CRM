@@ -16,10 +16,11 @@ const GREEN_BG = "E8F5E9";
 const GREEN_DARK = "2E7D32";
 const WHITE = "FFFFFF";
 
-const logoBuffer = fs.readFileSync("/home/claude/rch_logo.jpg");
-const idealFlowBuffer = fs.readFileSync("/home/claude/flowchart_ideal_v3.png");
-const invoiceFlowBuffer = fs.readFileSync("/home/claude/flowchart_invoice_v2.png");
-const moneyFlowBuffer = fs.readFileSync("/home/claude/flowchart_money_v2.png");
+const BASE = __dirname + "/..";
+const logoBuffer = fs.readFileSync(BASE + "/assets/rch_logo.jpg");
+const idealFlowBuffer = fs.readFileSync(BASE + "/flowcharts/rendered/ideal_system.png");
+const invoiceFlowBuffer = fs.readFileSync(BASE + "/flowcharts/rendered/current_invoice_lifecycle.png");
+const moneyFlowBuffer = fs.readFileSync(BASE + "/flowcharts/rendered/current_money_flow.png");
 
 const thinBorder = { style: BorderStyle.SINGLE, size: 1, color: "CCCCCC" };
 const cellBorders = { top: thinBorder, bottom: thinBorder, left: thinBorder, right: thinBorder };
@@ -314,11 +315,15 @@ const doc = new Document({
 
         para("If the client is per-job, the AM can also upload the service agreement for reference. Professional fees are automatically filled from the price list when services are logged. If a client has a special negotiated rate (for example, a discount arrangement), the AM can adjust the professional fee when logging the service. For clients with permanent special rates, the system can store a custom price list so the correct rate is applied automatically every time."),
 
-        h2("4.2 Clients Across Both Companies"),
+        h2("4.2 Client Assignment to Account Managers"),
 
-        para("Some clients may have services that fall under Rapid and services that fall under RCHBS. The system handles this by letting the AM choose the company each time a service is logged. The client profile exists once in the system, but individual services are assigned to the correct company. Invoices are generated per company \u2014 a client with services under both Rapid and RCHBS will receive separate invoices from each."),
+        para("Every client in the system is assigned to one Account Manager. When an AM logs into the system, they only see the clients assigned to them \u2014 this keeps each AM\u2019s workspace clean and focused. The AM Team Leader (Elena) can reassign any client to a different AM directly from the client list with a single click, without needing to open the full client profile."),
 
-        h2("4.3 Custom Invoice Requirements"),
+        h2("4.3 Clients Across Both Companies"),
+
+        para("Each client profile has a primary company \u2014 either Rapid Clearing House or RCH Business Solutions (RCHBS). When an Account Manager logs a service for a client, the system automatically uses that client\u2019s company to determine the correct price list and which credit cards are available for the government fee. There is no manual company selection during service logging; the correct company is set from the client profile and confirmed to the AM via a colour-coded indicator on the form. Invoices are always generated under the company the service was logged against."),
+
+        h2("4.4 Custom Invoice Requirements"),
 
         para("Some clients \u2014 especially larger companies under Rapid like EY, ABB, and Hitachi \u2014 require extra information on their invoices that standard clients do not need. Examples include cost codes, business unit references, tax PINs, and custom addressee lines (for example, EY requires invoices addressed to a specific service line such as \u201CAssurance Service Line\u201D). The system must support per-client invoice customization so that these fields are stored in the client profile and automatically included on every invoice for that client."),
 
@@ -365,9 +370,8 @@ const doc = new Document({
 
         para("The Account Manager logs the service request in the CRM. At this stage, the AM enters:"),
 
-        bulletItem("The client (selected from the list, or created if new)"),
-        bulletItem("The company this service falls under (Rapid or RCHBS)"),
-        bulletItem("The type of service (selected from a list \u2014 e.g. QID Renewal, Gate Passes, Company Documents Amendment, Visa Issuance)"),
+        bulletItem("The client (selected from their personal client list \u2014 each AM only sees the clients assigned to them)"),
+        bulletItem("The type of service (selected from a list \u2014 e.g. QID Renewal, Gate Passes, Company Documents Amendment, Visa Issuance). Once the client is selected, the system automatically determines whether this is a Rapid or RCHBS service based on the client\u2019s profile and shows this as a colour-coded indicator."),
         bulletItem("The number of people the service is for"),
         bulletItem("The names of the employees or individuals involved"),
 
@@ -711,6 +715,6 @@ const doc = new Document({
 });
 
 Packer.toBuffer(doc).then(buffer => {
-  fs.writeFileSync("/home/claude/RCH_CRM_Vision_v2.docx", buffer);
+  fs.writeFileSync(BASE + "/docs/RCH_CRM_System_Vision.docx", buffer);
   console.log("Document created successfully.");
 });
