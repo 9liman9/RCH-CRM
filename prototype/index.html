@@ -197,25 +197,148 @@ const USERS = [
 // ═══════════════════════════════════
 // REFERENCE DATA
 // ═══════════════════════════════════
-const CLIENTS = [
-  { id:1, name:'ABB Qatar',              company:'Rapid', contact:'Sarah Al-Mansour', creditLimit:8000  },
-  { id:2, name:'Acrogym Sport Center',   company:'Rapid', contact:'Kirill Bazhanov',  creditLimit:20000 },
-  { id:3, name:'Seaquest Services',      company:'RCHBS', contact:'Ahmad Siregar',    creditLimit:3000  },
-  { id:4, name:'EY Qatar',              company:'Rapid', contact:'Finance Dept',     creditLimit:75000 },
-  { id:5, name:'Hitachi Energy',         company:'Rapid', contact:'HR Dept',          creditLimit:2000  },
-  { id:6, name:'Property Finder Qatar', company:'RCHBS', contact:'Ops Team',         creditLimit:25000 },
+const CLIENTS_SEED = [
+  { id:1, name:'ABB Qatar',              company:'Rapid', contact:'Sarah Al-Mansour', email:'sarah@abbqatar.qa',       phone:'+974 4412 3001', type:'retainer', creditLimit:8000  },
+  { id:2, name:'Acrogym Sport Center',   company:'Rapid', contact:'Kirill Bazhanov',  email:'kirill@acrogym.qa',       phone:'+974 5501 8822', type:'per-job',  creditLimit:20000 },
+  { id:3, name:'Seaquest Services',      company:'RCHBS', contact:'Ahmad Siregar',    email:'ahmad@seaquest.qa',       phone:'+974 3309 1145', type:'retainer', creditLimit:3000  },
+  { id:4, name:'EY Qatar',              company:'Rapid', contact:'Finance Dept',     email:'finance@ey.qa',           phone:'+974 4497 0000', type:'retainer', creditLimit:75000 },
+  { id:5, name:'Hitachi Energy',         company:'Rapid', contact:'HR Dept',          email:'hr@hitachienergy.qa',     phone:'+974 4410 5500', type:'per-job',  creditLimit:2000  },
+  { id:6, name:'Property Finder Qatar', company:'RCHBS', contact:'Ops Team',         email:'ops@propertyfinder.qa',   phone:'+974 4421 7700', type:'per-job',  creditLimit:25000 },
 ];
 
+const CLIENTS_DB_KEY = 'rch_clients_v1';
+function clientsLoad() { try { const r = localStorage.getItem(CLIENTS_DB_KEY); return r ? JSON.parse(r) : null; } catch(e) { return null; } }
+function clientsSave(c) { localStorage.setItem(CLIENTS_DB_KEY, JSON.stringify(c)); }
+function clientsGet() { let c = clientsLoad(); if (!c) { c = CLIENTS_SEED.map(x=>({...x})); clientsSave(c); } return c; }
+function clientUpdate(id, patch) { const cl = clientsGet(); const i = cl.findIndex(c=>c.id===id); if(i!==-1){Object.assign(cl[i],patch);clientsSave(cl);} return cl; }
+function clientAdd(c) { const cl = clientsGet(); cl.push(c); clientsSave(cl); }
+function clientsReset() { localStorage.removeItem(CLIENTS_DB_KEY); }
+
+// Live accessor — always returns current client list
+let CLIENTS = clientsGet();
+
+// price = professional fee charged to client (gov charges are additional, as per receipt)
 const SERVICES = [
-  { id:'qid',     label:'QID Renewal',                  price:1220 },
-  { id:'visa',    label:'Work Visa',                     price:300  },
-  { id:'hc',      label:'HC Issuance',                  price:100  },
-  { id:'smartid', label:'Smart ID Issuance',             price:200  },
-  { id:'gate',    label:'Gate Passes',                  price:200  },
-  { id:'company', label:'Company Registration Renewal', price:2500 },
+  // ── COMPANY DOCUMENTS ──────────────────────────────────────────────────────
+  { id:'cr-renewal',         label:'CR Renewal (incl. Chamber of Commerce)',         category:'Company Documents',      priceRapid:1000, priceRCHBS:500  },
+  { id:'ml-renewal',         label:'Municipality License Renewal',                   category:'Company Documents',      priceRapid:3500, priceRCHBS:1000 },
+  { id:'cc-renewal',         label:'Computer Card (CC) Renewal',                     category:'Company Documents',      priceRapid:500,  priceRCHBS:350  },
+  { id:'cr-gov-renewal',     label:'CR Renewal (Gov. Contracted Company)',            category:'Company Documents',      priceRapid:3000, priceRCHBS:3000 },
+  { id:'class-cert-renewal', label:'Classification Certificate Renewal',             category:'Company Documents',      priceRapid:1000, priceRCHBS:500  },
+  { id:'class-cert-obtain',  label:'Classification Certificate Obtainment',          category:'Company Documents',      priceRapid:2000, priceRCHBS:1000 },
+  { id:'aoa-amend',          label:'Articles of Association Amendment',               category:'Company Documents',      priceRapid:3000, priceRCHBS:1000 },
+  { id:'cr-amend',           label:'CR Amendment (Address / Activities)',             category:'Company Documents',      priceRapid:1000, priceRCHBS:500  },
+  { id:'ml-amend',           label:'Municipality License Amendment',                 category:'Company Documents',      priceRapid:2000, priceRCHBS:1000 },
+  { id:'signatory-cr',       label:'Add / Remove Signatory – CR',                    category:'Company Documents',      priceRapid:1000, priceRCHBS:500  },
+  { id:'signatory-cc-co',    label:'CC for Signatory (Under Company Sponsorship)',   category:'Company Documents',      priceRapid:500,  priceRCHBS:350  },
+  { id:'signatory-cc-ext',   label:'CC for Signatory (Not Under Company Sponsorship)', category:'Company Documents',    priceRapid:500,  priceRCHBS:350  },
+  { id:'cr-extract-ar',      label:'CR Extraction in Arabic',                        category:'Company Documents',      priceRapid:350,  priceRCHBS:150  },
+  { id:'cr-extract-en',      label:'CR Extraction in English',                       category:'Company Documents',      priceRapid:350,  priceRCHBS:150  },
+  { id:'ml-extract',         label:'Municipality License Extraction',                category:'Company Documents',      priceRapid:1000, priceRCHBS:150  },
+  // ── IMMIGRATION – NEW RP ───────────────────────────────────────────────────
+  { id:'work-visa',          label:'Work Visa',                                       category:'Immigration – New RP',   priceRapid:350,  priceRCHBS:200  },
+  { id:'medical-test',       label:'Medical Test',                                    category:'Immigration – New RP',   priceRapid:350,  priceRCHBS:200  },
+  { id:'fingerprint',        label:'Fingerprint',                                     category:'Immigration – New RP',   priceRapid:350,  priceRCHBS:200  },
+  { id:'labor-contract',     label:'Labor Contract Attestation',                      category:'Immigration – New RP',   priceRapid:350,  priceRCHBS:200  },
+  { id:'qid-issuance',       label:'QID Card Issuance',                               category:'Immigration – New RP',   priceRapid:350,  priceRCHBS:200  },
+  { id:'qvc-appt',           label:'QVC Appointment (PH / SL / IN / PK / NP / BD)',  category:'Immigration – New RP',   priceRapid:500,  priceRCHBS:200  },
+  // ── IMMIGRATION – OTHER RP SERVICES ───────────────────────────────────────
+  { id:'return-permit',      label:'Return Permit',                                   category:'Immigration – Other',    priceRapid:350,  priceRCHBS:200  },
+  { id:'update-wv-passport', label:'Update Work Visa with New Passport Details',      category:'Immigration – Other',    priceRapid:350,  priceRCHBS:200  },
+  { id:'switch-visa',        label:'Switch Visa Status',                              category:'Immigration – Other',    priceRapid:350,  priceRCHBS:350  },
+  { id:'return-permit-fam',  label:'Return Permit (Family)',                          category:'Immigration – Other',    priceRapid:350,  priceRCHBS:350  },
+  { id:'res-visa-family',    label:'Residence Visa for Family Members',               category:'Immigration – Other',    priceRapid:1000, priceRCHBS:1000 },
+  { id:'renew-res-family',   label:'Renewal of Residence Visa for Family',            category:'Immigration – Other',    priceRapid:350,  priceRCHBS:200  },
+  { id:'update-qid-fam',     label:'Update QID with New Passport (Family)',           category:'Immigration – Other',    priceRapid:350,  priceRCHBS:200  },
+  { id:'multi-entry-visa',   label:'Multi-Entry Visa (Gov. Contracted)',              category:'Immigration – Other',    priceRapid:350,  priceRCHBS:350  },
+  { id:'multi-entry-ext',    label:'Multi-Entry Visa Extension',                      category:'Immigration – Other',    priceRapid:350,  priceRCHBS:350  },
+  { id:'transfer-sponsor',   label:'Transfer of Sponsorship (Approval)',              category:'Immigration – Other',    priceRapid:500,  priceRCHBS:500  },
+  { id:'transfer-sponsor-cancel', label:'Transfer of Sponsorship Cancelation',       category:'Immigration – Other',    priceRapid:500,  priceRCHBS:500  },
+  { id:'insurance-60',       label:'Insurance – Persons Above 60',                    category:'Immigration – Other',    priceRapid:350,  priceRCHBS:350  },
+  { id:'health-card',        label:'Health Card Issuance / Renewal',                  category:'Immigration – Other',    priceRapid:350,  priceRCHBS:200  },
+  { id:'health-cert',        label:'Health Certificate Issuance / Renewal',           category:'Immigration – Other',    priceRapid:350,  priceRCHBS:200  },
+  { id:'visa-cancel',        label:'Visa Cancelation',                                category:'Immigration – Other',    priceRapid:350,  priceRCHBS:200  },
+  { id:'passport-sticker',   label:'Sticker / Stamp on Passport for Visa',            category:'Immigration – Other',    priceRapid:500,  priceRCHBS:350  },
+  { id:'moi-stats-rp',       label:'MOI Statistics – RP',                             category:'Immigration – Other',    priceRapid:350,  priceRCHBS:200  },
+  { id:'moi-stats-visa',     label:'MOI Statistics – Visa',                           category:'Immigration – Other',    priceRapid:350,  priceRCHBS:200  },
+  { id:'mol-stats-rp',       label:'MOL Statistics – RP',                             category:'Immigration – Other',    priceRapid:350,  priceRCHBS:200  },
+  { id:'mol-stats-visa',     label:'MOL Statistics – Visa',                           category:'Immigration – Other',    priceRapid:350,  priceRCHBS:200  },
+  // ── RP RENEWAL ─────────────────────────────────────────────────────────────
+  { id:'qid-renewal-1yr',    label:'QID Renewal – 1 Year',                            category:'RP Renewal',             priceRapid:350,  priceRCHBS:200  },
+  { id:'qid-renewal-23yr',   label:'QID Renewal – 2 / 3 Years',                       category:'RP Renewal',             priceRapid:500,  priceRCHBS:350  },
+  { id:'qid-renewal-quota',  label:'QID Renewal with Quota Renewal',                  category:'RP Renewal',             priceRapid:500,  priceRCHBS:350  },
+  { id:'qid-renewal-60',     label:'QID Renewal – Person Over 60',                    category:'RP Renewal',             priceRapid:500,  priceRCHBS:350  },
+  // ── WORK PERMIT ────────────────────────────────────────────────────────────
+  { id:'work-permit',        label:'Work Permit Issuance',                            category:'Work Permit',            priceRapid:500,  priceRCHBS:350  },
+  { id:'work-permit-cancel', label:'Work Permit Cancelation',                         category:'Work Permit',            priceRapid:350,  priceRCHBS:200  },
+  { id:'secondment',         label:'Secondment',                                       category:'Work Permit',            priceRapid:500,  priceRCHBS:350  },
+  { id:'secondment-cancel',  label:'Secondment Cancelation',                          category:'Work Permit',            priceRapid:350,  priceRCHBS:200  },
+  // ── PASSPORTS & QID ────────────────────────────────────────────────────────
+  { id:'profession-change',  label:'Profession Change + Updated QID',                 category:'Passports & QID',        priceRapid:1000, priceRCHBS:500  },
+  { id:'smart-qid',          label:'"Smart" QID Card',                                category:'Passports & QID',        priceRapid:700,  priceRCHBS:350  },
+  { id:'update-passport-qid',label:'Update Passport Details in QID',                  category:'Passports & QID',        priceRapid:350,  priceRCHBS:200  },
+  { id:'qid-lost',           label:'QID Card – Lost',                                 category:'Passports & QID',        priceRapid:350,  priceRCHBS:200  },
+  { id:'qid-sig-photo',      label:'Change Signature / Photo on QID',                 category:'Passports & QID',        priceRapid:350,  priceRCHBS:200  },
+  { id:'smart-qid-sig',      label:'Change Signature / Photo on Smart QID',           category:'Passports & QID',        priceRapid:350,  priceRCHBS:350  },
+  // ── CANCELLATIONS ──────────────────────────────────────────────────────────
+  { id:'rp-cancel',          label:'RP Cancelation – Employee',                       category:'Cancellations',          priceRapid:350,  priceRCHBS:200  },
+  { id:'rp-cancel-fam',      label:'Family RP Cancelation',                           category:'Cancellations',          priceRapid:350,  priceRCHBS:200  },
+  // ── TRAFFIC DEPARTMENT ─────────────────────────────────────────────────────
+  { id:'dl-convert',         label:'Driving License (Countries That Can Convert)',    category:'Traffic Dept',           priceRapid:350,  priceRCHBS:350  },
+  { id:'dl-test',            label:'Driving License (Countries Requiring Test)',      category:'Traffic Dept',           priceRapid:500,  priceRCHBS:500  },
+  { id:'vehicle-penalty',    label:'Penalty Settlement for Vehicles',                 category:'Traffic Dept',           priceRapid:350,  priceRCHBS:200  },
+  { id:'car-accident',       label:'Car Accident Report Submission',                  category:'Traffic Dept',           priceRapid:350,  priceRCHBS:350  },
+  { id:'istimara',           label:'Vehicle Istimara Issuance / Renewal / Cancelation', category:'Traffic Dept',         priceRapid:350,  priceRCHBS:200  },
+  { id:'istimara-lost',      label:'Vehicle Istimara – Lost',                         category:'Traffic Dept',           priceRapid:350,  priceRCHBS:200  },
+  { id:'istimara-damaged',   label:'Vehicle Istimara – Damaged',                      category:'Traffic Dept',           priceRapid:350,  priceRCHBS:200  },
+  { id:'vehicle-exit',       label:'Vehicle Exit Permit',                             category:'Traffic Dept',           priceRapid:350,  priceRCHBS:200  },
+  { id:'vehicle-entry',      label:'Vehicle Entry Permit',                            category:'Traffic Dept',           priceRapid:350,  priceRCHBS:200  },
+  { id:'baladiya-vehicle',   label:'Baladiya Vehicle Sticker Approval',               category:'Traffic Dept',           priceRapid:1500, priceRCHBS:500  },
+  { id:'vehicle-insurance',  label:'Vehicle Insurance',                               category:'Traffic Dept',           priceRapid:350,  priceRCHBS:200  },
+  { id:'fahes',              label:'FAHES Inspection Assistance',                     category:'Traffic Dept',           priceRapid:500,  priceRCHBS:350  },
+  // ── ADMINISTRATIVE SERVICES ────────────────────────────────────────────────
+  { id:'emp-contract-attest',label:'Employment Contract Attestation',                 category:'Administrative',         priceRapid:350,  priceRCHBS:200  },
+  { id:'mofa-attest',        label:'Attestation in MOFA Qatar',                       category:'Administrative',         priceRapid:350,  priceRCHBS:200  },
+  { id:'chamber-attest',     label:'Attestation in Chamber of Commerce',              category:'Administrative',         priceRapid:350,  priceRCHBS:200  },
+  { id:'doc-auth',           label:'Authentication of Official Documents',            category:'Administrative',         priceRapid:350,  priceRCHBS:200  },
+  { id:'emp-letter',         label:'Employment Letter',                               category:'Administrative',         priceRapid:150,  priceRCHBS:100  },
+  { id:'other-letter',       label:'Other Letters and Certificates',                  category:'Administrative',         priceRapid:150,  priceRCHBS:100  },
+  { id:'car-reg',            label:'Company Car Registration',                        category:'Administrative',         priceRapid:500,  priceRCHBS:200  },
+  { id:'translation',        label:'Translation',                                     category:'Administrative',         priceRapid:150,  priceRCHBS:50   },
+  { id:'labor-quota-new',    label:'Labor Quota New Approval',                        category:'Administrative',         priceRapid:500,  priceRCHBS:500  },
+  { id:'labor-quota-renew',  label:'Labor Quota Renewal / Extension',                 category:'Administrative',         priceRapid:500,  priceRCHBS:350  },
+  { id:'labor-quota-amend',  label:'Labor Quota Amendment',                           category:'Administrative',         priceRapid:500,  priceRCHBS:500  },
+  { id:'multi-quota',        label:'Multi Entry QUOTA Submission',                    category:'Administrative',         priceRapid:1000, priceRCHBS:500  },
+  { id:'multi-quota-ext',    label:'Multi Entry QUOTA Extension',                     category:'Administrative',         priceRapid:350,  priceRCHBS:200  },
+  { id:'gate-offshore',      label:'Offshore Gate Passes',                            category:'Administrative',         priceRapid:500,  priceRCHBS:350  },
+  { id:'gate-onshore',       label:'Onshore Gate Passes',                             category:'Administrative',         priceRapid:500,  priceRCHBS:350  },
+  { id:'ban-removal-ml',     label:'Company Ban Removal (Municipality License)',       category:'Administrative',         priceRapid:3000, priceRCHBS:1500 },
+  { id:'ban-removal-mol',    label:'Company Ban Removal (Ministry of Labor)',          category:'Administrative',         priceRapid:2500, priceRCHBS:1000 },
+  { id:'national-address',   label:'National Address Registration',                   category:'Administrative',         priceRapid:300,  priceRCHBS:200  },
+  { id:'mol-update',         label:'Update Company Information in MOL',               category:'Administrative',         priceRapid:500,  priceRCHBS:200  },
+  { id:'al-nadeeb',          label:'Registration in Al Nadeeb (Customs)',             category:'Administrative',         priceRapid:500,  priceRCHBS:200  },
+  { id:'ubo-cert',           label:'Ultimate Beneficial Ownership Certificate',       category:'Administrative',         priceRapid:350,  priceRCHBS:200  },
+  { id:'single-window',      label:'Single Window Approval',                          category:'Administrative',         priceRapid:350,  priceRCHBS:200  },
+  { id:'promo-license',      label:'Promotion License',                               category:'Administrative',         priceRapid:1500, priceRCHBS:1000 },
+  { id:'price-list-reg',     label:'Price List Registration',                         category:'Administrative',         priceRapid:1500, priceRCHBS:1000 },
+  { id:'events-permit',      label:'Events Permit',                                   category:'Administrative',         priceRapid:2000, priceRCHBS:2000 },
+  { id:'sheesha-license',    label:'Sheesha License + Menu Registration',             category:'Administrative',         priceRapid:5000, priceRCHBS:5000 },
+  { id:'company-stamp',      label:'Company Stamp',                                   category:'Administrative',         priceRapid:160,  priceRCHBS:160  },
+  { id:'baladiya-signage',   label:'Baladiya Signage Approval',                       category:'Administrative',         priceRapid:2000, priceRCHBS:2000 },
+  { id:'man-hour',           label:'Man Hour',                                         category:'Administrative',         priceRapid:0,    priceRCHBS:150  },
+  { id:'moph-company',       label:'MOPH – Company Registration',                     category:'Administrative',         priceRapid:0,    priceRCHBS:350  },
+  { id:'moph-product',       label:'MOPH – Product Registration',                     category:'Administrative',         priceRapid:0,    priceRCHBS:350  },
 ];
+
+// Helper: get professional fee for a given company
+function svcPrice(svc, company) {
+  return company === 'Rapid' ? svc.priceRapid : svc.priceRCHBS;
+}
 
 const CARDS = [
+  { id:'rapid1', label:'Rapid CC-1 (xxx1001)', company:'Rapid' },
+  { id:'rapid2', label:'Rapid CC-2 (xxx3139)', company:'Rapid' },
+  { id:'rchbs',  label:'RCHBS CC (xxx5958)',   company:'RCHBS' },
   { id:'rapid1', label:'Rapid CC-1 (xxx1001)', company:'Rapid', limit:50000 },
   { id:'rapid2', label:'Rapid CC-2 (xxx3139)', company:'Rapid', limit:30000 },
   { id:'rchbs',  label:'RCHBS CC (xxx5958)',   company:'RCHBS', limit:25000 },
@@ -228,48 +351,48 @@ const DB_KEY = 'rch_logs_v5';
 
 const SEED = [
   {
-    id:'LOG-001', clientId:1, clientName:'ABB Qatar', serviceId:'qid', serviceName:'QID Renewal',
-    qty:3, unitPrice:1220, total:3660, card:'rapid1', cardLabel:'Rapid CC-1 (xxx1001)',
+    id:'LOG-001', clientId:1, clientName:'ABB Qatar', serviceId:'qid-issuance', serviceName:'QID Card Issuance',
+    qty:3, unitPrice:350, total:1050, card:'rapid1', cardLabel:'Rapid CC-1 (xxx1001)',
     employees:[{name:'Ali Hassan',date:'2026-03-04'},{name:'Sara Khan',date:'2026-03-04'},{name:'Priya Nair',date:'2026-03-04'}],
     submittedBy:'violetta', submittedByName:'Violetta A.', submittedAt:'2026-03-04T10:30:00',
     status:'ops_pending', approvedBy:null, approvedAt:null, rejectedReason:null,
     expensedBy:null, expensedAt:null, invoiceId:null, invoicedBy:null, invoicedAt:null, notes:''
   },
   {
-    id:'LOG-002', clientId:4, clientName:'EY Qatar', serviceId:'visa', serviceName:'Work Visa',
-    qty:1, unitPrice:300, total:300, card:'rapid2', cardLabel:'Rapid CC-2 (xxx3139)',
+    id:'LOG-002', clientId:4, clientName:'EY Qatar', serviceId:'work-visa', serviceName:'Work Visa',
+    qty:1, unitPrice:350, total:350, card:'rapid2', cardLabel:'Rapid CC-2 (xxx3139)',
     employees:[{name:'John Patel',date:'2026-03-05'}],
     submittedBy:'violetta', submittedByName:'Violetta A.', submittedAt:'2026-03-05T14:10:00',
     status:'pending', approvedBy:null, approvedAt:null, rejectedReason:null,
     expensedBy:null, expensedAt:null, invoiceId:null, invoicedBy:null, invoicedAt:null, notes:''
   },
   {
-    id:'LOG-012', clientId:6, clientName:'Property Finder Qatar', serviceId:'visa', serviceName:'Work Visa',
-    qty:2, unitPrice:300, total:600, card:'rchbs', cardLabel:'RCHBS CC (xxx5958)',
+    id:'LOG-012', clientId:6, clientName:'Property Finder Qatar', serviceId:'work-visa', serviceName:'Work Visa',
+    qty:2, unitPrice:200, total:400, card:'rchbs', cardLabel:'RCHBS CC (xxx5958)',
     employees:[{name:'Kevin Zhao',date:'2026-03-07'},{name:'Maria Santos',date:'2026-03-07'}],
     submittedBy:'violetta', submittedByName:'Violetta A.', submittedAt:'2026-03-07T09:00:00',
     status:'ops_pending', approvedBy:null, approvedAt:null, rejectedReason:null,
     expensedBy:null, expensedAt:null, invoiceId:null, invoicedBy:null, invoicedAt:null, notes:''
   },
   {
-    id:'LOG-013', clientId:2, clientName:'Acrogym Sport Center', serviceId:'qid', serviceName:'QID Renewal',
-    qty:1, unitPrice:1220, total:1220, card:'rapid1', cardLabel:'Rapid CC-1 (xxx1001)',
+    id:'LOG-013', clientId:2, clientName:'Acrogym Sport Center', serviceId:'qid-issuance', serviceName:'QID Card Issuance',
+    qty:1, unitPrice:350, total:350, card:'rapid1', cardLabel:'Rapid CC-1 (xxx1001)',
     employees:[{name:'Olga Petrov',date:'2026-03-08'}],
     submittedBy:'violetta', submittedByName:'Violetta A.', submittedAt:'2026-03-08T08:30:00',
     status:'ops_pending', approvedBy:null, approvedAt:null, rejectedReason:null,
     expensedBy:null, expensedAt:null, invoiceId:null, invoicedBy:null, invoicedAt:null, notes:''
   },
   {
-    id:'LOG-003', clientId:2, clientName:'Acrogym Sport Center', serviceId:'hc', serviceName:'HC Issuance',
-    qty:2, unitPrice:100, total:200, card:'rapid1', cardLabel:'Rapid CC-1 (xxx1001)',
+    id:'LOG-003', clientId:2, clientName:'Acrogym Sport Center', serviceId:'health-card', serviceName:'Health Card Issuance / Renewal',
+    qty:2, unitPrice:350, total:700, card:'rapid1', cardLabel:'Rapid CC-1 (xxx1001)',
     employees:[{name:'Dmitri Volkov',date:'2026-03-03'},{name:'Nadia Cruz',date:'2026-03-03'}],
     submittedBy:'violetta', submittedByName:'Violetta A.', submittedAt:'2026-03-03T11:00:00',
     status:'approved', approvedBy:'elena', approvedByName:'Elena F.', approvedAt:'2026-03-03T16:45:00',
     rejectedReason:null, expensedBy:null, expensedAt:null, invoiceId:null, invoicedBy:null, invoicedAt:null, notes:''
   },
   {
-    id:'LOG-004', clientId:5, clientName:'Hitachi Energy', serviceId:'smartid', serviceName:'Smart ID Issuance',
-    qty:4, unitPrice:200, total:800, card:'rchbs', cardLabel:'RCHBS CC (xxx5958)',
+    id:'LOG-004', clientId:5, clientName:'Hitachi Energy', serviceId:'smart-qid', serviceName:'"Smart" QID Card',
+    qty:4, unitPrice:350, total:1400, card:'rapid2', cardLabel:'Rapid CC-2 (xxx3139)',
     employees:[{name:'Mark Chen',date:'2026-03-01'},{name:'Fatima Al-Ali',date:'2026-03-01'},{name:'Robert Kim',date:'2026-03-01'},{name:'Aisha Patel',date:'2026-03-01'}],
     submittedBy:'violetta', submittedByName:'Violetta A.', submittedAt:'2026-03-01T09:00:00',
     status:'expensed', approvedBy:'elena', approvedByName:'Elena F.', approvedAt:'2026-03-01T14:00:00',
@@ -277,8 +400,8 @@ const SEED = [
     invoiceId:null, invoicedBy:null, invoicedAt:null, notes:''
   },
   {
-    id:'LOG-005', clientId:3, clientName:'Seaquest Services', serviceId:'company', serviceName:'Company Registration Renewal',
-    qty:1, unitPrice:2500, total:2500, card:'rchbs', cardLabel:'RCHBS CC (xxx5958)',
+    id:'LOG-005', clientId:3, clientName:'Seaquest Services', serviceId:'cr-renewal', serviceName:'CR Renewal (incl. Chamber of Commerce)',
+    qty:1, unitPrice:500, total:500, card:'rchbs', cardLabel:'RCHBS CC (xxx5958)',
     employees:[{name:'Ahmad Siregar',date:'2026-02-25'}],
     submittedBy:'violetta', submittedByName:'Violetta A.', submittedAt:'2026-02-25T08:00:00',
     status:'invoiced', approvedBy:'elena', approvedByName:'Elena F.', approvedAt:'2026-02-25T12:00:00',
@@ -286,8 +409,8 @@ const SEED = [
     invoiceId:'INV-2026-001', invoicedBy:'suleiman', invoicedByName:'Suleiman M.', invoicedAt:'2026-02-27T10:00:00', notes:''
   },
   {
-    id:'LOG-006', clientId:1, clientName:'ABB Qatar', serviceId:'qid', serviceName:'QID Renewal',
-    qty:5, unitPrice:1220, total:6100, card:'rapid1', cardLabel:'Rapid CC-1 (xxx1001)',
+    id:'LOG-006', clientId:1, clientName:'ABB Qatar', serviceId:'qid-issuance', serviceName:'QID Card Issuance',
+    qty:5, unitPrice:350, total:1750, card:'rapid1', cardLabel:'Rapid CC-1 (xxx1001)',
     employees:[{name:'Tom Reid',date:'2026-02-10'},{name:'Jan Kowalski',date:'2026-02-10'},{name:'Mei Lin',date:'2026-02-10'},{name:'Youssef Osman',date:'2026-02-10'},{name:'Laura Diaz',date:'2026-02-10'}],
     submittedBy:'violetta', submittedByName:'Violetta A.', submittedAt:'2026-02-10T09:00:00',
     status:'invoiced', approvedBy:'elena', approvedByName:'Elena F.', approvedAt:'2026-02-10T14:00:00',
@@ -295,8 +418,8 @@ const SEED = [
     invoiceId:'INV-2026-002', invoicedBy:'suleiman', invoicedByName:'Suleiman M.', invoicedAt:'2026-02-12T11:00:00', notes:''
   },
   {
-    id:'LOG-007', clientId:1, clientName:'ABB Qatar', serviceId:'visa', serviceName:'Work Visa',
-    qty:6, unitPrice:300, total:1800, card:'rapid1', cardLabel:'Rapid CC-1 (xxx1001)',
+    id:'LOG-007', clientId:1, clientName:'ABB Qatar', serviceId:'work-visa', serviceName:'Work Visa',
+    qty:6, unitPrice:350, total:2100, card:'rapid1', cardLabel:'Rapid CC-1 (xxx1001)',
     employees:[{name:'Carlos Mendez',date:'2026-02-15'},{name:'Rasha Hamdan',date:'2026-02-15'},{name:'David Park',date:'2026-02-15'},{name:'Nour Al-Farsi',date:'2026-02-15'},{name:'Ivan Petrov',date:'2026-02-15'},{name:'Anita Sharma',date:'2026-02-15'}],
     submittedBy:'violetta', submittedByName:'Violetta A.', submittedAt:'2026-02-15T10:00:00',
     status:'invoiced', approvedBy:'elena', approvedByName:'Elena F.', approvedAt:'2026-02-15T15:00:00',
@@ -304,8 +427,8 @@ const SEED = [
     invoiceId:'INV-2026-003', invoicedBy:'suleiman', invoicedByName:'Suleiman M.', invoicedAt:'2026-02-17T13:00:00', notes:''
   },
   {
-    id:'LOG-008', clientId:5, clientName:'Hitachi Energy', serviceId:'gate', serviceName:'Gate Passes',
-    qty:8, unitPrice:200, total:1600, card:'rapid2', cardLabel:'Rapid CC-2 (xxx3139)',
+    id:'LOG-008', clientId:5, clientName:'Hitachi Energy', serviceId:'gate-onshore', serviceName:'Onshore Gate Passes',
+    qty:8, unitPrice:500, total:4000, card:'rapid2', cardLabel:'Rapid CC-2 (xxx3139)',
     employees:[{name:'Ben Clarke',date:'2026-02-20'},{name:'Zara Khan',date:'2026-02-20'},{name:'Liam Murphy',date:'2026-02-20'},{name:'Fatima Said',date:'2026-02-20'},{name:'Omar Hassan',date:'2026-02-20'},{name:'Lucy Wang',date:'2026-02-20'},{name:'Raj Kumar',date:'2026-02-20'},{name:'Anna Novak',date:'2026-02-20'}],
     submittedBy:'violetta', submittedByName:'Violetta A.', submittedAt:'2026-02-20T08:30:00',
     status:'invoiced', approvedBy:'elena', approvedByName:'Elena F.', approvedAt:'2026-02-20T13:00:00',
@@ -313,8 +436,8 @@ const SEED = [
     invoiceId:'INV-2026-004', invoicedBy:'suleiman', invoicedByName:'Suleiman M.', invoicedAt:'2026-02-22T10:00:00', notes:''
   },
   {
-    id:'LOG-009', clientId:6, clientName:'Property Finder Qatar', serviceId:'hc', serviceName:'HC Issuance',
-    qty:3, unitPrice:100, total:300, card:'rchbs', cardLabel:'RCHBS CC (xxx5958)',
+    id:'LOG-009', clientId:6, clientName:'Property Finder Qatar', serviceId:'health-card', serviceName:'Health Card Issuance / Renewal',
+    qty:3, unitPrice:200, total:600, card:'rchbs', cardLabel:'RCHBS CC (xxx5958)',
     employees:[{name:'Sandra Osei',date:'2026-02-28'},{name:'Tariq Fahim',date:'2026-02-28'},{name:'Elena Vasquez',date:'2026-02-28'}],
     submittedBy:'violetta', submittedByName:'Violetta A.', submittedAt:'2026-02-28T10:00:00',
     status:'invoiced', approvedBy:'elena', approvedByName:'Elena F.', approvedAt:'2026-02-28T15:00:00',
@@ -322,8 +445,8 @@ const SEED = [
     invoiceId:'INV-2026-005', invoicedBy:'suleiman', invoicedByName:'Suleiman M.', invoicedAt:'2026-03-02T11:00:00', notes:''
   },
   {
-    id:'LOG-010', clientId:4, clientName:'EY Qatar', serviceId:'smartid', serviceName:'Smart ID Issuance',
-    qty:3, unitPrice:200, total:600, card:'rapid1', cardLabel:'Rapid CC-1 (xxx1001)',
+    id:'LOG-010', clientId:4, clientName:'EY Qatar', serviceId:'smart-qid', serviceName:'"Smart" QID Card',
+    qty:3, unitPrice:700, total:2100, card:'rapid1', cardLabel:'Rapid CC-1 (xxx1001)',
     employees:[{name:'Paula Reyes',date:'2026-03-06'},{name:'Hamid Rashidi',date:'2026-03-06'},{name:'Yu Tanaka',date:'2026-03-06'}],
     submittedBy:'violetta', submittedByName:'Violetta A.', submittedAt:'2026-03-06T09:00:00',
     status:'expensed', approvedBy:'elena', approvedByName:'Elena F.', approvedAt:'2026-03-06T14:00:00',
@@ -331,8 +454,8 @@ const SEED = [
     invoiceId:null, invoicedBy:null, invoicedAt:null, notes:''
   },
   {
-    id:'LOG-011', clientId:2, clientName:'Acrogym Sport Center', serviceId:'gate', serviceName:'Gate Passes',
-    qty:2, unitPrice:200, total:400, card:'rapid2', cardLabel:'Rapid CC-2 (xxx3139)',
+    id:'LOG-011', clientId:2, clientName:'Acrogym Sport Center', serviceId:'gate-onshore', serviceName:'Onshore Gate Passes',
+    qty:2, unitPrice:500, total:1000, card:'rapid2', cardLabel:'Rapid CC-2 (xxx3139)',
     employees:[{name:'Alice Sato',date:'2026-03-07'},{name:'Bruno Costa',date:'2026-03-07'}],
     submittedBy:'violetta', submittedByName:'Violetta A.', submittedAt:'2026-03-07T10:30:00',
     status:'rejected', approvedBy:'elena', approvedByName:'Elena F.', approvedAt:'2026-03-07T16:00:00',
@@ -373,6 +496,8 @@ function dbAdd(log) {
 
 function dbReset() {
   localStorage.removeItem(DB_KEY);
+  clientsReset();
+  CLIENTS = clientsGet();
 }
 
 // ═══════════════════════════════════
@@ -384,19 +509,29 @@ let S = {
   loginError: '',
   view: 'dashboard',
   // Log service flow
+  logCompany: null,
   logClient: null,
   logStep: 0,
-  logForm: { serviceId:'', qty:1, employees:[{name:'',date:''}], card:'', notes:'' },
+  logForm: { serviceId:'', qty:1, unitPrice:'', employees:[{name:'',date:''}], card:'', notes:'' },
   logDone: false,
   // approval reject modal
   rejectId: null,
   rejectReason: '',
   // invoice preview
   invoiceLogId: null,
+  // editing
+  editingLogId: null,
+  // clients view
+  clientsTab: 'Rapid',
+  editingClientId: null,
+  editClientForm: null,
+  addingClient: false,
+  newClientForm: { name:'', company:'Rapid', contact:'', email:'', phone:'', type:'per-job', creditLimit:5000 },
 };
 
 function set(patch) {
   Object.assign(S, patch);
+  CLIENTS = clientsGet();
   render();
 }
 
@@ -412,6 +547,27 @@ const statusBadge = s => {
   const lbl = {ops_pending:'With OPs',pending:'Pending Approval',approved:'Approved',rejected:'Rejected',expensed:'Expensed',invoiced:'Invoiced',paid:'Paid'};
   return `<span class="badge ${map[s]||''}">${lbl[s]||s}</span>`;
 };
+
+// Service option groups — built once per company on first call, then cached
+let _svcOpts = null;
+function getServiceOpts(company) {
+  if (!_svcOpts) {
+    const cats = [...new Set(SERVICES.map(s=>s.category))];
+    _svcOpts = {};
+    ['Rapid','RCHBS'].forEach(co => {
+      _svcOpts[co] = cats.map(cat => {
+        const items = SERVICES.filter(s=>s.category===cat);
+        return `<optgroup label="${cat}">${items.map(s=>{
+          const p = svcPrice(s, co);
+          return `<option value="${s.id}">${s.label}${p?` — QAR ${fmt(p)}`:''}</option>`;
+        }).join('')}</optgroup>`;
+      }).join('');
+    });
+  }
+  // Inject `selected` for the currently chosen service
+  const base = _svcOpts[company] || '';
+  return base.replace(`value="${S.logForm.serviceId}"`, `value="${S.logForm.serviceId}" selected`);
+}
 
 function logoSVG(sz) {
   return `<svg width="${sz}" height="${sz}" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -433,24 +589,42 @@ function handleLogin(e) {
 }
 
 function handleLogout() {
-  set({screen:'login', user:null, loginError:'', view:'dashboard', logClient:null, logDone:false});
+  set({screen:'login', user:null, loginError:'', view:'dashboard', logCompany:null, logClient:null, logDone:false});
 }
 
 function startLog(clientId) {
-  set({view:'log', logClient:clientId, logStep:0, logForm:{serviceId:'',qty:1,employees:[{name:'',date:''}],card:'',notes:''}, logDone:false});
+  const client = CLIENTS.find(c=>c.id===clientId);
+  set({view:'log', logCompany:client?.company||S.logCompany, logClient:clientId, logStep:0, logForm:{serviceId:'',qty:1,unitPrice:'',employees:[{name:'',date:''}],card:'',notes:''}, logDone:false, editingLogId:null});
 }
 
 function submitLog() {
   const client = CLIENTS.find(c=>c.id===S.logClient);
   const svc = SERVICES.find(s=>s.id===S.logForm.serviceId);
   if (!svc || !S.logForm.card) { alert('Please fill all fields'); return; }
-  const total = svc.price * S.logForm.qty;
+  const unitPrice = parseFloat(S.logForm.unitPrice) || svcPrice(svc, S.logCompany);
+  const total = unitPrice * S.logForm.qty;
   const card = CARDS.find(c=>c.id===S.logForm.card);
+
+  if (S.editingLogId) {
+    dbUpdate(S.editingLogId, {
+      serviceId: svc.id, serviceName: svc.label,
+      qty: S.logForm.qty, unitPrice, total,
+      card: S.logForm.card, cardLabel: card.label,
+      employees: S.logForm.employees.slice(0, S.logForm.qty),
+      submittedAt: new Date().toISOString(),
+      status:'ops_pending',
+      approvedBy:null, approvedByName:null, approvedAt:null, rejectedReason:null,
+      notes: S.logForm.notes
+    });
+    set({logDone:true, logStep:3, editingLogId:null});
+    return;
+  }
+
   const log = {
     id: uid(),
     clientId: client.id, clientName: client.name,
     serviceId: svc.id, serviceName: svc.label,
-    qty: S.logForm.qty, unitPrice: svc.price, total,
+    qty: S.logForm.qty, unitPrice, total,
     card: S.logForm.card, cardLabel: card.label,
     employees: S.logForm.employees.slice(0, S.logForm.qty),
     submittedBy: S.user.id, submittedByName: S.user.name,
@@ -503,16 +677,40 @@ function updateQty(val) {
   S.logForm = {...S.logForm, qty, employees:emps};
 }
 
+function editLog(id) {
+  const log = dbGet().find(l => l.id === id);
+  if (!log) return;
+  const client = CLIENTS.find(c=>c.id===log.clientId);
+  set({
+    view:'log',
+    logCompany: client?.company || null,
+    logClient: log.clientId,
+    logStep: 0,
+    logForm: {
+      serviceId: log.serviceId,
+      qty: log.qty,
+      unitPrice: log.unitPrice || '',
+      employees: log.employees.slice(),
+      card: log.card,
+      notes: log.notes || ''
+    },
+    logDone: false,
+    editingLogId: id
+  });
+}
+
+function deleteLog(id) {
+  const log = dbGet().find(l => l.id === id);
+  if (!log) return;
+  if (!confirm(`Delete "${log.serviceName}" for ${log.clientName}?`)) return;
+  const logs = dbGet().filter(l => l.id !== id);
+  dbSave(logs);
+  set({});
+}
+
 // ═══════════════════════════════════
 // VIEW: Dashboard (AM / TL)
 // ═══════════════════════════════════
-function arStatus(ar, limit) {
-  const pct = limit > 0 ? ar / limit : 0;
-  if (pct >= 1)    return { label:'Follow up required', cls:'b-rejected', color:'var(--red)'    };
-  if (pct >= 0.75) return { label:'Follow up soon',     cls:'b-pending',  color:'var(--orange)' };
-  return                  { label:'Good to service',    cls:'b-approved', color:'var(--green)'  };
-}
-
 function vDashboardAM() {
   const allLogs = dbGet();
   const myLogs  = allLogs.filter(l => l.submittedBy === S.user.id);
@@ -526,45 +724,10 @@ function vDashboardAM() {
   const pendingCount   = myLogs.filter(l => l.status === 'pending').length;
   const rejectedCount  = myLogs.filter(l => l.status === 'rejected').length;
 
-  // Client list — grouped by company: Rapid first, then RCHBS
-  const rapidClients = [...CLIENTS].filter(c => c.company === 'Rapid').sort((a,b) => a.name.localeCompare(b.name));
-  const rchbsClients = [...CLIENTS].filter(c => c.company === 'RCHBS').sort((a,b) => a.name.localeCompare(b.name));
-
-  const buildClientRows = (clients) => clients.map(c => {
-    const invoicedLogs  = allLogs.filter(l => l.clientId === c.id && l.status === 'invoiced');
-    const ar            = invoicedLogs.reduce((s,l) => s + l.total, 0);
-    const invCount      = invoicedLogs.length;
-    const limit         = c.creditLimit || 0;
-    const st            = arStatus(ar, limit);
-    const pct           = limit > 0 ? Math.min(ar / limit, 1) : 0;
-    const blocked       = pct >= 1;
-    return `
-      <tr>
-        <td>
-          <div style="font-weight:600;font-size:13px;color:var(--g900)">${c.name}</div>
-          <div style="font-size:10px;color:var(--g500);margin-top:2px">${c.contact}</div>
-        </td>
-        <td>
-          <div style="font-weight:700;font-size:13px;color:var(--navy)">QAR ${fmt(ar)}</div>
-          <div style="font-size:10px;color:var(--g500);margin-top:2px">${invCount} unpaid invoice${invCount!==1?'s':''}</div>
-        </td>
-        <td style="color:var(--g700);font-size:12px">QAR ${fmt(limit)}</td>
-        <td>
-          <div style="display:flex;align-items:center;gap:6px">
-            <div class="ar-bar-wrap"><div class="ar-bar-fill" style="width:${Math.round(pct*100)}%;--bc:${st.color}"></div></div>
-            <span style="font-size:10px;font-weight:600;color:${st.color}">${Math.round(pct*100)}%</span>
-          </div>
-        </td>
-        <td>
-          ${blocked
-            ? `<span class="badge b-rejected" style="font-size:9px">Follow Up Required</span>`
-            : pct >= 0.75
-              ? `<span class="badge b-pending" style="font-size:9px">Follow Up Soon</span>`
-              : `<button class="btn btn-primary btn-xs" onclick="startLog(${c.id})">+ Log Service</button>`
-          }
-        </td>
-      </tr>`;
-  }).join('');
+  // History — sorted newest first
+  const historyLogs = (S.user.type === 'am' ? myLogs : allLogs).slice().sort((a,b) => new Date(b.submittedAt) - new Date(a.submittedAt));
+  const canEdit = l => ['ops_pending','rejected'].includes(l.status);
+  const canDelete = l => ['ops_pending','pending','rejected'].includes(l.status);
 
   // Kanban — services removed from board once client pays
   const kanbanCols = [
@@ -629,30 +792,60 @@ function vDashboardAM() {
       </div>
     </div>
 
-    <div class="card" style="margin-bottom:10px">
-      <div class="card-hd">
-        <span class="card-title">Rapid Clearing House</span>
-        <span class="badge" style="background:var(--navy-lt);color:var(--navy)">${rapidClients.length} clients</span>
-      </div>
-      <table class="client-table">
-        <thead><tr>
-          <th>Client</th><th>A/R Balance</th><th>Limit</th><th>Usage</th><th></th>
-        </tr></thead>
-        <tbody>${buildClientRows(rapidClients)}</tbody>
-      </table>
+    <div style="display:flex;gap:10px;margin-bottom:16px">
+      <button class="btn btn-primary" onclick="set({view:'log',logCompany:null,logClient:null,logStep:0,logForm:{serviceId:'',qty:1,unitPrice:'',employees:[{name:'',date:''}],card:'',notes:''},logDone:false,editingLogId:null})" style="gap:6px">
+        <span style="font-size:15px">⊕</span> Log New Service
+      </button>
+      <button class="btn btn-ghost" onclick="set({view:'submissions'})" style="gap:6px">
+        <span style="font-size:14px">📋</span> View All Submissions
+      </button>
     </div>
 
     <div class="card" style="margin-bottom:20px">
       <div class="card-hd">
-        <span class="card-title">RCHBS</span>
-        <span class="badge" style="background:var(--mag-lt);color:var(--magenta)">${rchbsClients.length} clients</span>
+        <span class="card-title">Recent Activity</span>
+        <span class="badge" style="background:var(--navy-lt);color:var(--navy)">${historyLogs.length} entries</span>
       </div>
-      <table class="client-table">
-        <thead><tr>
-          <th>Client</th><th>A/R Balance</th><th>Limit</th><th>Usage</th><th></th>
-        </tr></thead>
-        <tbody>${buildClientRows(rchbsClients)}</tbody>
-      </table>
+      ${historyLogs.length === 0
+        ? `<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-txt">No activity yet</div><div class="empty-sub">Log your first service to get started.</div></div>`
+        : `<table class="client-table">
+          <thead><tr>
+            <th>Date</th><th>Client</th><th>Service</th><th>Emp.</th><th>Amount</th><th>Status</th><th style="text-align:right">Actions</th>
+          </tr></thead>
+          <tbody>${historyLogs.map(l => {
+            const editBtn = canEdit(l)
+              ? `<button class="btn btn-ghost btn-xs" onclick="editLog('${l.id}')" title="Edit">✎ Edit</button>`
+              : '';
+            const deleteBtn = canDelete(l)
+              ? `<button class="btn btn-xs" style="background:var(--red-lt);color:var(--red)" onclick="deleteLog('${l.id}')" title="Delete">✕</button>`
+              : '';
+            return `<tr>
+              <td style="font-size:11px;color:var(--g500);white-space:nowrap">${fmtDate(l.submittedAt)}</td>
+              <td>
+                <div style="font-weight:600;font-size:12px">${l.clientName}</div>
+              </td>
+              <td style="font-size:12px">${l.serviceName}</td>
+              <td style="font-size:12px;text-align:center">${l.qty}</td>
+              <td style="font-weight:700;font-size:12px;color:var(--navy)">QAR ${fmt(l.total)}</td>
+              <td>${statusBadge(l.status)}</td>
+              <td style="text-align:right">
+                <div style="display:flex;gap:4px;justify-content:flex-end">
+                  ${editBtn}${deleteBtn}
+                </div>
+              </td>
+            </tr>`;
+          }).join('')}</tbody>
+        </table>`
+      }
+      ${historyLogs.some(l => l.rejectedReason) ? `
+        <div style="margin-top:12px;padding:10px 14px;background:var(--red-lt);border-radius:8px;border:1px solid rgba(192,39,45,.15)">
+          <div style="font-size:10px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Needs Attention</div>
+          ${historyLogs.filter(l=>l.rejectedReason && l.status==='rejected').map(l => `
+            <div style="font-size:11px;color:var(--g700);margin-bottom:4px">
+              <strong>${l.clientName}</strong> · ${l.serviceName}: <span style="color:var(--red)">${l.rejectedReason}</span>
+              <button class="btn btn-xs" style="background:var(--red);color:white;margin-left:6px" onclick="editLog('${l.id}')">Re-submit</button>
+            </div>`).join('')}
+        </div>` : ''}
     </div>
 
     <div class="card-hd" style="margin-bottom:10px">
@@ -663,16 +856,227 @@ function vDashboardAM() {
 }
 
 // ═══════════════════════════════════
+// VIEW: Clients
+// ═══════════════════════════════════
+function startEditClient(id) {
+  const c = CLIENTS.find(x=>x.id===id);
+  if (!c) return;
+  set({ editingClientId:id, editClientForm:{...c} });
+}
+
+function saveEditClient() {
+  if (!S.editClientForm) return;
+  const f = S.editClientForm;
+  clientUpdate(f.id, { name:f.name, contact:f.contact, email:f.email, phone:f.phone, type:f.type, creditLimit:Number(f.creditLimit)||0 });
+  set({ editingClientId:null, editClientForm:null });
+}
+
+function cancelEditClient() {
+  set({ editingClientId:null, editClientForm:null });
+}
+
+function saveNewClient() {
+  const f = S.newClientForm;
+  if (!f.name.trim()) { alert('Client name is required'); return; }
+  const nextId = Math.max(...clientsGet().map(c=>c.id), 0) + 1;
+  clientAdd({ id:nextId, name:f.name.trim(), company:f.company, contact:f.contact.trim(), email:f.email.trim(), phone:f.phone.trim(), type:f.type, creditLimit:Number(f.creditLimit)||0 });
+  set({ addingClient:false, newClientForm:{ name:'', company:S.clientsTab, contact:'', email:'', phone:'', type:'per-job', creditLimit:5000 } });
+}
+
+function vClients() {
+  const allLogs = dbGet();
+  const tab = S.clientsTab;
+  const clients = CLIENTS.filter(c => c.company === tab).sort((a,b) => a.name.localeCompare(b.name));
+
+  const rapidCount = CLIENTS.filter(c=>c.company==='Rapid').length;
+  const rchbsCount = CLIENTS.filter(c=>c.company==='RCHBS').length;
+
+  const tabBtn = (label, count, company) => `
+    <button class="btn ${tab===company ? 'btn-navy' : 'btn-ghost'} btn-sm" onclick="set({clientsTab:'${company}',editingClientId:null})" style="gap:4px">
+      ${label} <span style="font-size:10px;opacity:.7">(${count})</span>
+    </button>`;
+
+  const tableRows = clients.map(c => {
+    const logs = allLogs.filter(l => l.clientId === c.id);
+    const invoicedTotal = logs.filter(l=>l.status==='invoiced').reduce((s,l)=>s+l.total, 0);
+    const totalSpend = logs.filter(l=>l.status!=='rejected').reduce((s,l)=>s+l.total, 0);
+    const serviceCount = logs.length;
+    const pct = c.creditLimit > 0 ? Math.min(invoicedTotal / c.creditLimit, 1) : 0;
+    const barColor = pct >= 1 ? 'var(--red)' : pct >= 0.75 ? 'var(--orange)' : 'var(--green)';
+
+    if (S.editingClientId === c.id && S.editClientForm) {
+      const f = S.editClientForm;
+      return `<tr style="background:var(--navy-lt)">
+        <td><input class="form-input" style="padding:5px 8px;font-size:12px" value="${f.name}" oninput="S.editClientForm.name=this.value"></td>
+        <td><input class="form-input" style="padding:5px 8px;font-size:12px" value="${f.contact}" oninput="S.editClientForm.contact=this.value"></td>
+        <td><input class="form-input" style="padding:5px 8px;font-size:12px" value="${f.email}" oninput="S.editClientForm.email=this.value"></td>
+        <td><input class="form-input" style="padding:5px 8px;font-size:12px" value="${f.phone}" oninput="S.editClientForm.phone=this.value"></td>
+        <td>
+          <select class="form-input" style="padding:5px 8px;font-size:12px" onchange="S.editClientForm.type=this.value;render()">
+            <option value="retainer" ${f.type==='retainer'?'selected':''}>Retainer</option>
+            <option value="per-job" ${f.type==='per-job'?'selected':''}>Per-Job</option>
+          </select>
+        </td>
+        <td><input class="form-input" style="padding:5px 8px;font-size:12px;width:90px" type="number" value="${f.creditLimit}" oninput="S.editClientForm.creditLimit=this.value"></td>
+        <td style="font-size:12px;color:var(--g500)" colspan="2">—</td>
+        <td style="text-align:right">
+          <div style="display:flex;gap:4px;justify-content:flex-end">
+            <button class="btn btn-success btn-xs" onclick="saveEditClient()">Save</button>
+            <button class="btn btn-ghost btn-xs" onclick="cancelEditClient()">Cancel</button>
+          </div>
+        </td>
+      </tr>`;
+    }
+
+    return `<tr>
+      <td><div style="font-weight:600;font-size:12px">${c.name}</div></td>
+      <td style="font-size:12px">${c.contact}</td>
+      <td style="font-size:11px;color:var(--g500)">${c.email||'—'}</td>
+      <td style="font-size:11px;color:var(--g500);white-space:nowrap">${c.phone||'—'}</td>
+      <td><span class="badge ${c.type==='retainer'?'b-invoiced':'b-ops'}" style="font-size:9px">${c.type==='retainer'?'Retainer':'Per-Job'}</span></td>
+      <td style="font-size:12px;color:var(--g700)">QAR ${fmt(c.creditLimit)}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:6px">
+          <div style="width:60px;height:5px;background:var(--g100);border-radius:3px">
+            <div style="height:100%;border-radius:3px;background:${barColor};width:${Math.round(pct*100)}%"></div>
+          </div>
+          <span style="font-size:10px;font-weight:600;color:${barColor}">${Math.round(pct*100)}%</span>
+        </div>
+        <div style="font-size:10px;color:var(--g500);margin-top:2px">QAR ${fmt(invoicedTotal)} / ${fmt(c.creditLimit)}</div>
+      </td>
+      <td style="font-size:12px;text-align:center;color:var(--g700)">${serviceCount}</td>
+      <td style="text-align:right">
+        <button class="btn btn-ghost btn-xs" onclick="startEditClient(${c.id})">✎ Edit</button>
+      </td>
+    </tr>`;
+  }).join('');
+
+  // Add client form (inline row at top of table)
+  const addRow = S.addingClient ? `<tr style="background:var(--green-lt)">
+    <td><input class="form-input" style="padding:5px 8px;font-size:12px" placeholder="Company name" value="${S.newClientForm.name}" oninput="S.newClientForm.name=this.value"></td>
+    <td><input class="form-input" style="padding:5px 8px;font-size:12px" placeholder="Contact person" value="${S.newClientForm.contact}" oninput="S.newClientForm.contact=this.value"></td>
+    <td><input class="form-input" style="padding:5px 8px;font-size:12px" placeholder="Email" value="${S.newClientForm.email}" oninput="S.newClientForm.email=this.value"></td>
+    <td><input class="form-input" style="padding:5px 8px;font-size:12px" placeholder="Phone" value="${S.newClientForm.phone}" oninput="S.newClientForm.phone=this.value"></td>
+    <td>
+      <select class="form-input" style="padding:5px 8px;font-size:12px" onchange="S.newClientForm.type=this.value;render()">
+        <option value="per-job" ${S.newClientForm.type==='per-job'?'selected':''}>Per-Job</option>
+        <option value="retainer" ${S.newClientForm.type==='retainer'?'selected':''}>Retainer</option>
+      </select>
+    </td>
+    <td><input class="form-input" style="padding:5px 8px;font-size:12px;width:90px" type="number" placeholder="Limit" value="${S.newClientForm.creditLimit}" oninput="S.newClientForm.creditLimit=this.value"></td>
+    <td colspan="2" style="font-size:10px;color:var(--g500)">New</td>
+    <td style="text-align:right">
+      <div style="display:flex;gap:4px;justify-content:flex-end">
+        <button class="btn btn-success btn-xs" onclick="saveNewClient()">Add</button>
+        <button class="btn btn-ghost btn-xs" onclick="set({addingClient:false})">Cancel</button>
+      </div>
+    </td>
+  </tr>` : '';
+
+  return `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div style="display:flex;gap:6px">
+        ${tabBtn('Rapid Clearing House', rapidCount, 'Rapid')}
+        ${tabBtn('RCHBS', rchbsCount, 'RCHBS')}
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="set({addingClient:true,newClientForm:{name:'',company:'${tab}',contact:'',email:'',phone:'',type:'per-job',creditLimit:5000}})" style="gap:4px">
+        <span style="font-size:14px">+</span> Add Client
+      </button>
+    </div>
+
+    <div class="card" style="overflow-x:auto">
+      <table class="client-table" style="min-width:900px">
+        <thead><tr>
+          <th>Client</th><th>Contact</th><th>Email</th><th>Phone</th><th>Type</th><th>Limit</th><th>A/R Usage</th><th style="text-align:center">Services</th><th style="text-align:right">Actions</th>
+        </tr></thead>
+        <tbody>
+          ${addRow}
+          ${tableRows}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+// ═══════════════════════════════════
 // VIEW: Log Service
 // ═══════════════════════════════════
 function vLogService() {
-  if (!S.logClient) return `<div style="text-align:center;padding:48px;color:var(--g500)">Select a client to begin</div>`;
+  // Derived once, used across all screens
+  const companyColor = S.logCompany === 'Rapid' ? 'var(--navy)' : 'var(--magenta)';
+  const companyBg    = S.logCompany === 'Rapid' ? 'var(--navy-lt)' : 'var(--mag-lt)';
+  const companyChip  = `<span style="font-size:11px;font-weight:700;color:${companyColor};background:${companyBg};padding:3px 9px;border-radius:20px">${S.logCompany}</span>`;
+
+  // ── SCREEN 1: Company picker ─────────────────────────────────────────────
+  if (!S.logCompany) {
+    const rapidCount = CLIENTS.filter(c=>c.company==='Rapid').length;
+    const rchbsCount = CLIENTS.filter(c=>c.company==='RCHBS').length;
+    const companyCard = (co, label, sub, count, color) => `
+      <div onclick="set({logCompany:'${co}'})"
+        style="flex:1;border:2px solid var(--border);border-radius:12px;padding:24px 20px;cursor:pointer;background:white;transition:all .15s;text-align:center"
+        onmouseover="this.style.borderColor='${color}';this.style.boxShadow='0 4px 16px rgba(0,0,0,.10)'"
+        onmouseout="this.style.borderColor='var(--border)';this.style.boxShadow='none'">
+        <div style="font-size:22px;font-weight:800;color:${color};margin-bottom:4px">${co}</div>
+        <div style="font-size:12px;font-weight:600;color:var(--g700);margin-bottom:6px">${label}</div>
+        <div style="font-size:11px;color:var(--g500)">${count} client${count!==1?'s':''}</div>
+        <div style="margin-top:14px;font-size:11px;color:${color};font-weight:700">${sub}</div>
+      </div>`;
+    return `
+      <button class="btn btn-ghost btn-sm" onclick="set({view:'dashboard'})" style="margin-bottom:14px">← Back</button>
+      <div class="card" style="max-width:520px">
+        <div class="card-hd"><span class="card-title" style="font-size:15px">Log Service — Select Entity</span></div>
+        <div style="font-size:12px;color:var(--g500);margin-bottom:20px">Which company is this service for?</div>
+        <div style="display:flex;gap:14px">
+          ${companyCard('Rapid','Rapid Clearing House','Price list 2025',rapidCount,'var(--navy)')}
+          ${companyCard('RCHBS','RCH Business Solutions','Price list 2024',rchbsCount,'var(--magenta)')}
+        </div>
+      </div>`;
+  }
+
+  // ── SCREEN 2: Client picker (filtered by company) ────────────────────────
+  if (!S.logClient) {
+    const filteredClients = [...CLIENTS].filter(c=>c.company===S.logCompany).sort((a,b)=>a.name.localeCompare(b.name));
+    const allLogs = dbGet();
+    // Pre-group invoiced totals by client in a single O(logs) pass
+    const invoicedByClient = allLogs
+      .filter(l=>l.status==='invoiced')
+      .reduce((acc,l)=>{ acc[l.clientId]=(acc[l.clientId]||0)+l.total; return acc; }, {});
+    const clientRow = (c) => {
+      const ar = invoicedByClient[c.id] || 0;
+      const limit = c.creditLimit || 0;
+      const pct = limit > 0 ? Math.min(ar/limit,1) : 0;
+      const blocked = pct >= 1;
+      return `<div onclick="${blocked?'':`startLog(${c.id})`}"
+        style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border:1px solid var(--border);border-radius:8px;cursor:${blocked?'not-allowed':'pointer'};background:${blocked?'var(--red-lt)':'var(--white)'};transition:box-shadow .15s"
+        ${blocked?'':`onmouseover="this.style.boxShadow='0 2px 8px rgba(0,0,0,.08)';this.style.borderColor='${companyColor}'" onmouseout="this.style.boxShadow='none';this.style.borderColor='var(--border)'"`}>
+        <div>
+          <div style="font-weight:600;font-size:13px;color:${blocked?'var(--g500)':'var(--g900)'}">${c.name}</div>
+          <div style="font-size:10px;color:var(--g500);margin-top:2px">${c.contact}</div>
+        </div>
+        <div>${blocked?`<span class="badge b-rejected" style="font-size:9px">At Limit</span>`:`<span style="font-size:11px;color:${companyColor};font-weight:600">Select →</span>`}</div>
+      </div>`;
+    };
+    return `
+      <button class="btn btn-ghost btn-sm" onclick="set({logCompany:null})" style="margin-bottom:14px">← Back</button>
+      <div class="card" style="max-width:620px">
+        <div class="card-hd">
+          <span class="card-title" style="font-size:15px">Log Service — Select Client</span>
+          ${companyChip}
+        </div>
+        <div style="font-size:12px;color:var(--g500);margin-bottom:14px">Choose a client to log a service for</div>
+        <div style="display:flex;flex-direction:column;gap:6px">${filteredClients.map(clientRow).join('')}</div>
+      </div>`;
+  }
+
+  // ── WIZARD ───────────────────────────────────────────────────────────────
   const client = CLIENTS.find(c=>c.id===S.logClient);
   const svc = SERVICES.find(s=>s.id===S.logForm.serviceId);
-  const total = svc ? svc.price * S.logForm.qty : 0;
+  const listPrice = svc ? svcPrice(svc, S.logCompany) : 0;
+  const unitPrice = S.logForm.unitPrice !== '' ? parseFloat(S.logForm.unitPrice)||0 : listPrice;
+  const total = unitPrice * S.logForm.qty;
+  const priceEdited = !!(svc && S.logForm.unitPrice !== '' && parseFloat(S.logForm.unitPrice) !== listPrice);
 
   const steps = ['Service','Employees','Payment','Done'];
-  let stepsHTML = `<div class="stepper">${steps.map((s,i)=>{
+  const stepsHTML = `<div class="stepper">${steps.map((s,i)=>{
     const done=i<S.logStep, active=i===S.logStep;
     return `<div class="step ${done?'done':active?'active':''}">
       <div class="step-circle">${done?'✓':i+1}</div>
@@ -686,24 +1090,45 @@ function vLogService() {
     body = `
       <div class="form-group">
         <label class="form-label">Service Type</label>
-        <select class="form-input" onchange="S.logForm.serviceId=this.value;render()">
+        <select class="form-input" onchange="
+          S.logForm.serviceId=this.value;
+          const sv=SERVICES.find(s=>s.id===this.value);
+          S.logForm.unitPrice = sv ? svcPrice(sv, S.logCompany) : '';
+          render()">
           <option value="">Choose a service...</option>
-          ${SERVICES.map(s=>`<option value="${s.id}" ${S.logForm.serviceId===s.id?'selected':''}>${s.label} — QAR ${fmt(s.price)}</option>`).join('')}
+          ${getServiceOpts(S.logCompany)}
         </select>
       </div>
+      ${svc ? `
       <div class="form-group">
-        <label class="form-label">Number of Employees</label>
+        <label class="form-label" style="display:flex;align-items:center;justify-content:space-between">
+          <span>Professional Fee (QAR)</span>
+          ${priceEdited
+            ? `<span style="font-size:10px;color:var(--orange);font-weight:600">✏ Custom price — list price: QAR ${fmt(listPrice)}</span>`
+            : `<span style="font-size:10px;color:var(--g500)">List price from ${S.logCompany} price list</span>`
+          }
+        </label>
+        <input class="form-input" type="number" min="0" step="50" value="${S.logForm.unitPrice !== '' ? S.logForm.unitPrice : listPrice}"
+          oninput="S.logForm.unitPrice=this.value;render()" style="width:180px">
+        ${priceEdited ? `<div style="margin-top:4px;font-size:11px;color:var(--orange)">Modified from standard rate — ensure special agreement is documented in notes.</div>` : ''}
+      </div>` : ''}
+      <div class="form-group">
+        <label class="form-label">Quantity</label>
         <input class="form-input" type="number" min="1" max="20" value="${S.logForm.qty}"
           onchange="updateQty(this.value);render()" style="width:120px">
-      </div>`;
+      </div>
+      ${svc && S.logForm.qty > 0 ? `
+      <div style="padding:10px 13px;background:var(--g50);border:1px solid var(--border);border-radius:8px;font-size:12px;color:var(--g700)">
+        Estimated total: <strong>QAR ${fmt(total)}</strong> (${S.logForm.qty} × QAR ${fmt(unitPrice)})
+      </div>` : ''}`;
   }
 
   if (S.logStep === 1) {
     body = `
-      <div style="font-size:12px;color:var(--g500);margin-bottom:14px">Enter name &amp; service date for each employee</div>
+      <div style="font-size:12px;color:var(--g500);margin-bottom:14px">Enter name &amp; service date for each employee / reference</div>
       ${S.logForm.employees.map((e,i)=>`
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
-          <input class="form-input" type="text" placeholder="Employee ${i+1} name" value="${e.name||''}"
+          <input class="form-input" type="text" placeholder="Name / reference ${i+1}" value="${e.name||''}"
             oninput="updateEmp(${i},'name',this.value)">
           <input class="form-input" type="date" value="${e.date||''}"
             onchange="updateEmp(${i},'date',this.value)">
@@ -711,24 +1136,26 @@ function vLogService() {
   }
 
   if (S.logStep === 2) {
+    const availableCards = CARDS.filter(c=>c.company===S.logCompany);
     body = `
       <div class="form-group">
         <label class="form-label">Payment Card</label>
         <select class="form-input" onchange="S.logForm.card=this.value;render()">
           <option value="">Select card...</option>
-          ${CARDS.map(c=>`<option value="${c.id}" ${S.logForm.card===c.id?'selected':''}>${c.label}</option>`).join('')}
+          ${availableCards.map(c=>`<option value="${c.id}" ${S.logForm.card===c.id?'selected':''}>${c.label}</option>`).join('')}
         </select>
       </div>
       <div class="form-group">
         <label class="form-label">Total Amount</label>
-        <div class="form-input" style="background:var(--navy-lt);color:var(--navy);font-weight:800;font-size:16px">QAR ${fmt(total)}</div>
+        <div class="form-input" style="background:${companyBg};color:${companyColor};font-weight:800;font-size:16px">QAR ${fmt(total)}</div>
       </div>
       <div class="form-group">
         <label class="form-label">Notes (optional)</label>
-        <textarea class="form-input" rows="2" placeholder="Any notes..." oninput="S.logForm.notes=this.value">${S.logForm.notes||''}</textarea>
+        <textarea class="form-input" rows="2" placeholder="Special agreement details, references, etc..." oninput="S.logForm.notes=this.value">${S.logForm.notes||''}</textarea>
       </div>
       <div style="padding:11px 13px;background:var(--g50);border:1px solid var(--border);border-radius:8px;font-size:12px;color:var(--g700)">
-        📋 Summary: <strong>${svc?.label}</strong> × ${S.logForm.qty} employee(s) = <strong>QAR ${fmt(total)}</strong>
+        📋 <strong>${svc?.label}</strong> × ${S.logForm.qty} · QAR ${fmt(unitPrice)}/unit = <strong>QAR ${fmt(total)}</strong>
+        ${priceEdited ? `<span style="color:var(--orange);margin-left:6px">(custom rate)</span>` : ''}
       </div>`;
   }
 
@@ -736,15 +1163,15 @@ function vLogService() {
     body = S.logDone
       ? `<div style="text-align:center;padding:24px">
           <div style="font-size:48px;margin-bottom:12px">✅</div>
-          <div style="font-weight:800;font-size:16px;color:var(--green);margin-bottom:8px">Service Logged!</div>
+          <div style="font-weight:800;font-size:16px;color:var(--green);margin-bottom:8px">${S.editingLogId?'Service Updated!':'Service Logged!'}</div>
           <div style="font-size:12px;color:var(--g500);line-height:1.8">
-            <strong>${svc?.label}</strong> for <strong>${S.logForm.qty}</strong> employee(s)<br>
+            <strong>${svc?.label}</strong> × <strong>${S.logForm.qty}</strong><br>
             Total: <strong>QAR ${fmt(total)}</strong> · Card: <strong>${CARDS.find(c=>c.id===S.logForm.card)?.label||''}</strong><br>
             Status: <span class="badge b-ops">With OPs</span><br><br>
             Operations team will execute this service.
           </div>
           <div style="display:flex;gap:10px;justify-content:center;margin-top:20px">
-            <button class="btn btn-ghost" onclick="set({view:'dashboard',logClient:null,logDone:false})">Back to Dashboard</button>
+            <button class="btn btn-ghost" onclick="set({view:'dashboard',logCompany:null,logClient:null,logDone:false})">Back to Dashboard</button>
             <button class="btn btn-primary" onclick="set({view:'submissions'})">View Submissions</button>
           </div>
         </div>`
@@ -752,14 +1179,17 @@ function vLogService() {
   }
 
   const canNext =
-    (S.logStep===0 && S.logForm.serviceId && S.logForm.qty > 0) ||
+    (S.logStep===0 && S.logForm.serviceId && S.logForm.qty>0 && unitPrice>0) ||
     (S.logStep===1) ||
     (S.logStep===2 && S.logForm.card);
 
   return `
-    <button class="btn btn-ghost btn-sm" onclick="set({view:'dashboard',logClient:null})" style="margin-bottom:14px">← Back</button>
+    <button class="btn btn-ghost btn-sm" onclick="set({logClient:null})" style="margin-bottom:14px">← Back</button>
     <div class="card" style="max-width:620px">
-      <div class="card-hd"><span class="card-title" style="font-size:15px">Log Service — ${client.name}</span></div>
+      <div class="card-hd">
+        <span class="card-title" style="font-size:15px">${S.editingLogId?'Edit':'Log'} Service — ${client.name}</span>
+        ${companyChip}
+      </div>
       ${stepsHTML}
       <div class="fade">${body}</div>
       ${S.logStep < 3 ? `
@@ -1481,11 +1911,13 @@ function getNav(type) {
   const defs = {
     am: [
       item('dashboard','◈','Dashboard',''),
+      item('clients','👥','Clients',''),
       item('log','⊕','Log Service',''),
       item('submissions','📋','My Submissions',''),
     ],
     tl: [
       item('dashboard','◈','Dashboard',''),
+      item('clients','👥','Clients',''),
       item('log','⊕','Log Service',''),
       item('approvals','✓','Approval Queue', counts.pending||''),
       item('submissions','📋','All Submissions',''),
@@ -1511,6 +1943,7 @@ function getNav(type) {
 }
 
 function getViewTitle() {
+  const map = {dashboard:'Dashboard',clients:'Clients',log:'Log Service',submissions:'Submissions',approvals:'Approval Queue',expense:'Expense Tracker',finance:'Finance Queue',cfo:'Management',invoiceLogId:'Invoice'};
   const map = {dashboard:'Dashboard',log:'Log Service',submissions:'Submissions',approvals:'Approval Queue',expense:'Expense Tracker',finance:'Invoice Queue',cfo:'Management',invoiceLogId:'Invoice'};
   if (S.invoiceLogId) return 'Invoice Preview';
   return map[S.view]||'Dashboard';
@@ -1518,6 +1951,14 @@ function getViewTitle() {
 
 function renderView() {
   const t = S.user?.type;
+  if (S.view==='dashboard'  && (t==='am'||t==='tl')) return vDashboardAM();
+  if (S.view==='clients'   && (t==='am'||t==='tl')) return vClients();
+  if (S.view==='log')                                  return vLogService();
+  if (S.view==='submissions')                          return vSubmissions();
+  if (S.view==='approvals'  && t==='tl')               return vApprovals();
+  if (S.view==='expense'    && t==='expense')          return vExpense();
+  if (S.view==='finance'    && t==='finance')          return vFinance();
+  if (S.view==='cfo'        && t==='cfo')              return vCFO();
   if (S.view==='dashboard'  && (t==='am'||t==='tl'))        return vDashboardAM();
   if (S.view==='dashboard'  && t==='accountant')             return vAccountantDashboard();
   if (S.view==='dashboard'  && t==='acct_mgr')              return vAcctMgrDashboard();
