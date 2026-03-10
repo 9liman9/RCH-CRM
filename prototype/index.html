@@ -336,9 +336,6 @@ function svcPrice(svc, company) {
 }
 
 const CARDS = [
-  { id:'rapid1', label:'Rapid CC-1 (xxx1001)', company:'Rapid' },
-  { id:'rapid2', label:'Rapid CC-2 (xxx3139)', company:'Rapid' },
-  { id:'rchbs',  label:'RCHBS CC (xxx5958)',   company:'RCHBS' },
   { id:'rapid1', label:'Rapid CC-1 (xxx1001)', company:'Rapid', limit:50000 },
   { id:'rapid2', label:'Rapid CC-2 (xxx3139)', company:'Rapid', limit:30000 },
   { id:'rchbs',  label:'RCHBS CC (xxx5958)',   company:'RCHBS', limit:25000 },
@@ -1943,31 +1940,23 @@ function getNav(type) {
 }
 
 function getViewTitle() {
-  const map = {dashboard:'Dashboard',clients:'Clients',log:'Log Service',submissions:'Submissions',approvals:'Approval Queue',expense:'Expense Tracker',finance:'Finance Queue',cfo:'Management',invoiceLogId:'Invoice'};
-  const map = {dashboard:'Dashboard',log:'Log Service',submissions:'Submissions',approvals:'Approval Queue',expense:'Expense Tracker',finance:'Invoice Queue',cfo:'Management',invoiceLogId:'Invoice'};
+  const map = {dashboard:'Dashboard',clients:'Clients',log:'Log Service',submissions:'Submissions',approvals:'Approval Queue',expense:'Expense Tracker',finance:'Invoice Queue',cfo:'Management',invoiceLogId:'Invoice'};
   if (S.invoiceLogId) return 'Invoice Preview';
   return map[S.view]||'Dashboard';
 }
 
 function renderView() {
   const t = S.user?.type;
-  if (S.view==='dashboard'  && (t==='am'||t==='tl')) return vDashboardAM();
-  if (S.view==='clients'   && (t==='am'||t==='tl')) return vClients();
-  if (S.view==='log')                                  return vLogService();
-  if (S.view==='submissions')                          return vSubmissions();
-  if (S.view==='approvals'  && t==='tl')               return vApprovals();
-  if (S.view==='expense'    && t==='expense')          return vExpense();
-  if (S.view==='finance'    && t==='finance')          return vFinance();
-  if (S.view==='cfo'        && t==='cfo')              return vCFO();
-  if (S.view==='dashboard'  && (t==='am'||t==='tl'))        return vDashboardAM();
-  if (S.view==='dashboard'  && t==='accountant')             return vAccountantDashboard();
-  if (S.view==='dashboard'  && t==='acct_mgr')              return vAcctMgrDashboard();
-  if (S.view==='log')                                        return vLogService();
-  if (S.view==='submissions')                                return vSubmissions();
-  if (S.view==='approvals'  && t==='tl')                     return vApprovals();
-  if (S.view==='expense'    && t==='expense')                return vExpense();
+  if (S.view==='dashboard'  && (t==='am'||t==='tl'))              return vDashboardAM();
+  if (S.view==='dashboard'  && t==='accountant')                  return vAccountantDashboard();
+  if (S.view==='dashboard'  && t==='acct_mgr')                   return vAcctMgrDashboard();
+  if (S.view==='clients'    && (t==='am'||t==='tl'))              return vClients();
+  if (S.view==='log')                                             return vLogService();
+  if (S.view==='submissions')                                     return vSubmissions();
+  if (S.view==='approvals'  && t==='tl')                          return vApprovals();
+  if (S.view==='expense'    && t==='expense')                     return vExpense();
   if (S.view==='finance'    && (t==='accountant'||t==='acct_mgr')) return vFinance();
-  if (S.view==='cfo'        && t==='cfo')                   return vCFO();
+  if (S.view==='cfo'        && t==='cfo')                         return vCFO();
   // Default landing per type
   if (t==='expense')    return vExpense();
   if (t==='accountant') return vAccountantDashboard();
