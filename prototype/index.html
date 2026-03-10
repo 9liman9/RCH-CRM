@@ -150,6 +150,7 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 
 .fade{animation:fadeIn .2s ease}
 @keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 
 
 .empty-state{text-align:center;padding:48px 20px;color:var(--g500)}
@@ -236,7 +237,9 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
   .inv-wrap{border:none;border-radius:0;max-width:100%;padding:10px;box-shadow:none}
   .content > .fade{animation:none}
   body,html{background:white}
+  .receipt-print-page{display:block!important;page-break-before:always;padding:20px;min-height:200px}
 }
+.receipt-print-page{display:none}
 </style>
 </head>
 <body>
@@ -247,6 +250,7 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 // ═══════════════════════════════════
 const USERS = [
   { id:'violetta', name:'Violetta A.', role:'Account Manager',      password:'rch2026', avatar:'VA', type:'am'      },
+  { id:'vongai',   name:'Vongai K.',   role:'Account Manager',      password:'rch2026', avatar:'VK', type:'am'      },
   { id:'elena',    name:'Elena F.',    role:'Team Leader',           password:'rch2026', avatar:'EF', type:'tl'      },
   { id:'gabi',     name:'Gabi M.',     role:'Expense Tracker',       password:'rch2026', avatar:'GM', type:'expense' },
   { id:'suleiman', name:'Suleiman M.', role:'Accountant',            password:'rch2026', avatar:'SM', type:'accountant' },
@@ -257,7 +261,35 @@ const USERS = [
 // ═══════════════════════════════════
 // REFERENCE DATA
 // ═══════════════════════════════════
-const CLIENTS_SEED = [];
+const CLIENTS_SEED = [
+  // ── Rapid Clearing House clients ──────────────────────────────────────────
+  { id:1,  name:'ABB Qatar WLL',               company:'Rapid', contact:'Ahmed Al-Mannai',   email:'accounts@abb.com.qa',         phone:'+974 4455 1001', type:'retainer', creditLimit:15000, assignedTo:'violetta' },
+  { id:2,  name:'EY Qatar',                    company:'Rapid', contact:'Sara Al-Emadi',     email:'info@qa.ey.com',              phone:'+974 4457 4200', type:'retainer', creditLimit:20000, assignedTo:'violetta' },
+  { id:3,  name:'Hitachi Qatar WLL',           company:'Rapid', contact:'Khalid Al-Sulaiti', email:'qatar@hitachi.com',           phone:'+974 4431 0050', type:'per-job',  creditLimit:10000, assignedTo:'violetta' },
+  { id:4,  name:'Industries Qatar QSC',        company:'Rapid', contact:'Faisal Al-Kuwari',  email:'info@iq.com.qa',              phone:'+974 4496 5500', type:'retainer', creditLimit:25000, assignedTo:'violetta' },
+  { id:5,  name:'Vodafone Qatar PSC',          company:'Rapid', contact:'Reem Al-Ansari',    email:'corporate@vodafone.com.qa',   phone:'+974 7777 0000', type:'retainer', creditLimit:18000, assignedTo:'violetta' },
+  { id:6,  name:'Al Meera Consumer Goods',     company:'Rapid', contact:'Mohammed Al-Hajri', email:'hr@almeera.com.qa',           phone:'+974 4012 3456', type:'retainer', creditLimit:12000, assignedTo:'violetta' },
+  { id:7,  name:'Qatar Steel Company WLL',     company:'Rapid', contact:'Saif Al-Sada',      email:'admin@qatarsteel.com.qa',     phone:'+974 4477 2255', type:'retainer', creditLimit:20000, assignedTo:'violetta' },
+  { id:8,  name:'Property Finder Qatar',       company:'Rapid', contact:'Layla Al-Dossari',  email:'ops@propertyfinder.qa',       phone:'+974 4465 1234', type:'per-job',  creditLimit:8000,  assignedTo:'vongai'   },
+  { id:9,  name:'Acrogym Qatar',               company:'Rapid', contact:'Nadia Beshir',      email:'info@acrogym.qa',             phone:'+974 5556 7890', type:'per-job',  creditLimit:5000,  assignedTo:'vongai'   },
+  { id:10, name:'Ooredoo Qatar PSC',           company:'Rapid', contact:'Tariq Al-Kaabi',    email:'corporate@ooredoo.com.qa',    phone:'+974 4466 0000', type:'retainer', creditLimit:22000, assignedTo:'vongai'   },
+  { id:11, name:'Gulf International Bank',     company:'Rapid', contact:'Hana Al-Muftah',    email:'hr@gibonline.com',            phone:'+974 4496 3000', type:'retainer', creditLimit:16000, assignedTo:'vongai'   },
+  { id:12, name:'Lulu Hypermarket Qatar WLL',  company:'Rapid', contact:'Priya Nair',        email:'hr.qatar@luluhypermarket.com',phone:'+974 4432 8800', type:'retainer', creditLimit:14000, assignedTo:'vongai'   },
+  { id:13, name:'Milaha (Qatar Navigation)',   company:'Rapid', contact:'Jaber Al-Marri',    email:'crewing@milaha.com',          phone:'+974 4445 3888', type:'retainer', creditLimit:19000, assignedTo:'vongai'   },
+  // ── RCH Business Solutions clients ───────────────────────────────────────
+  { id:14, name:'Seaquest Qatar',              company:'RCHBS', contact:'James O\'Brien',    email:'admin@seaquest.qa',           phone:'+974 4455 2002', type:'per-job',  creditLimit:9000,  assignedTo:'vongai'   },
+  { id:15, name:'QatarEnergy',                 company:'RCHBS', contact:'Ali Al-Mohannadi',  email:'govt.affairs@qatarenergy.qa', phone:'+974 4449 0000', type:'retainer', creditLimit:30000, assignedTo:'violetta' },
+  { id:16, name:'Hamad Medical Corporation',   company:'RCHBS', contact:'Dr. Nour Al-Said',  email:'admin@hamad.qa',              phone:'+974 4439 4444', type:'retainer', creditLimit:25000, assignedTo:'vongai'   },
+  { id:17, name:'Nakilat QSC',                 company:'RCHBS', contact:'Ibrahim Al-Buainain',email:'hr@nakilat.com',            phone:'+974 4426 9511', type:'retainer', creditLimit:20000, assignedTo:'violetta' },
+  { id:18, name:'KAHRAMAA',                    company:'RCHBS', contact:'Yousef Al-Jaber',   email:'procurement@km.com.qa',       phone:'+974 4464 4444', type:'retainer', creditLimit:22000, assignedTo:'vongai'   },
+  { id:19, name:'QAPCO',                       company:'RCHBS', contact:'Hamad Al-Mohannadi',email:'admin@qapco.com.qa',          phone:'+974 4476 6800', type:'retainer', creditLimit:18000, assignedTo:'violetta' },
+  { id:20, name:'Mesaieed Petrochemical',      company:'RCHBS', contact:'Salem Al-Rumaihi',  email:'info@mphc.com.qa',            phone:'+974 4477 0555', type:'retainer', creditLimit:20000, assignedTo:'vongai'   },
+  { id:21, name:'Mannai Corporation',          company:'RCHBS', contact:'George Varghese',   email:'hr@mannai.com.qa',            phone:'+974 4455 7700', type:'per-job',  creditLimit:11000, assignedTo:'violetta' },
+  { id:22, name:'Barwa Real Estate',           company:'RCHBS', contact:'Fatima Al-Kuwari',  email:'admin@barwa.com.qa',          phone:'+974 4014 4440', type:'retainer', creditLimit:13000, assignedTo:'vongai'   },
+  { id:23, name:'HBK Contracting Company',     company:'RCHBS', contact:'Mohammed Al-Khulaifi',email:'projects@hbk.com.qa',      phone:'+974 4455 6600', type:'per-job',  creditLimit:15000, assignedTo:'violetta' },
+  { id:24, name:'Ezdan Holding Group',         company:'RCHBS', contact:'Rashed Al-Qubaisi', email:'hr@ezdan.qa',                 phone:'+974 4455 3300', type:'retainer', creditLimit:12000, assignedTo:'vongai'   },
+  { id:25, name:'Salini Qatar WLL',            company:'RCHBS', contact:'Marco Rossi',       email:'admin@saliniqa.com',          phone:'+974 4444 9900', type:'per-job',  creditLimit:8000,  assignedTo:'violetta' },
+];
 
 const CLIENTS_DB_KEY = 'rch_clients_v1';
 function clientsLoad() { try { const r = localStorage.getItem(CLIENTS_DB_KEY); return r ? JSON.parse(r) : null; } catch(e) { return null; } }
@@ -511,7 +543,8 @@ let S = {
   // AM completion flow (post-OPs)
   completingRequestId: null,
   completingIds: [],         // selected log IDs to complete together
-  completeForm: { paymentMethod:'', card:'', govFee:'', receiptRef:'', notes:'' },
+  completeForm: { paymentMethod:'', card:'', govFees:{}, notes:'' },
+  perServiceReceipts: {},    // { [logId]: [{id,fileName,base64,mimeType}] }
   // approval reject modal
   rejectId: null,
   rejectReason: '',
@@ -534,6 +567,9 @@ let S = {
   expandedApprovalId: null,
   // expense view batch selection
   selectedExpenseIds: [],
+  // gabi expense editing
+  editingExpenseId: null,
+  editExpenseForm: null,
   // service catalog management
   editingServiceId: null,
   addingService: false,
@@ -620,7 +656,7 @@ function handleLogin(e) {
 }
 
 function handleLogout() {
-  set({screen:'login', user:null, loginError:'', view:'dashboard', logClient:null, logProvider:null, logDone:false, completingRequestId:null, completingIds:[]});
+  set({screen:'login', user:null, loginError:'', view:'dashboard', logClient:null, logProvider:null, logDone:false, completingRequestId:null, completingIds:[], completeForm:{paymentMethod:'',card:'',govFees:{},notes:''}, perServiceReceipts:{}, uploadedReceipts:[], editingExpenseId:null, editExpenseForm:null});
 }
 
 function initNewService() {
@@ -713,7 +749,9 @@ function startCompleteService(id) {
     view:'complete_service',
     completingRequestId: log.requestId||log.id,
     completingIds: grouped.map(l=>l.id),
-    completeForm: { paymentMethod:'', card:'', govFee:'', receiptRef:'', notes:'' }
+    completeForm: { paymentMethod:'', card:'', govFees:{}, notes:'' },
+    perServiceReceipts: {},
+    uploadedReceipts: []
   });
 }
 
@@ -754,6 +792,35 @@ function expenseSelected() {
   set({});
 }
 
+function startEditExpense(id) {
+  const log = dbGet().find(l => l.id === id);
+  if (!log) return;
+  set({ editingExpenseId: id, editExpenseForm: { govFee: log.govFee||0, paymentMethod: log.paymentMethod||'', card: log.card||'', notes: log.notes||'' } });
+}
+
+function saveEditExpense() {
+  const f = S.editExpenseForm;
+  if (!f) return;
+  const log = dbGet().find(l => l.id === S.editingExpenseId);
+  const provider = log?.provider || 'Rapid';
+  const availableCards = CARDS.filter(c => c.company === provider);
+  const card = f.paymentMethod === 'card' ? availableCards.find(c=>c.id===f.card) : null;
+  dbUpdate(S.editingExpenseId, {
+    govFee: parseFloat(f.govFee) || 0,
+    paymentMethod: f.paymentMethod,
+    card: card ? card.id : '',
+    cardLabel: card ? card.label : (f.paymentMethod === 'cash' ? 'Cash' : 'Other'),
+    notes: f.notes || ''
+  });
+  set({ editingExpenseId: null, editExpenseForm: null });
+}
+
+function deleteExpense(id) {
+  if (!confirm('Undo this expense check? The service will return to "Approved" status.')) return;
+  dbUpdate(id, { status:'approved', expensedBy:null, expensedByName:null, expensedAt:null, gabiChecked:false });
+  set({});
+}
+
 function startBatchComplete(clientId) {
   const ready = dbGet().filter(l => l.clientId === clientId && l.status === 'am_completing');
   if (!ready.length) return;
@@ -761,9 +828,36 @@ function startBatchComplete(clientId) {
     view:'complete_service',
     completingRequestId: null,
     completingIds: ready.map(l=>l.id),
-    completeForm: { paymentMethod:'', card:'', govFee:'', receiptRef:'', notes:'' },
+    completeForm: { paymentMethod:'', card:'', govFees:{}, notes:'' },
+    perServiceReceipts: {},
     uploadedReceipts: []
   });
+}
+
+// ── Per-service receipt handlers ──
+function handleServiceReceiptUpload(logId, files) {
+  if (!S.perServiceReceipts) S.perServiceReceipts = {};
+  if (!S.perServiceReceipts[logId]) S.perServiceReceipts[logId] = [];
+  Array.from(files).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      S.perServiceReceipts[logId].push({
+        id: 'RCT-'+Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).slice(2,5).toUpperCase(),
+        fileName: file.name,
+        base64: e.target.result,
+        mimeType: file.type
+      });
+      render();
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function removeServiceReceipt(logId, receiptId) {
+  if (S.perServiceReceipts && S.perServiceReceipts[logId]) {
+    S.perServiceReceipts[logId] = S.perServiceReceipts[logId].filter(r => r.id !== receiptId);
+  }
+  render();
 }
 
 // ── Receipt file storage ──
@@ -805,32 +899,35 @@ function submitCompletion() {
   if (!f.paymentMethod) { alert('Please select a payment method'); return; }
   if (f.paymentMethod === 'card' && !f.card) { alert('Please select a card'); return; }
   const card = f.paymentMethod === 'card' ? CARDS.find(c=>c.id===f.card) : null;
-  const govFee = parseFloat(f.govFee) || 0;
   const receiptGroupId = 'RG-'+Date.now().toString(36).toUpperCase();
   const now = new Date().toISOString();
-
-  // Save uploaded receipts
-  if (S.uploadedReceipts.length > 0) {
-    const existing = dbGetReceipts();
-    S.uploadedReceipts.forEach(r => {
-      existing.push({...r, logIds: [...S.completingIds], uploadedAt: now});
-    });
-    dbSaveReceipts(existing);
-  }
+  const perSvcReceipts = S.perServiceReceipts || {};
 
   S.completingIds.forEach(id => {
+    const govFee = parseFloat((f.govFees||{})[id]) || 0;
+    const svcReceipts = perSvcReceipts[id] || [];
+
+    // Save per-service receipts
+    if (svcReceipts.length > 0) {
+      const existing = dbGetReceipts();
+      svcReceipts.forEach(r => {
+        existing.push({...r, logIds: [id], uploadedAt: now});
+      });
+      dbSaveReceipts(existing);
+    }
+
     dbUpdate(id, {
       status:'pending',
       paymentMethod: f.paymentMethod,
       card: card ? card.id : '',
       cardLabel: card ? card.label : (f.paymentMethod === 'cash' ? 'Cash' : 'Other'),
       govFee,
-      receiptRef: f.receiptRef || (S.uploadedReceipts.length > 0 ? S.uploadedReceipts.map(r=>r.fileName).join(', ') : ''),
+      receiptRef: svcReceipts.length > 0 ? svcReceipts.map(r=>r.fileName).join(', ') : '',
       receiptGroupId,
       notes: f.notes || ''
     });
   });
-  set({view:'dashboard', completingRequestId:null, completingIds:[], completeForm:{paymentMethod:'',card:'',govFee:'',receiptRef:'',notes:''}, uploadedReceipts:[]});
+  set({view:'dashboard', completingRequestId:null, completingIds:[], completeForm:{paymentMethod:'',card:'',govFees:{},notes:''}, perServiceReceipts:{}, uploadedReceipts:[]});
 }
 
 function approveLog(id) {
@@ -1031,9 +1128,9 @@ function vDashboardAM() {
   return `
     <div class="stats-row">
       <div class="stat" style="--sc:var(--navy)">
-        <div class="stat-lbl">Clients</div>
-        <div class="stat-val">${CLIENTS.length}</div>
-        <div class="stat-sub">Active accounts</div>
+        <div class="stat-lbl">My Clients</div>
+        <div class="stat-val">${CLIENTS.filter(c=>S.user.type!=='am'||c.assignedTo===S.user.id).length}</div>
+        <div class="stat-sub">Assigned accounts</div>
       </div>
       <div class="stat" style="--sc:var(--green)">
         <div class="stat-lbl">Services This Week</div>
@@ -1181,10 +1278,14 @@ function saveNewClient() {
 function vClients() {
   const allLogs = dbGet();
   const tab = S.clientsTab;
-  const clients = CLIENTS.filter(c => c.company === tab).sort((a,b) => a.name.localeCompare(b.name));
+  const clients = CLIENTS.filter(c => {
+    if (c.company !== tab) return false;
+    if (S.user.type === 'am') return c.assignedTo === S.user.id;
+    return true;
+  }).sort((a,b) => a.name.localeCompare(b.name));
 
-  const rapidCount = CLIENTS.filter(c=>c.company==='Rapid').length;
-  const rchbsCount = CLIENTS.filter(c=>c.company==='RCHBS').length;
+  const rapidCount = CLIENTS.filter(c=>c.company==='Rapid' && (S.user.type!=='am' || c.assignedTo===S.user.id)).length;
+  const rchbsCount = CLIENTS.filter(c=>c.company==='RCHBS' && (S.user.type!=='am' || c.assignedTo===S.user.id)).length;
 
   const tabBtn = (label, count, company) => `
     <button class="btn ${tab===company ? 'btn-navy' : 'btn-ghost'} btn-sm" onclick="set({clientsTab:'${company}',editingClientId:null})" style="gap:4px">
@@ -1318,7 +1419,9 @@ function vLogService() {
 
   // ── STEP 0: Client & Provider ──────────────────────────────────────────
   if (S.logStep === 0) {
-    const allClients = [...CLIENTS].sort((a,b)=>a.name.localeCompare(b.name));
+    const allClients = [...CLIENTS]
+      .filter(c => S.user.type !== 'am' || c.assignedTo === S.user.id)
+      .sort((a,b)=>a.name.localeCompare(b.name));
     const rapidClients = allClients.filter(c=>c.company==='Rapid');
     const rchbsClients = allClients.filter(c=>c.company==='RCHBS');
     body = `
@@ -1585,7 +1688,7 @@ function vCompleteService() {
   const totalRchFees = selectedLogs.reduce((s,l) => s + l.total, 0);
 
   return `
-    <button class="btn btn-ghost btn-sm" onclick="set({view:'dashboard',completingRequestId:null,completingIds:[],completeForm:{paymentMethod:'',card:'',govFee:'',receiptRef:'',notes:''}})" style="margin-bottom:14px">← Back to Dashboard</button>
+    <button class="btn btn-ghost btn-sm" onclick="set({view:'dashboard',completingRequestId:null,completingIds:[],completeForm:{paymentMethod:'',card:'',govFees:{},notes:''},perServiceReceipts:{},uploadedReceipts:[]})" style="margin-bottom:14px">← Back to Dashboard</button>
     <div class="card" style="max-width:680px">
       <div class="card-hd">
         <span class="card-title" style="font-size:15px">Complete Service — ${firstLog?.clientName||'—'}</span>
@@ -1619,29 +1722,36 @@ function vCompleteService() {
       </div>
 
       <div class="form-group">
-        <label class="form-label">Government Fee (from receipt)</label>
-        <input class="form-input" type="number" min="0" step="10" placeholder="0" value="${f.govFee}"
-          oninput="S.completeForm.govFee=this.value" onblur="render()" style="width:200px">
-        <div style="font-size:10px;color:var(--g500);margin-top:3px">The actual amount OPs paid to the government</div>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">Government Receipt(s)</label>
-        <label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;padding:8px 14px;border:2px dashed var(--border);border-radius:8px;font-size:12px;color:var(--g500);background:var(--g50)">
-          <span>📎 Upload receipt files</span>
-          <input type="file" accept="application/pdf,image/*" multiple style="display:none"
-            onchange="handleReceiptUpload(this.files)">
-        </label>
-        ${S.uploadedReceipts.length > 0 ? `
-          <div style="margin-top:8px">
-            ${S.uploadedReceipts.map(r => `
-              <div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--navy-lt);border-radius:6px;margin-bottom:4px;font-size:12px">
-                <span style="flex:1">${r.mimeType.startsWith('image/') ? '🖼️' : '📄'} ${r.fileName}</span>
-                <button class="btn btn-ghost btn-xs" onclick="removeUploadedReceipt('${r.id}')" style="color:var(--red)">✕</button>
-              </div>`).join('')}
-          </div>
-        ` : ''}
-        <div style="font-size:10px;color:var(--g500);margin-top:6px">One receipt can cover all selected services. PDF or image files accepted.</div>
+        <label class="form-label">Government Fees &amp; Receipts — per service</label>
+        <div style="font-size:11px;color:var(--g500);margin-bottom:8px">Enter each service's government fee and attach its receipt on the same line.</div>
+        ${S.completingIds.map(id => {
+          const l = allLogs.find(x=>x.id===id);
+          if (!l) return '';
+          const svcGovFee = (f.govFees||{})[id] || '';
+          const svcFiles = (S.perServiceReceipts||{})[id] || [];
+          return `
+            <div style="border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin-bottom:8px;background:white">
+              <div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:8px">${l.serviceName} <span style="font-weight:400;color:var(--g500)">× ${l.qty}</span></div>
+              <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+                  <label style="font-size:10px;font-weight:700;color:var(--g500);white-space:nowrap">GOV FEE (QAR)</label>
+                  <input class="form-input" type="number" min="0" step="10" placeholder="0" value="${svcGovFee}"
+                    oninput="if(!S.completeForm.govFees)S.completeForm.govFees={};S.completeForm.govFees['${id}']=this.value"
+                    style="width:110px;padding:6px 8px">
+                </div>
+                <label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;padding:6px 12px;border:1.5px dashed var(--border);border-radius:7px;font-size:11px;color:var(--g500);background:var(--g50);white-space:nowrap;flex-shrink:0">
+                  📎 Attach receipt
+                  <input type="file" accept="application/pdf,image/*" multiple style="display:none"
+                    onchange="handleServiceReceiptUpload('${id}',this.files)">
+                </label>
+                ${svcFiles.map(r => `
+                  <div style="display:inline-flex;align-items:center;gap:5px;padding:4px 8px;background:var(--navy-lt);border-radius:5px;font-size:11px;max-width:180px">
+                    <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.mimeType.startsWith('image/')?'🖼️':'📄'} ${r.fileName}</span>
+                    <button style="background:none;border:none;cursor:pointer;color:var(--red);font-size:12px;flex-shrink:0" onclick="removeServiceReceipt('${id}','${r.id}')">✕</button>
+                  </div>`).join('')}
+              </div>
+            </div>`;
+        }).join('')}
       </div>
 
       <div class="form-group">
@@ -1670,7 +1780,7 @@ function vCompleteService() {
       </div>
 
       <div style="display:flex;justify-content:space-between;margin-top:18px;padding-top:14px;border-top:1px solid var(--border)">
-        <button class="btn btn-ghost btn-sm" onclick="set({view:'dashboard',completingRequestId:null,completingIds:[]})">Cancel</button>
+        <button class="btn btn-ghost btn-sm" onclick="set({view:'dashboard',completingRequestId:null,completingIds:[],completeForm:{paymentMethod:'',card:'',govFees:{},notes:''},perServiceReceipts:{},uploadedReceipts:[]})">Cancel</button>
         <button class="btn btn-success btn-sm" onclick="submitCompletion()" ${S.completingIds.length===0||!f.paymentMethod||(f.paymentMethod==='card'&&!f.card)?'disabled':''}>Submit for Approval →</button>
       </div>
     </div>`;
@@ -1802,6 +1912,7 @@ function vApprovals() {
 // ═══════════════════════════════════
 function vExpense() {
   const all = dbGet();
+  const pending = all.filter(l=>l.status==='pending');   // just submitted by AM — new feed
   const approved = all.filter(l=>l.status==='approved');
   const done = all.filter(l=>l.status==='expensed'||l.status==='invoiced');
   const totalGov = approved.reduce((s,l)=>s+(l.govFee||0),0);
@@ -1820,19 +1931,19 @@ function vExpense() {
   return `
     <div class="stats-row">
       <div class="stat" style="--sc:var(--orange)">
+        <div class="stat-lbl">New Submissions</div>
+        <div class="stat-val">${pending.length}</div>
+        <div class="stat-sub">Awaiting Elena approval</div>
+      </div>
+      <div class="stat" style="--sc:var(--navy)">
         <div class="stat-lbl">Ready to Expense</div>
         <div class="stat-val">${approved.length}</div>
         <div class="stat-sub">${clientGroups.length} client${clientGroups.length!==1?'s':''}</div>
       </div>
       <div class="stat" style="--sc:var(--red)">
-        <div class="stat-lbl">Gov Fees</div>
+        <div class="stat-lbl">Gov Fees Pending</div>
         <div class="stat-val">QAR ${fmt(totalGov)}</div>
         <div class="stat-sub">To be expensed</div>
-      </div>
-      <div class="stat" style="--sc:var(--navy)">
-        <div class="stat-lbl">Prof Fees</div>
-        <div class="stat-val">QAR ${fmt(totalProf)}</div>
-        <div class="stat-sub">RCH service fees</div>
       </div>
       <div class="stat" style="--sc:var(--green)">
         <div class="stat-lbl">Processed</div>
@@ -1840,6 +1951,30 @@ function vExpense() {
         <div class="stat-sub">Expensed or invoiced</div>
       </div>
     </div>
+
+    ${pending.length > 0 ? `
+      <div style="margin-bottom:16px">
+        <div style="font-size:11px;font-weight:700;color:var(--orange);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;display:flex;align-items:center;gap:6px">
+          <span style="width:8px;height:8px;border-radius:50%;background:var(--orange);display:inline-block;animation:pulse 1.5s infinite"></span>
+          New Submissions from AM (${pending.length}) — Pending Elena Approval
+        </div>
+        ${pending.map(l => {
+          const receipts = getReceiptsForLog(l.id);
+          return `
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:1px solid var(--orange);border-radius:8px;margin-bottom:6px;background:var(--orange-lt);font-size:12px">
+            <span style="font-size:15px">🔔</span>
+            <div style="flex:1">
+              <span style="font-weight:700">${l.clientName}</span>
+              <span style="color:var(--g700)"> · ${l.serviceName} × ${l.qty}</span>
+              ${l.govFee ? `<span style="color:var(--red);margin-left:6px">Gov: QAR ${fmt(l.govFee)}</span>` : ''}
+              <span style="font-size:10px;color:var(--g500);margin-left:6px">by ${l.submittedByName} · ${fmtDate(l.submittedAt)}</span>
+            </div>
+            <span class="badge b-pending">Pending Approval</span>
+            ${receipts.length > 0 ? `<span style="font-size:10px;color:var(--g500)">📎 ${receipts.length} file${receipts.length!==1?'s':''}</span>` : ''}
+          </div>`;
+        }).join('')}
+      </div>
+    ` : ''}
 
     ${approved.length > 0 ? `
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
@@ -1901,16 +2036,65 @@ function vExpense() {
 
     ${done.length > 0 ? `
       <div style="font-size:11px;font-weight:700;color:var(--g500);text-transform:uppercase;margin:16px 0 8px;letter-spacing:.5px">Previously Processed (${done.length})</div>
-      ${done.slice(0,10).map(l => `
-        <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;margin-bottom:6px;font-size:12px">
-          <div style="flex:1">
-            <span style="font-weight:600">${l.clientName}</span>
-            <span style="color:var(--g500)"> · ${l.serviceName} × ${l.qty}</span>
-          </div>
-          <div style="color:var(--navy);font-weight:700">QAR ${fmt(l.total+(l.govFee||0))}</div>
-          ${statusBadge(l.status)}
-        </div>`).join('')}
-      ${done.length > 10 ? `<div style="font-size:11px;color:var(--g500);text-align:center;padding:8px">... and ${done.length-10} more</div>` : ''}
+      ${done.slice(0,20).map(l => {
+        const isEditing = S.editingExpenseId === l.id;
+        if (isEditing && S.editExpenseForm) {
+          const ef = S.editExpenseForm;
+          const provider = l.provider || 'Rapid';
+          const availableCards = CARDS.filter(c => c.company === provider);
+          return `
+            <div style="border:2px solid var(--navy);border-radius:10px;padding:12px 14px;margin-bottom:8px;background:var(--navy-lt)">
+              <div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:10px">Edit Expense — ${l.clientName} · ${l.serviceName}</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+                <div>
+                  <label class="form-label" style="font-size:10px">Gov. Fee (QAR)</label>
+                  <input class="form-input" type="number" min="0" value="${ef.govFee}"
+                    oninput="S.editExpenseForm.govFee=this.value" style="padding:6px 8px">
+                </div>
+                <div>
+                  <label class="form-label" style="font-size:10px">Payment Method</label>
+                  <select class="form-input" onchange="S.editExpenseForm.paymentMethod=this.value;render()" style="padding:6px 8px">
+                    <option value="card" ${ef.paymentMethod==='card'?'selected':''}>Card</option>
+                    <option value="cash" ${ef.paymentMethod==='cash'?'selected':''}>Cash</option>
+                    <option value="other" ${ef.paymentMethod==='other'?'selected':''}>Other</option>
+                  </select>
+                </div>
+                ${ef.paymentMethod==='card' ? `
+                <div style="grid-column:span 2">
+                  <label class="form-label" style="font-size:10px">Card</label>
+                  <select class="form-input" onchange="S.editExpenseForm.card=this.value" style="padding:6px 8px">
+                    <option value="">Choose card...</option>
+                    ${availableCards.map(c=>`<option value="${c.id}" ${ef.card===c.id?'selected':''}>${c.label}</option>`).join('')}
+                  </select>
+                </div>` : ''}
+                <div style="grid-column:span 2">
+                  <label class="form-label" style="font-size:10px">Notes</label>
+                  <input class="form-input" value="${ef.notes||''}" oninput="S.editExpenseForm.notes=this.value" style="padding:6px 8px">
+                </div>
+              </div>
+              <div style="display:flex;gap:6px">
+                <button class="btn btn-success btn-sm" onclick="saveEditExpense()">Save Changes</button>
+                <button class="btn btn-ghost btn-sm" onclick="set({editingExpenseId:null,editExpenseForm:null})">Cancel</button>
+              </div>
+            </div>`;
+        }
+        return `
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;margin-bottom:6px;font-size:12px">
+            <div style="flex:1">
+              <span style="font-weight:600">${l.clientName}</span>
+              <span style="color:var(--g500)"> · ${l.serviceName} × ${l.qty}</span>
+              ${l.govFee ? `<span style="color:var(--red);margin-left:6px;font-size:11px">Gov: QAR ${fmt(l.govFee)}</span>` : ''}
+            </div>
+            <div style="color:var(--navy);font-weight:700">QAR ${fmt(l.total+(l.govFee||0))}</div>
+            ${statusBadge(l.status)}
+            ${l.status==='expensed' ? `
+              <div style="display:flex;gap:4px">
+                <button class="btn btn-ghost btn-xs" onclick="startEditExpense('${l.id}')">✎ Edit</button>
+                <button class="btn btn-xs" style="background:var(--red-lt);color:var(--red)" onclick="deleteExpense('${l.id}')">↩ Undo</button>
+              </div>` : ''}
+          </div>`;
+      }).join('')}
+      ${done.length > 20 ? `<div style="font-size:11px;color:var(--g500);text-align:center;padding:8px">... and ${done.length-20} more</div>` : ''}
     ` : ''}`;
 }
 
@@ -2143,12 +2327,16 @@ function vInvoicePreview() {
   const lineItems = [];
   logs.forEach(l => {
     const hasEmps = l.employees && l.employees.length > 0;
+    const buCcNote = (l.buCode || l.costCenter)
+      ? `${l.buCode ? 'BU: '+l.buCode : ''}${l.buCode && l.costCenter ? ' · ' : ''}${l.costCenter ? 'CC: '+l.costCenter : ''}`
+      : '';
     if (hasEmps) {
       const govPerEmp  = (l.govFee||0) / l.qty;
       const profPerEmp = l.unitPrice;
       l.employees.forEach(emp => {
         lineItems.push({
           desc: `${l.serviceName} — ${emp.name}`,
+          buCc: buCcNote || (emp.buCode || emp.costCenter ? `${emp.buCode?'BU: '+emp.buCode:''}${emp.buCode&&emp.costCenter?' · ':''}${emp.costCenter?'CC: '+emp.costCenter:''}` : ''),
           date: emp.date ? fmtInvDate(emp.date + 'T12:00:00') : fmtInvDate(l.submittedAt),
           govFee: govPerEmp,
           profFee: profPerEmp,
@@ -2157,7 +2345,8 @@ function vInvoicePreview() {
       });
     } else {
       lineItems.push({
-        desc: l.serviceName + (l.buCode ? ` (BU: ${l.buCode}${l.costCenter ? ', CC: '+l.costCenter : ''})` : ''),
+        desc: l.serviceName,
+        buCc: buCcNote,
         date: fmtInvDate(l.submittedAt),
         govFee: l.govFee||0,
         profFee: l.total,
@@ -2216,7 +2405,10 @@ function vInvoicePreview() {
         <tbody>
           ${lineItems.map(li => `
             <tr>
-              <td>${li.desc}</td>
+              <td>
+                <div>${li.desc}</div>
+                ${li.buCc ? `<div style="font-size:10px;color:var(--g500);margin-top:2px">${li.buCc}</div>` : ''}
+              </td>
               <td style="white-space:nowrap;color:var(--g700)">${li.date}</td>
               <td class="r" style="color:${li.govFee>0?'var(--g900)':'var(--g300)'}">
                 ${li.govFee > 0 ? fmt(li.govFee) : '—'}
@@ -2263,32 +2455,64 @@ function vInvoicePreview() {
         </div>
       </div>
 
-      <!-- Attached Government Receipts -->
+      <!-- Attached Government Receipts — shown as additional pages -->
       ${(() => {
         const allReceipts = [];
         const seen = new Set();
         logs.forEach(l => {
           getReceiptsForLog(l.id).forEach(r => {
-            if (!seen.has(r.id)) { seen.add(r.id); allReceipts.push(r); }
+            if (!seen.has(r.id)) { seen.add(r.id); allReceipts.push({...r, logName: l.serviceName, clientName: l.clientName}); }
           });
         });
         if (!allReceipts.length) return '';
-        return `
+        // Preview (non-print): show thumbnails inline
+        const previewHtml = `
           <div class="inv-section no-print">
-            <div class="inv-section-hd">Attached Government Receipts</div>
+            <div class="inv-section-hd">Attached Receipts (${allReceipts.length}) — will print as Page${allReceipts.length>1?'s':''} ${[...Array(allReceipts.length).keys()].map(i=>i+2).join(', ')}</div>
             <div style="display:flex;gap:10px;flex-wrap:wrap">
-              ${allReceipts.map(r => r.mimeType.startsWith('image/') ? `
+              ${allReceipts.map((r,i) => r.mimeType.startsWith('image/') ? `
                 <div style="text-align:center">
-                  <img src="${r.base64}" style="width:120px;height:90px;object-fit:cover;border-radius:6px;border:1px solid var(--border);display:block;margin-bottom:4px">
+                  <div style="font-size:9px;font-weight:700;color:var(--g500);margin-bottom:3px;text-transform:uppercase">Page ${i+2}</div>
+                  <img src="${r.base64}" style="width:120px;height:90px;object-fit:cover;border-radius:6px;border:1px solid var(--border);display:block;margin-bottom:3px">
                   <span style="font-size:10px;color:var(--g500)">${r.fileName}</span>
                 </div>
               ` : `
-                <a href="${r.base64}" download="${r.fileName}" style="display:flex;align-items:center;gap:6px;padding:8px 12px;background:var(--g50);border:1px solid var(--border);border-radius:8px;text-decoration:none;font-size:12px;color:var(--navy)">
-                  📄 ${r.fileName}
-                </a>
+                <div style="text-align:center">
+                  <div style="font-size:9px;font-weight:700;color:var(--g500);margin-bottom:3px;text-transform:uppercase">Page ${i+2}</div>
+                  <a href="${r.base64}" download="${r.fileName}" style="display:flex;align-items:center;gap:6px;padding:8px 12px;background:var(--g50);border:1px solid var(--border);border-radius:8px;text-decoration:none;font-size:12px;color:var(--navy)">
+                    📄 ${r.fileName}
+                  </a>
+                </div>
               `).join('')}
             </div>
           </div>`;
+        // Print pages: one per receipt, each on a new page
+        const printPages = allReceipts.map((r,i) => `
+          <div class="receipt-print-page">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid var(--navy)">
+              <div>
+                <div style="font-size:13px;font-weight:800;color:var(--navy)">${co.name}</div>
+                <div style="font-size:11px;color:var(--g700)">${invoice.id} · ${r.clientName}</div>
+              </div>
+              <div style="text-align:right">
+                <div style="font-size:22px;font-weight:900;color:var(--magenta)">Page ${i+2}</div>
+                <div style="font-size:10px;color:var(--g500)">of ${allReceipts.length+1}</div>
+              </div>
+            </div>
+            <div style="font-size:11px;font-weight:700;color:var(--g500);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">
+              Attached Receipt — ${r.logName}
+            </div>
+            <div style="font-size:11px;color:var(--g700);margin-bottom:8px">📎 ${r.fileName}</div>
+            ${r.mimeType.startsWith('image/') ? `
+              <img src="${r.base64}" style="max-width:100%;max-height:700px;object-fit:contain;border:1px solid var(--border);border-radius:6px">
+            ` : `
+              <div style="padding:20px;background:var(--g50);border:1px solid var(--border);border-radius:8px;text-align:center;font-size:13px;color:var(--g700)">
+                📄 PDF attachment: ${r.fileName}<br>
+                <span style="font-size:11px;color:var(--g500)">Open and print separately if needed</span>
+              </div>
+            `}
+          </div>`).join('');
+        return previewHtml + printPages;
       })()}
 
       <!-- Footer -->
@@ -3109,7 +3333,7 @@ function getNav(type) {
       item('price_list','💲','Price List',''),
     ],
     expense: [
-      item('expense','💰','Expense Tracker', counts.approved||''),
+      item('expense','💰','Expense Tracker', (counts.approved+(counts.pending||0))||''),
     ],
     accountant: [
       item('dashboard','◈','Dashboard',''),
