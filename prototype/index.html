@@ -343,9 +343,9 @@ function svcPrice(svc, company) {
 }
 
 const CARDS = [
-  { id:'rapid1', label:'Rapid CC-1 (xxx1001)'  },
-  { id:'rapid2', label:'Rapid CC-2 (xxx3139)'  },
-  { id:'rchbs',  label:'RCHBS CC (xxx5958)'    },
+  { id:'rapid1', label:'Rapid CC-1 (xxx1001)', company:'Rapid' },
+  { id:'rapid2', label:'Rapid CC-2 (xxx3139)', company:'Rapid' },
+  { id:'rchbs',  label:'RCHBS CC (xxx5958)',   company:'RCHBS' },
 ];
 
 // ═══════════════════════════════════
@@ -556,6 +556,27 @@ const pipeHTML = status => {
   const idx = {ops_pending:0,pending:1,approved:2,expensed:2,invoiced:3}[status]??0;
   return `<div class="pipeline">${steps.map((s,i)=>`<div class="pipe-step ${i<idx?'done':i===idx?'current':''}"><span class="pipe-step-num">${i<idx?'✓':i+1}</span>${s}</div>`).join('')}</div>`;
 };
+
+// Service option groups — built once per company on first call, then cached
+let _svcOpts = null;
+function getServiceOpts(company) {
+  if (!_svcOpts) {
+    const cats = [...new Set(SERVICES.map(s=>s.category))];
+    _svcOpts = {};
+    ['Rapid','RCHBS'].forEach(co => {
+      _svcOpts[co] = cats.map(cat => {
+        const items = SERVICES.filter(s=>s.category===cat);
+        return `<optgroup label="${cat}">${items.map(s=>{
+          const p = svcPrice(s, co);
+          return `<option value="${s.id}">${s.label}${p?` — QAR ${fmt(p)}`:''}</option>`;
+        }).join('')}</optgroup>`;
+      }).join('');
+    });
+  }
+  // Inject `selected` for the currently chosen service
+  const base = _svcOpts[company] || '';
+  return base.replace(`value="${S.logForm.serviceId}"`, `value="${S.logForm.serviceId}" selected`);
+}
 
 function logoSVG(sz) {
   return `<svg width="${sz}" height="${sz}" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -989,6 +1010,11 @@ function vClients() {
 // VIEW: Log Service
 // ═══════════════════════════════════
 function vLogService() {
+  // Derived once, used across all screens
+  const companyColor = S.logCompany === 'Rapid' ? 'var(--navy)' : 'var(--magenta)';
+  const companyBg    = S.logCompany === 'Rapid' ? 'var(--navy-lt)' : 'var(--mag-lt)';
+  const companyChip  = `<span style="font-size:11px;font-weight:700;color:${companyColor};background:${companyBg};padding:3px 9px;border-radius:20px">${S.logCompany}</span>`;
+
   // ── SCREEN 1: Company picker ─────────────────────────────────────────────
   if (!S.logCompany) {
     const rapidCount = CLIENTS.filter(c=>c.company==='Rapid').length;
@@ -1017,11 +1043,14 @@ function vLogService() {
 
   // ── SCREEN 2: Client picker (filtered by company) ────────────────────────
   if (!S.logClient) {
-    const companyColor = S.logCompany === 'Rapid' ? 'var(--navy)' : 'var(--magenta)';
     const filteredClients = [...CLIENTS].filter(c=>c.company===S.logCompany).sort((a,b)=>a.name.localeCompare(b.name));
     const allLogs = dbGet();
+    // Pre-group invoiced totals by client in a single O(logs) pass
+    const invoicedByClient = allLogs
+      .filter(l=>l.status==='invoiced')
+      .reduce((acc,l)=>{ acc[l.clientId]=(acc[l.clientId]||0)+l.total; return acc; }, {});
     const clientRow = (c) => {
-      const ar = allLogs.filter(l=>l.clientId===c.id&&l.status==='invoiced').reduce((s,l)=>s+l.total,0);
+      const ar = invoicedByClient[c.id] || 0;
       const limit = c.creditLimit || 0;
       const pct = limit > 0 ? Math.min(ar/limit,1) : 0;
       const blocked = pct >= 1;
@@ -1040,7 +1069,7 @@ function vLogService() {
       <div class="card" style="max-width:620px">
         <div class="card-hd">
           <span class="card-title" style="font-size:15px">Log Service — Select Client</span>
-          <span style="font-size:11px;font-weight:700;color:${companyColor};background:${S.logCompany==='Rapid'?'var(--navy-lt)':'var(--mag-lt)'};padding:3px 9px;border-radius:20px">${S.logCompany}</span>
+          ${companyChip}
         </div>
         <div style="font-size:12px;color:var(--g500);margin-bottom:14px">Choose a client to log a service for</div>
         <div style="display:flex;flex-direction:column;gap:6px">${filteredClients.map(clientRow).join('')}</div>
@@ -1053,7 +1082,7 @@ function vLogService() {
   const listPrice = svc ? svcPrice(svc, S.logCompany) : 0;
   const unitPrice = S.logForm.unitPrice !== '' ? parseFloat(S.logForm.unitPrice)||0 : listPrice;
   const total = unitPrice * S.logForm.qty;
-  const companyColor = S.logCompany === 'Rapid' ? 'var(--navy)' : 'var(--magenta)';
+  const priceEdited = !!(svc && S.logForm.unitPrice !== '' && parseFloat(S.logForm.unitPrice) !== listPrice);
 
   const steps = ['Service','Employees','Payment','Done'];
   const stepsHTML = `<div class="stepper">${steps.map((s,i)=>{
@@ -1067,19 +1096,6 @@ function vLogService() {
   let body = '';
 
   if (S.logStep === 0) {
-    // Build grouped optgroups from SERVICES
-    const cats = [...new Set(SERVICES.map(s=>s.category))];
-    const opts = cats.map(cat=>{
-      const items = SERVICES.filter(s=>s.category===cat);
-      return `<optgroup label="${cat}">${items.map(s=>{
-        const p = svcPrice(s, S.logCompany);
-        return `<option value="${s.id}" ${S.logForm.serviceId===s.id?'selected':''}>${s.label}${p?` — QAR ${fmt(p)}`:''}` +
-               `</option>`;
-      }).join('')}</optgroup>`;
-    }).join('');
-
-    const priceEdited = svc && S.logForm.unitPrice !== '' && parseFloat(S.logForm.unitPrice) !== listPrice;
-
     body = `
       <div class="form-group">
         <label class="form-label">Service Type</label>
@@ -1089,7 +1105,7 @@ function vLogService() {
           S.logForm.unitPrice = sv ? svcPrice(sv, S.logCompany) : '';
           render()">
           <option value="">Choose a service...</option>
-          ${opts}
+          ${getServiceOpts(S.logCompany)}
         </select>
       </div>
       ${svc ? `
@@ -1129,9 +1145,7 @@ function vLogService() {
   }
 
   if (S.logStep === 2) {
-    const availableCards = S.logCompany === 'Rapid'
-      ? CARDS.filter(c=>c.id!=='rchbs')
-      : CARDS.filter(c=>c.id==='rchbs');
+    const availableCards = CARDS.filter(c=>c.company===S.logCompany);
     body = `
       <div class="form-group">
         <label class="form-label">Payment Card</label>
@@ -1142,7 +1156,7 @@ function vLogService() {
       </div>
       <div class="form-group">
         <label class="form-label">Total Amount</label>
-        <div class="form-input" style="background:${S.logCompany==='Rapid'?'var(--navy-lt)':'var(--mag-lt)'};color:${companyColor};font-weight:800;font-size:16px">QAR ${fmt(total)}</div>
+        <div class="form-input" style="background:${companyBg};color:${companyColor};font-weight:800;font-size:16px">QAR ${fmt(total)}</div>
       </div>
       <div class="form-group">
         <label class="form-label">Notes (optional)</label>
@@ -1150,7 +1164,7 @@ function vLogService() {
       </div>
       <div style="padding:11px 13px;background:var(--g50);border:1px solid var(--border);border-radius:8px;font-size:12px;color:var(--g700)">
         📋 <strong>${svc?.label}</strong> × ${S.logForm.qty} · QAR ${fmt(unitPrice)}/unit = <strong>QAR ${fmt(total)}</strong>
-        ${parseFloat(S.logForm.unitPrice) !== listPrice && listPrice > 0 ? `<span style="color:var(--orange);margin-left:6px">(custom rate)</span>` : ''}
+        ${priceEdited ? `<span style="color:var(--orange);margin-left:6px">(custom rate)</span>` : ''}
       </div>`;
   }
 
@@ -1183,7 +1197,7 @@ function vLogService() {
     <div class="card" style="max-width:620px">
       <div class="card-hd">
         <span class="card-title" style="font-size:15px">${S.editingLogId?'Edit':'Log'} Service — ${client.name}</span>
-        <span style="font-size:11px;font-weight:700;color:${companyColor};background:${S.logCompany==='Rapid'?'var(--navy-lt)':'var(--mag-lt)'};padding:3px 9px;border-radius:20px">${S.logCompany}</span>
+        ${companyChip}
       </div>
       ${stepsHTML}
       <div class="fade">${body}</div>
