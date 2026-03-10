@@ -257,14 +257,7 @@ const USERS = [
 // ═══════════════════════════════════
 // REFERENCE DATA
 // ═══════════════════════════════════
-const CLIENTS_SEED = [
-  { id:1, name:'ABB Qatar',              company:'Rapid', contact:'Sarah Al-Mansour', email:'sarah@abbqatar.qa',       phone:'+974 4412 3001', type:'retainer', creditLimit:8000  },
-  { id:2, name:'Acrogym Sport Center',   company:'Rapid', contact:'Kirill Bazhanov',  email:'kirill@acrogym.qa',       phone:'+974 5501 8822', type:'per-job',  creditLimit:20000 },
-  { id:3, name:'Seaquest Services',      company:'RCHBS', contact:'Ahmad Siregar',    email:'ahmad@seaquest.qa',       phone:'+974 3309 1145', type:'retainer', creditLimit:3000  },
-  { id:4, name:'EY Qatar',              company:'Rapid', contact:'Finance Dept',     email:'finance@ey.qa',           phone:'+974 4497 0000', type:'retainer', creditLimit:75000 },
-  { id:5, name:'Hitachi Energy',         company:'Rapid', contact:'HR Dept',          email:'hr@hitachienergy.qa',     phone:'+974 4410 5500', type:'per-job',  creditLimit:2000  },
-  { id:6, name:'Property Finder Qatar', company:'RCHBS', contact:'Ops Team',         email:'ops@propertyfinder.qa',   phone:'+974 4421 7700', type:'per-job',  creditLimit:25000 },
-];
+const CLIENTS_SEED = [];
 
 const CLIENTS_DB_KEY = 'rch_clients_v1';
 function clientsLoad() { try { const r = localStorage.getItem(CLIENTS_DB_KEY); return r ? JSON.parse(r) : null; } catch(e) { return null; } }
@@ -428,189 +421,7 @@ function isGatePassService(serviceId) {
 // ═══════════════════════════════════
 const DB_KEY = 'rch_logs_v6';
 
-const SEED = [
-  {
-    id:'LOG-001', clientId:1, clientName:'ABB Qatar', serviceId:'qid-issuance', serviceName:'QID Card Issuance',
-    qty:3, unitPrice:350, total:1050, card:'', cardLabel:'', paymentMethod:'', govFee:0, rchFee:350,
-    receiptRef:'', receiptGroupId:'', buCode:'PS', costCenter:'CC-401', serviceLine:'', department:'',
-    employees:[{name:'Ali Hassan',date:'2026-03-04'},{name:'Sara Khan',date:'2026-03-04'},{name:'Priya Nair',date:'2026-03-04'}],
-    submittedBy:'violetta', submittedByName:'Violetta A.', submittedAt:'2026-03-04T10:30:00',
-    requestId:'REQ-001', provider:'Rapid',
-    status:'ops_pending', approvedBy:null, approvedAt:null, rejectedReason:null,
-    expensedBy:null, expensedAt:null, invoiceId:null, invoicedBy:null, invoicedAt:null, notes:''
-  },
-  {
-    id:'LOG-002', clientId:4, clientName:'EY Qatar', serviceId:'work-visa', serviceName:'Work Visa',
-    qty:1, unitPrice:350, total:350, card:'', cardLabel:'', paymentMethod:'', govFee:0, rchFee:350,
-    receiptRef:'', receiptGroupId:'', buCode:'Advisory', costCenter:'CC-100', serviceLine:'', department:'Consulting',
-    employees:[{name:'John Patel',date:'2026-03-05'}],
-    submittedBy:'violetta', submittedByName:'Violetta A.', submittedAt:'2026-03-05T14:10:00',
-    requestId:'REQ-002', provider:'Rapid',
-    status:'pending', approvedBy:null, approvedAt:null, rejectedReason:null,
-    expensedBy:null, expensedAt:null, invoiceId:null, invoicedBy:null, invoicedAt:null,
-    notes:'', paymentMethod:'card', card:'rapid2', cardLabel:'Rapid CC-2 (xxx3139)', govFee:200, receiptRef:'GOV-REC-002.pdf', receiptGroupId:'RG-002'
-  },
-  {
-    id:'LOG-014', clientId:1, clientName:'ABB Qatar', serviceId:'medical-test', serviceName:'Medical Test',
-    qty:2, unitPrice:350, total:700, card:'', cardLabel:'', paymentMethod:'', govFee:0, rchFee:350,
-    receiptRef:'', receiptGroupId:'', buCode:'EL', costCenter:'CC-220', serviceLine:'', department:'',
-    employees:[{name:'Hana Ibrahim',date:'2026-03-08'},{name:'Khalid Nasser',date:'2026-03-08'}],
-    submittedBy:'violetta', submittedByName:'Violetta A.', submittedAt:'2026-03-08T11:00:00',
-    requestId:'REQ-005', provider:'Rapid',
-    status:'am_completing', approvedBy:null, approvedAt:null, rejectedReason:null,
-    expensedBy:null, expensedAt:null, invoiceId:null, invoicedBy:null, invoicedAt:null, notes:''
-  },
-  {
-    id:'LOG-015', clientId:4, clientName:'EY Qatar', serviceId:'gate-onshore', serviceName:'Onshore Gate Passes',
-    qty:3, unitPrice:500, total:1500, card:'', cardLabel:'', paymentMethod:'', govFee:0, rchFee:500,
-    receiptRef:'', receiptGroupId:'', buCode:'Tax', costCenter:'CC-300', serviceLine:'', department:'Tax',
-    employees:[{name:'Nina Petrova',date:'2026-03-09'},{name:'Omar Khalil',date:'2026-03-09'},{name:'Lena Schmidt',date:'2026-03-09'}],
-    submittedBy:'violetta', submittedByName:'Violetta A.', submittedAt:'2026-03-09T08:00:00',
-    requestId:'REQ-006', provider:'Rapid',
-    status:'am_completing', approvedBy:null, approvedAt:null, rejectedReason:null,
-    expensedBy:null, expensedAt:null, invoiceId:null, invoicedBy:null, invoicedAt:null, notes:''
-  },
-  {
-    id:'LOG-012', clientId:6, clientName:'Property Finder Qatar', serviceId:'work-visa', serviceName:'Work Visa',
-    qty:2, unitPrice:200, total:400, card:'', cardLabel:'', paymentMethod:'', govFee:0, rchFee:200,
-    receiptRef:'', receiptGroupId:'', buCode:'', costCenter:'', serviceLine:'', department:'',
-    employees:[{name:'Kevin Zhao',date:'2026-03-07'},{name:'Maria Santos',date:'2026-03-07'}],
-    submittedBy:'violetta', submittedByName:'Violetta A.', submittedAt:'2026-03-07T09:00:00',
-    requestId:'REQ-003', provider:'RCHBS',
-    status:'ops_pending', approvedBy:null, approvedAt:null, rejectedReason:null,
-    expensedBy:null, expensedAt:null, invoiceId:null, invoicedBy:null, invoicedAt:null, notes:''
-  },
-  {
-    id:'LOG-013', clientId:2, clientName:'Acrogym Sport Center', serviceId:'qid-issuance', serviceName:'QID Card Issuance',
-    qty:1, unitPrice:350, total:350, card:'', cardLabel:'', paymentMethod:'', govFee:0, rchFee:350,
-    receiptRef:'', receiptGroupId:'', buCode:'', costCenter:'', serviceLine:'', department:'',
-    employees:[{name:'Olga Petrov',date:'2026-03-08'}],
-    submittedBy:'violetta', submittedByName:'Violetta A.', submittedAt:'2026-03-08T08:30:00',
-    requestId:'REQ-004', provider:'Rapid',
-    status:'ops_pending', approvedBy:null, approvedAt:null, rejectedReason:null,
-    expensedBy:null, expensedAt:null, invoiceId:null, invoicedBy:null, invoicedAt:null, notes:''
-  },
-  {
-    id:'LOG-003', clientId:2, clientName:'Acrogym Sport Center', serviceId:'health-card', serviceName:'Health Card Issuance / Renewal',
-    qty:2, unitPrice:350, total:700, card:'rapid1', cardLabel:'Rapid CC-1 (xxx1001)', paymentMethod:'card', govFee:150, rchFee:350,
-    receiptRef:'GOV-REC-003.pdf', receiptGroupId:'RG-003', buCode:'', costCenter:'', serviceLine:'', department:'',
-    employees:[{name:'Dmitri Volkov',date:'2026-03-03'},{name:'Nadia Cruz',date:'2026-03-03'}],
-    submittedBy:'violetta', submittedByName:'Violetta A.', submittedAt:'2026-03-03T11:00:00',
-    requestId:'REQ-007', provider:'Rapid',
-    status:'approved', approvedBy:'elena', approvedByName:'Elena F.', approvedAt:'2026-03-03T16:45:00',
-    rejectedReason:null, expensedBy:null, expensedAt:null, invoiceId:null, invoicedBy:null, invoicedAt:null, notes:''
-  },
-  {
-    id:'LOG-004', clientId:5, clientName:'Hitachi Energy', serviceId:'smart-qid', serviceName:'"Smart" QID Card',
-    qty:4, unitPrice:350, total:1400, card:'rapid2', cardLabel:'Rapid CC-2 (xxx3139)', paymentMethod:'card', govFee:400, rchFee:350,
-    receiptRef:'GOV-REC-004.pdf', receiptGroupId:'RG-004', buCode:'Grid Integration', costCenter:'CC-500', serviceLine:'', department:'',
-    employees:[{name:'Mark Chen',date:'2026-03-01'},{name:'Fatima Al-Ali',date:'2026-03-01'},{name:'Robert Kim',date:'2026-03-01'},{name:'Aisha Patel',date:'2026-03-01'}],
-    submittedBy:'violetta', submittedByName:'Violetta A.', submittedAt:'2026-03-01T09:00:00',
-    requestId:'REQ-008', provider:'Rapid',
-    status:'expensed', approvedBy:'elena', approvedByName:'Elena F.', approvedAt:'2026-03-01T14:00:00',
-    rejectedReason:null, expensedBy:'gabi', expensedByName:'Gabi M.', expensedAt:'2026-03-02T10:30:00',
-    invoiceId:null, invoicedBy:null, invoicedAt:null, notes:''
-  },
-  {
-    id:'LOG-005', clientId:3, clientName:'Seaquest Services', serviceId:'cr-renewal', serviceName:'CR Renewal (incl. Chamber of Commerce)',
-    qty:1, unitPrice:500, total:500, card:'rchbs', cardLabel:'RCHBS CC (xxx5958)', paymentMethod:'card', govFee:300, rchFee:500,
-    receiptRef:'GOV-REC-005.pdf', receiptGroupId:'RG-005', buCode:'', costCenter:'', serviceLine:'', department:'',
-    employees:[],
-    submittedBy:'violetta', submittedByName:'Violetta A.', submittedAt:'2026-02-25T08:00:00',
-    requestId:'REQ-009', provider:'RCHBS',
-    status:'invoiced', approvedBy:'elena', approvedByName:'Elena F.', approvedAt:'2026-02-25T12:00:00',
-    rejectedReason:null, expensedBy:'gabi', expensedByName:'Gabi M.', expensedAt:'2026-02-26T09:00:00',
-    invoiceId:'INV-2026-001', invoicedBy:'suleiman', invoicedByName:'Suleiman M.', invoicedAt:'2026-02-27T10:00:00', notes:''
-  },
-  {
-    id:'LOG-006', clientId:1, clientName:'ABB Qatar', serviceId:'qid-issuance', serviceName:'QID Card Issuance',
-    qty:5, unitPrice:350, total:1750, card:'rapid1', cardLabel:'Rapid CC-1 (xxx1001)', paymentMethod:'card', govFee:500, rchFee:350,
-    receiptRef:'GOV-REC-006.pdf', receiptGroupId:'RG-006', buCode:'PS', costCenter:'CC-401', serviceLine:'', department:'',
-    employees:[{name:'Tom Reid',date:'2026-02-10'},{name:'Jan Kowalski',date:'2026-02-10'},{name:'Mei Lin',date:'2026-02-10'},{name:'Youssef Osman',date:'2026-02-10'},{name:'Laura Diaz',date:'2026-02-10'}],
-    submittedBy:'violetta', submittedByName:'Violetta A.', submittedAt:'2026-02-10T09:00:00',
-    requestId:'REQ-010', provider:'Rapid',
-    status:'invoiced', approvedBy:'elena', approvedByName:'Elena F.', approvedAt:'2026-02-10T14:00:00',
-    rejectedReason:null, expensedBy:'gabi', expensedByName:'Gabi M.', expensedAt:'2026-02-11T10:00:00',
-    invoiceId:'INV-2026-002', invoicedBy:'suleiman', invoicedByName:'Suleiman M.', invoicedAt:'2026-02-12T11:00:00', notes:''
-  },
-  {
-    id:'LOG-007', clientId:1, clientName:'ABB Qatar', serviceId:'work-visa', serviceName:'Work Visa',
-    qty:6, unitPrice:350, total:2100, card:'rapid1', cardLabel:'Rapid CC-1 (xxx1001)', paymentMethod:'card', govFee:600, rchFee:350,
-    receiptRef:'GOV-REC-007.pdf', receiptGroupId:'RG-007', buCode:'EL', costCenter:'CC-220', serviceLine:'', department:'',
-    employees:[{name:'Carlos Mendez',date:'2026-02-15'},{name:'Rasha Hamdan',date:'2026-02-15'},{name:'David Park',date:'2026-02-15'},{name:'Nour Al-Farsi',date:'2026-02-15'},{name:'Ivan Petrov',date:'2026-02-15'},{name:'Anita Sharma',date:'2026-02-15'}],
-    submittedBy:'violetta', submittedByName:'Violetta A.', submittedAt:'2026-02-15T10:00:00',
-    requestId:'REQ-010', provider:'Rapid',
-    status:'invoiced', approvedBy:'elena', approvedByName:'Elena F.', approvedAt:'2026-02-15T15:00:00',
-    rejectedReason:null, expensedBy:'gabi', expensedByName:'Gabi M.', expensedAt:'2026-02-16T09:00:00',
-    invoiceId:'INV-2026-003', invoicedBy:'suleiman', invoicedByName:'Suleiman M.', invoicedAt:'2026-02-17T13:00:00', notes:''
-  },
-  {
-    id:'LOG-008', clientId:5, clientName:'Hitachi Energy', serviceId:'gate-onshore', serviceName:'Onshore Gate Passes',
-    qty:8, unitPrice:500, total:4000, card:'rapid2', cardLabel:'Rapid CC-2 (xxx3139)', paymentMethod:'card', govFee:800, rchFee:500,
-    receiptRef:'GOV-REC-008.pdf', receiptGroupId:'RG-008', buCode:'Transformers', costCenter:'CC-600', serviceLine:'', department:'',
-    employees:[{name:'Ben Clarke',date:'2026-02-20'},{name:'Zara Khan',date:'2026-02-20'},{name:'Liam Murphy',date:'2026-02-20'},{name:'Fatima Said',date:'2026-02-20'},{name:'Omar Hassan',date:'2026-02-20'},{name:'Lucy Wang',date:'2026-02-20'},{name:'Raj Kumar',date:'2026-02-20'},{name:'Anna Novak',date:'2026-02-20'}],
-    submittedBy:'violetta', submittedByName:'Violetta A.', submittedAt:'2026-02-20T08:30:00',
-    requestId:'REQ-011', provider:'Rapid',
-    status:'invoiced', approvedBy:'elena', approvedByName:'Elena F.', approvedAt:'2026-02-20T13:00:00',
-    rejectedReason:null, expensedBy:'gabi', expensedByName:'Gabi M.', expensedAt:'2026-02-21T09:00:00',
-    invoiceId:'INV-2026-004', invoicedBy:'suleiman', invoicedByName:'Suleiman M.', invoicedAt:'2026-02-22T10:00:00', notes:''
-  },
-  {
-    id:'LOG-009', clientId:6, clientName:'Property Finder Qatar', serviceId:'health-card', serviceName:'Health Card Issuance / Renewal',
-    qty:3, unitPrice:200, total:600, card:'rchbs', cardLabel:'RCHBS CC (xxx5958)', paymentMethod:'card', govFee:150, rchFee:200,
-    receiptRef:'GOV-REC-009.pdf', receiptGroupId:'RG-009', buCode:'', costCenter:'', serviceLine:'', department:'',
-    employees:[{name:'Sandra Osei',date:'2026-02-28'},{name:'Tariq Fahim',date:'2026-02-28'},{name:'Elena Vasquez',date:'2026-02-28'}],
-    submittedBy:'violetta', submittedByName:'Violetta A.', submittedAt:'2026-02-28T10:00:00',
-    requestId:'REQ-012', provider:'RCHBS',
-    status:'invoiced', approvedBy:'elena', approvedByName:'Elena F.', approvedAt:'2026-02-28T15:00:00',
-    rejectedReason:null, expensedBy:'gabi', expensedByName:'Gabi M.', expensedAt:'2026-03-01T09:00:00',
-    invoiceId:'INV-2026-005', invoicedBy:'suleiman', invoicedByName:'Suleiman M.', invoicedAt:'2026-03-02T11:00:00', notes:''
-  },
-  {
-    id:'LOG-010', clientId:4, clientName:'EY Qatar', serviceId:'smart-qid', serviceName:'"Smart" QID Card',
-    qty:3, unitPrice:700, total:2100, card:'rapid1', cardLabel:'Rapid CC-1 (xxx1001)', paymentMethod:'card', govFee:300, rchFee:700,
-    receiptRef:'GOV-REC-010.pdf', receiptGroupId:'RG-010', buCode:'Advisory', costCenter:'CC-100', serviceLine:'', department:'Consulting',
-    employees:[{name:'Paula Reyes',date:'2026-03-06'},{name:'Hamid Rashidi',date:'2026-03-06'},{name:'Yu Tanaka',date:'2026-03-06'}],
-    submittedBy:'violetta', submittedByName:'Violetta A.', submittedAt:'2026-03-06T09:00:00',
-    requestId:'REQ-013', provider:'Rapid',
-    status:'expensed', approvedBy:'elena', approvedByName:'Elena F.', approvedAt:'2026-03-06T14:00:00',
-    rejectedReason:null, expensedBy:'gabi', expensedByName:'Gabi M.', expensedAt:'2026-03-07T09:00:00',
-    invoiceId:null, invoicedBy:null, invoicedAt:null, notes:''
-  },
-  {
-    id:'LOG-012', clientId:4, clientName:'EY Qatar', serviceId:'medical-test', serviceName:'Medical Test',
-    qty:2, unitPrice:350, total:700, card:'rapid1', cardLabel:'Rapid CC-1 (xxx1001)', paymentMethod:'card', govFee:0, rchFee:350,
-    receiptRef:'', receiptGroupId:'', buCode:'Tax', costCenter:'CC-300', serviceLine:'', department:'Tax',
-    employees:[{name:'Nadia Okafor',date:'2026-03-07'},{name:'James Wei',date:'2026-03-07'}],
-    submittedBy:'violetta', submittedByName:'Violetta A.', submittedAt:'2026-03-07T09:00:00',
-    requestId:'REQ-015', provider:'Rapid',
-    status:'expensed', approvedBy:'elena', approvedByName:'Elena F.', approvedAt:'2026-03-07T13:00:00',
-    rejectedReason:null, expensedBy:'gabi', expensedByName:'Gabi M.', expensedAt:'2026-03-08T09:30:00',
-    invoiceId:null, invoicedBy:null, invoicedAt:null, notes:''
-  },
-  {
-    id:'LOG-013', clientId:5, clientName:'Hitachi Energy', serviceId:'cr-renewal', serviceName:'CR Renewal (incl. Chamber of Commerce)',
-    qty:1, unitPrice:500, total:500, card:'rapid2', cardLabel:'Rapid CC-2 (xxx3139)', paymentMethod:'card', govFee:1200, rchFee:500,
-    receiptRef:'GOV-REC-013.pdf', receiptGroupId:'RG-013', buCode:'', costCenter:'', serviceLine:'', department:'',
-    employees:[],
-    submittedBy:'violetta', submittedByName:'Violetta A.', submittedAt:'2026-03-08T10:00:00',
-    requestId:'REQ-016', provider:'Rapid',
-    status:'expensed', approvedBy:'elena', approvedByName:'Elena F.', approvedAt:'2026-03-08T14:00:00',
-    rejectedReason:null, expensedBy:'gabi', expensedByName:'Gabi M.', expensedAt:'2026-03-09T08:00:00',
-    invoiceId:null, invoicedBy:null, invoicedAt:null, notes:''
-  },
-  {
-    id:'LOG-011', clientId:2, clientName:'Acrogym Sport Center', serviceId:'gate-onshore', serviceName:'Onshore Gate Passes',
-    qty:2, unitPrice:500, total:1000, card:'rapid2', cardLabel:'Rapid CC-2 (xxx3139)', paymentMethod:'card', govFee:200, rchFee:500,
-    receiptRef:'GOV-REC-011.pdf', receiptGroupId:'RG-011', buCode:'', costCenter:'', serviceLine:'', department:'',
-    employees:[{name:'Alice Sato',date:'2026-03-07'},{name:'Bruno Costa',date:'2026-03-07'}],
-    submittedBy:'violetta', submittedByName:'Violetta A.', submittedAt:'2026-03-07T10:30:00',
-    requestId:'REQ-014', provider:'Rapid',
-    status:'rejected', approvedBy:'elena', approvedByName:'Elena F.', approvedAt:'2026-03-07T16:00:00',
-    rejectedReason:'Gate pass authorization not attached. Please re-submit with documentation.',
-    expensedBy:null, expensedAt:null, invoiceId:null, invoicedBy:null, invoicedAt:null, notes:''
-  },
-];
+const SEED = []
 
 function dbLoad() {
   try {
@@ -715,6 +526,24 @@ let S = {
   editClientForm: null,
   addingClient: false,
   newClientForm: { name:'', company:'Rapid', contact:'', email:'', phone:'', type:'per-job', creditLimit:5000 },
+  // receipt upload (completion flow)
+  uploadedReceipts: [],   // [{id, fileName, base64, mimeType}]
+  // AM dashboard accordion
+  expandedClients: {},
+  // approval view
+  expandedApprovalId: null,
+  // expense view batch selection
+  selectedExpenseIds: [],
+  // service catalog management
+  editingServiceId: null,
+  addingService: false,
+  newServiceForm: { id:'', label:'', category:'', priceRapid:0, priceRCHBS:0 },
+  _editSvc: {},
+  // invoice fee overrides
+  feeOverrides: {},
+  // invoice amendment
+  amendingInvoice: false,
+  amendedFees: {},
 };
 
 function set(patch) {
@@ -798,13 +627,13 @@ function handleLogout() {
 function initNewService() {
   set({
     view:'log', logStep:0, logClient:null, logProvider:null,
-    logServices:[{serviceId:'',qty:1,unitPrice:'',employees:[{name:'',date:''}],buCode:'',costCenter:'',serviceLine:'',department:''}],
+    logServices:[{serviceId:'',qty:1,unitPrice:'',employees:[{name:'',date:'',buCode:'',costCenter:''}],serviceLine:'',department:''}],
     logDone:false, editingLogId:null
   });
 }
 
 function addServiceRow() {
-  S.logServices.push({serviceId:'',qty:1,unitPrice:'',employees:[{name:'',date:''}],buCode:'',costCenter:'',serviceLine:'',department:''});
+  S.logServices.push({serviceId:'',qty:1,unitPrice:'',employees:[{name:'',date:'',buCode:'',costCenter:''}],serviceLine:'',department:''});
   render();
 }
 
@@ -824,7 +653,7 @@ function updateServiceField(idx, field, value) {
   if (field === 'qty') {
     const qty = Math.max(1, Math.min(20, parseInt(value)||1));
     svc.qty = qty;
-    svc.employees = Array.from({length:qty}, (_,i) => svc.employees[i]||{name:'',date:''});
+    svc.employees = Array.from({length:qty}, (_,i) => svc.employees[i]||{name:'',date:'',buCode:'',costCenter:''});
   }
   render();
 }
@@ -845,7 +674,8 @@ function submitNewServices() {
     if (!svc) return;
     const unitPrice = parseFloat(s.unitPrice) || svcPrice(svc, S.logProvider);
     const total = unitPrice * s.qty;
-    const needsEmp = requiresEmployeeDetails(s.serviceId);
+    const emps = s.employees.slice(0, s.qty);
+    const firstEmp = emps[0] || {};
     const log = {
       id: uid(),
       clientId: client.id, clientName: client.name,
@@ -854,8 +684,8 @@ function submitNewServices() {
       rchFee: unitPrice,
       card:'', cardLabel:'', paymentMethod:'', govFee:0,
       receiptRef:'', receiptGroupId:'',
-      buCode: s.buCode||'', costCenter: s.costCenter||'', serviceLine: s.serviceLine||'', department: s.department||'',
-      employees: needsEmp ? s.employees.slice(0, s.qty) : [],
+      buCode: firstEmp.buCode||'', costCenter: firstEmp.costCenter||'', serviceLine: s.serviceLine||'', department: s.department||'',
+      employees: emps,
       submittedBy: S.user.id, submittedByName: S.user.name,
       submittedAt: now,
       requestId, provider: S.logProvider,
@@ -888,6 +718,82 @@ function startCompleteService(id) {
   });
 }
 
+function applyInvoiceAmendment(invoiceId) {
+  const overrides = S.amendedFees || {};
+  if (!Object.keys(overrides).length) { S.amendingInvoice=false; render(); return; }
+  const allDbLogs = dbGet();
+  Object.entries(overrides).forEach(([logId, ov]) => {
+    const patch = {};
+    if (ov.govFee !== undefined) patch.govFee = ov.govFee;
+    if (ov.profFee !== undefined) { patch.total = ov.profFee; patch.unitPrice = ov.profFee / (allDbLogs.find(l=>l.id===logId)?.qty||1); }
+    if (Object.keys(patch).length) dbUpdate(logId, patch);
+  });
+  // Recalculate invoice totals
+  const invoices = dbGetInvoices();
+  const inv = invoices.find(i=>i.id===invoiceId);
+  if (inv) {
+    const logs = dbGet().filter(l=>inv.logIds.includes(l.id));
+    const amendment = {date:new Date().toISOString(), by:S.user.name, changes:Object.keys(overrides).length+' line(s) updated'};
+    Object.assign(inv, {
+      totalProfFee: logs.reduce((s,l)=>s+l.total,0),
+      totalGovFee: logs.reduce((s,l)=>s+(l.govFee||0),0),
+      grandTotal: logs.reduce((s,l)=>s+l.total+(l.govFee||0),0),
+      amendments: [...(inv.amendments||[]), amendment]
+    });
+    dbSaveInvoices(invoices);
+  }
+  S.amendingInvoice = false;
+  S.amendedFees = {};
+  set({});
+}
+
+function expenseSelected() {
+  (S.selectedExpenseIds||[]).forEach(id => {
+    dbUpdate(id, {status:'expensed', expensedBy:S.user.id, expensedByName:S.user.name, expensedAt:new Date().toISOString(), gabiChecked:true});
+  });
+  S.selectedExpenseIds = [];
+  set({});
+}
+
+function startBatchComplete(clientId) {
+  const ready = dbGet().filter(l => l.clientId === clientId && l.status === 'am_completing');
+  if (!ready.length) return;
+  set({
+    view:'complete_service',
+    completingRequestId: null,
+    completingIds: ready.map(l=>l.id),
+    completeForm: { paymentMethod:'', card:'', govFee:'', receiptRef:'', notes:'' },
+    uploadedReceipts: []
+  });
+}
+
+// ── Receipt file storage ──
+const RECEIPTS_KEY = 'rch_receipts_v1';
+function dbGetReceipts() { try { return JSON.parse(localStorage.getItem(RECEIPTS_KEY)||'[]'); } catch(e) { return []; } }
+function dbSaveReceipts(r) { localStorage.setItem(RECEIPTS_KEY, JSON.stringify(r)); }
+function getReceiptsForLog(logId) { return dbGetReceipts().filter(r => r.logIds && r.logIds.includes(logId)); }
+
+function handleReceiptUpload(files) {
+  Array.from(files).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      S.uploadedReceipts.push({
+        id: 'RCT-'+Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).slice(2,5).toUpperCase(),
+        fileName: file.name,
+        base64: e.target.result,
+        mimeType: file.type
+      });
+      render();
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function removeUploadedReceipt(id) {
+  S.uploadedReceipts = S.uploadedReceipts.filter(r => r.id !== id);
+  render();
+}
+
 function toggleCompleteId(id) {
   const idx = S.completingIds.indexOf(id);
   if (idx === -1) S.completingIds.push(id);
@@ -904,6 +810,15 @@ function submitCompletion() {
   const receiptGroupId = 'RG-'+Date.now().toString(36).toUpperCase();
   const now = new Date().toISOString();
 
+  // Save uploaded receipts
+  if (S.uploadedReceipts.length > 0) {
+    const existing = dbGetReceipts();
+    S.uploadedReceipts.forEach(r => {
+      existing.push({...r, logIds: [...S.completingIds], uploadedAt: now});
+    });
+    dbSaveReceipts(existing);
+  }
+
   S.completingIds.forEach(id => {
     dbUpdate(id, {
       status:'pending',
@@ -911,16 +826,16 @@ function submitCompletion() {
       card: card ? card.id : '',
       cardLabel: card ? card.label : (f.paymentMethod === 'cash' ? 'Cash' : 'Other'),
       govFee,
-      receiptRef: f.receiptRef || '',
+      receiptRef: f.receiptRef || (S.uploadedReceipts.length > 0 ? S.uploadedReceipts.map(r=>r.fileName).join(', ') : ''),
       receiptGroupId,
       notes: f.notes || ''
     });
   });
-  set({view:'dashboard', completingRequestId:null, completingIds:[], completeForm:{paymentMethod:'',card:'',govFee:'',receiptRef:'',notes:''}});
+  set({view:'dashboard', completingRequestId:null, completingIds:[], completeForm:{paymentMethod:'',card:'',govFee:'',receiptRef:'',notes:''}, uploadedReceipts:[]});
 }
 
 function approveLog(id) {
-  dbUpdate(id, {status:'approved', approvedBy:S.user.id, approvedByName:S.user.name, approvedAt:new Date().toISOString()});
+  dbUpdate(id, {status:'approved', approvedBy:S.user.id, approvedByName:S.user.name, approvedAt:new Date().toISOString(), elenaChecked:true});
   set({});
 }
 
@@ -930,7 +845,7 @@ function rejectLog(id, reason) {
 }
 
 function expenseLog(id) {
-  dbUpdate(id, {status:'expensed', expensedBy:S.user.id, expensedByName:S.user.name, expensedAt:new Date().toISOString()});
+  dbUpdate(id, {status:'expensed', expensedBy:S.user.id, expensedByName:S.user.name, expensedAt:new Date().toISOString(), gabiChecked:true});
   set({});
 }
 
@@ -968,10 +883,25 @@ function generateBatchInvoice(clientId) {
   if (!logIds.length) return;
 
   const year = new Date().getFullYear();
-  const serial = String(dbGetInvoices().length + 1).padStart(4, '0');
-  const invId = 'INV/' + year + '/' + serial;
-
-  const grpLogs = allLogs.filter(l => logIds.includes(l.id));
+  let grpLogs = allLogs.filter(l => logIds.includes(l.id));
+  // Apply fee overrides before generating invoice
+  if (S.feeOverrides && Object.keys(S.feeOverrides).length) {
+    const allDbLogs = dbGet();
+    grpLogs = grpLogs.map(l => {
+      const ov = S.feeOverrides[l.id];
+      if (!ov) return l;
+      const patch = {};
+      if (ov.govFee !== undefined) patch.govFee = ov.govFee;
+      if (ov.profFee !== undefined) { patch.total = ov.profFee; patch.unitPrice = ov.profFee / (l.qty||1); }
+      if (Object.keys(patch).length) dbUpdate(l.id, patch);
+      return {...l,...patch};
+    });
+  }
+  const provider = grpLogs[0].provider;
+  const prefix = provider === 'RCHBS' ? 'RCHBS' : 'RCH';
+  const startSerial = provider === 'RCHBS' ? 2001 : 1001;
+  const providerInvCount = dbGetInvoices().filter(i => i.provider === provider && i.id.includes('/' + year + '/')).length;
+  const invId = 'INV/' + prefix + '/' + year + '/' + (startSerial + providerInvCount);
   const client = CLIENTS.find(c => c.id === clientId);
   const totalProfFee = grpLogs.reduce((s,l) => s + l.total, 0);
   const totalGovFee  = grpLogs.reduce((s,l) => s + (l.govFee||0), 0);
@@ -1132,55 +1062,87 @@ function vDashboardAM() {
       </button>
     </div>
 
-    <div class="card" style="margin-bottom:20px">
-      <div class="card-hd">
-        <span class="card-title">Recent Activity</span>
-        <span class="badge" style="background:var(--navy-lt);color:var(--navy)">${historyLogs.length} entries</span>
-      </div>
-      ${historyLogs.length === 0
-        ? `<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-txt">No activity yet</div><div class="empty-sub">Create your first service request to get started.</div></div>`
-        : `<table class="client-table">
-          <thead><tr>
-            <th>Date</th><th>Client</th><th>Service</th><th>Emp.</th><th>RCH Fee</th><th>Status</th><th style="text-align:right">Actions</th>
-          </tr></thead>
-          <tbody>${historyLogs.map(l => {
-            const editBtn = canEdit(l)
-              ? `<button class="btn btn-ghost btn-xs" onclick="editLog('${l.id}')" title="Edit">✎ Edit</button>`
-              : '';
-            const deleteBtn = canDelete(l)
-              ? `<button class="btn btn-xs" style="background:var(--red-lt);color:var(--red)" onclick="deleteLog('${l.id}')" title="Delete">✕</button>`
-              : '';
-            const completeBtn = l.status === 'am_completing'
-              ? `<button class="btn btn-primary btn-xs" onclick="startCompleteService('${l.id}')">Complete</button>`
-              : '';
-            return `<tr>
-              <td style="font-size:11px;color:var(--g500);white-space:nowrap">${fmtDate(l.submittedAt)}</td>
-              <td>
-                <div style="font-weight:600;font-size:12px">${l.clientName}</div>
-              </td>
-              <td style="font-size:12px">${l.serviceName}</td>
-              <td style="font-size:12px;text-align:center">${l.qty}</td>
-              <td style="font-weight:700;font-size:12px;color:var(--navy)">QAR ${fmt(l.total)}</td>
-              <td>${statusBadge(l.status)}</td>
-              <td style="text-align:right">
-                <div style="display:flex;gap:4px;justify-content:flex-end">
-                  ${completeBtn}${editBtn}${deleteBtn}
-                </div>
-              </td>
-            </tr>`;
-          }).join('')}</tbody>
-        </table>`
-      }
-      ${historyLogs.some(l => l.rejectedReason) ? `
-        <div style="margin-top:12px;padding:10px 14px;background:var(--red-lt);border-radius:8px;border:1px solid rgba(192,39,45,.15)">
+    ${(() => {
+      // Needs-attention banner
+      const rejected = historyLogs.filter(l=>l.rejectedReason && l.status==='rejected');
+      const rejectedBanner = rejected.length > 0 ? `
+        <div style="padding:10px 14px;background:var(--red-lt);border-radius:8px;border:1px solid rgba(192,39,45,.15);margin-bottom:12px">
           <div style="font-size:10px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Needs Attention</div>
-          ${historyLogs.filter(l=>l.rejectedReason && l.status==='rejected').map(l => `
+          ${rejected.map(l => `
             <div style="font-size:11px;color:var(--g700);margin-bottom:4px">
               <strong>${l.clientName}</strong> · ${l.serviceName}: <span style="color:var(--red)">${l.rejectedReason}</span>
               <button class="btn btn-xs" style="background:var(--red);color:white;margin-left:6px" onclick="editLog('${l.id}')">Re-submit</button>
             </div>`).join('')}
-        </div>` : ''}
-    </div>
+        </div>` : '';
+
+      if (historyLogs.length === 0) return `
+        <div class="card" style="margin-bottom:20px">
+          <div class="card-hd"><span class="card-title">Activity by Client</span></div>
+          <div class="empty-state"><div class="empty-icon">📋</div><div class="empty-txt">No activity yet</div><div class="empty-sub">Create your first service request to get started.</div></div>
+        </div>`;
+
+      // Group by client
+      const byClient = {};
+      historyLogs.forEach(l => {
+        if (!byClient[l.clientId]) byClient[l.clientId] = {
+          clientId: l.clientId, clientName: l.clientName,
+          company: CLIENTS.find(c=>c.id===l.clientId)?.company || 'Rapid',
+          logs: []
+        };
+        byClient[l.clientId].logs.push(l);
+      });
+      const groups = Object.values(byClient).sort((a,b) => {
+        const aDate = Math.max(...a.logs.map(l=>new Date(l.submittedAt)));
+        const bDate = Math.max(...b.logs.map(l=>new Date(l.submittedAt)));
+        return bDate - aDate;
+      });
+
+      return `
+        <div style="font-size:11px;font-weight:700;color:var(--g500);text-transform:uppercase;margin-bottom:10px;letter-spacing:.5px">Activity by Client</div>
+        ${rejectedBanner}
+        ${groups.map(({clientId, clientName, company, logs}) => {
+          const expanded = S.expandedClients[clientId];
+          const readyCount = logs.filter(l=>l.status==='am_completing').length;
+          const totalFees = logs.reduce((s,l)=>s+l.total,0);
+          const coBadge = company === 'Rapid'
+            ? `<span style="font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;background:var(--navy-lt);color:var(--navy)">Rapid</span>`
+            : `<span style="font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;background:var(--mag-lt);color:var(--magenta)">RCHBS</span>`;
+          return `
+            <div class="card" style="margin-bottom:10px;overflow:hidden">
+              <div style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:12px 16px;border-bottom:${expanded?'1px solid var(--border)':'none'}"
+                onclick="S.expandedClients[${clientId}]=!S.expandedClients[${clientId}];render()">
+                <span style="font-size:14px;color:var(--g300)">${expanded?'▾':'▸'}</span>
+                ${coBadge}
+                <span style="font-weight:700;font-size:13px;flex:1">${clientName}</span>
+                <span style="font-size:11px;color:var(--g500)">${logs.length} service${logs.length!==1?'s':''}</span>
+                <span style="font-size:12px;font-weight:700;color:var(--navy)">QAR ${fmt(totalFees)}</span>
+                ${readyCount > 0 ? `
+                  <button class="btn btn-primary btn-xs" onclick="event.stopPropagation();startBatchComplete(${clientId})">
+                    Complete ${readyCount} Ready
+                  </button>` : ''}
+              </div>
+              ${expanded ? `
+                <table class="client-table" style="margin:0">
+                  <thead><tr>
+                    <th>Date</th><th>Service</th><th>Qty</th><th>RCH Fee</th><th>Status</th><th style="text-align:right">Actions</th>
+                  </tr></thead>
+                  <tbody>${logs.map(l => {
+                    const editBtn = canEdit(l) ? `<button class="btn btn-ghost btn-xs" onclick="editLog('${l.id}')">✎ Edit</button>` : '';
+                    const deleteBtn = canDelete(l) ? `<button class="btn btn-xs" style="background:var(--red-lt);color:var(--red)" onclick="deleteLog('${l.id}')">✕</button>` : '';
+                    const completeBtn = l.status === 'am_completing' ? `<button class="btn btn-primary btn-xs" onclick="startCompleteService('${l.id}')">Complete</button>` : '';
+                    return `<tr>
+                      <td style="font-size:11px;color:var(--g500)">${fmtDate(l.submittedAt)}</td>
+                      <td style="font-size:12px">${l.serviceName}</td>
+                      <td style="font-size:12px;text-align:center">${l.qty}</td>
+                      <td style="font-weight:700;font-size:12px;color:var(--navy)">QAR ${fmt(l.total)}</td>
+                      <td>${statusBadge(l.status)}</td>
+                      <td style="text-align:right"><div style="display:flex;gap:4px;justify-content:flex-end">${completeBtn}${editBtn}${deleteBtn}</div></td>
+                    </tr>`;
+                  }).join('')}</tbody>
+                </table>` : ''}
+            </div>`;
+        }).join('')}`;
+    })()}
 
     <div class="card-hd" style="margin-bottom:10px">
       <span class="card-title" style="font-size:14px">Service Pipeline</span>
@@ -1251,7 +1213,9 @@ function vClients() {
             <option value="per-job" ${f.type==='per-job'?'selected':''}>Per-Job</option>
           </select>
         </td>
-        <td><input class="form-input" style="padding:5px 8px;font-size:12px;width:90px" type="number" value="${f.creditLimit}" oninput="S.editClientForm.creditLimit=this.value"></td>
+        <td>${['acct_mgr','cfo'].includes(S.user?.type)
+          ? `<input class="form-input" style="padding:5px 8px;font-size:12px;width:90px" type="number" value="${f.creditLimit}" oninput="S.editClientForm.creditLimit=this.value">`
+          : `<span style="font-size:12px">QAR ${fmt(f.creditLimit||0)}</span>`}</td>
         <td style="font-size:12px;color:var(--g500)" colspan="2">—</td>
         <td style="text-align:right">
           <div style="display:flex;gap:4px;justify-content:flex-end">
@@ -1297,7 +1261,9 @@ function vClients() {
         <option value="retainer" ${S.newClientForm.type==='retainer'?'selected':''}>Retainer</option>
       </select>
     </td>
-    <td><input class="form-input" style="padding:5px 8px;font-size:12px;width:90px" type="number" placeholder="Limit" value="${S.newClientForm.creditLimit}" oninput="S.newClientForm.creditLimit=this.value"></td>
+    <td>${['acct_mgr','cfo'].includes(S.user?.type)
+      ? `<input class="form-input" style="padding:5px 8px;font-size:12px;width:90px" type="number" placeholder="Limit" value="${S.newClientForm.creditLimit}" oninput="S.newClientForm.creditLimit=this.value">`
+      : `<span style="font-size:11px;color:var(--g500)">Mgmt only</span>`}</td>
     <td colspan="2" style="font-size:10px;color:var(--g500)">New</td>
     <td style="text-align:right">
       <div style="display:flex;gap:4px;justify-content:flex-end">
@@ -1451,20 +1417,26 @@ function vLogService() {
       const needsEmp = requiresEmployeeDetails(s.serviceId);
       const isGP = isGatePassService(s.serviceId);
 
-      let empHTML = '';
-      if (needsEmp) {
-        empHTML = `
+      const empLabel = needsEmp ? `Employee Details (${s.qty})` : `Employee Name — optional (${s.qty})`;
+      const empHTML = `
           <div style="margin-bottom:12px">
-            <div style="font-size:10px;font-weight:700;color:var(--g500);text-transform:uppercase;margin-bottom:6px">Employee Details (${s.qty})</div>
+            <div style="font-size:10px;font-weight:700;color:var(--g500);text-transform:uppercase;margin-bottom:6px">${empLabel}</div>
             ${s.employees.slice(0, s.qty).map((e,i)=>`
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px">
-                <input class="form-input" type="text" placeholder="Employee name ${i+1}" value="${e.name||''}"
-                  oninput="updateSvcEmp(${idx},${i},'name',this.value)">
-                <input class="form-input" type="date" value="${e.date||''}"
-                  onchange="updateSvcEmp(${idx},${i},'date',this.value)">
+              <div style="border:1px solid var(--border);border-radius:8px;padding:8px 10px;margin-bottom:6px">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px">
+                  <input class="form-input" type="text" placeholder="Employee name ${i+1}" value="${e.name||''}"
+                    oninput="updateSvcEmp(${idx},${i},'name',this.value)">
+                  <input class="form-input" type="date" value="${e.date||''}"
+                    onchange="updateSvcEmp(${idx},${i},'date',this.value)">
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                  <input class="form-input" type="text" placeholder="BU (optional)" value="${e.buCode||''}"
+                    oninput="updateSvcEmp(${idx},${i},'buCode',this.value)" style="font-size:11px">
+                  <input class="form-input" type="text" placeholder="Cost Center (optional)" value="${e.costCenter||''}"
+                    oninput="updateSvcEmp(${idx},${i},'costCenter',this.value)" style="font-size:11px">
+                </div>
               </div>`).join('')}
           </div>`;
-      }
 
       let deptHTML = '';
       if (isEYClient && isGP) {
@@ -1484,22 +1456,10 @@ function vLogService() {
           <div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:10px">${svc.label} × ${s.qty}</div>
           ${empHTML}
           ${deptHTML}
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
-            <div>
-              <label class="form-label" style="margin-bottom:3px">BU <span style="font-weight:400;text-transform:none">(optional)</span></label>
-              <input class="form-input" type="text" placeholder="Business Unit" value="${s.buCode||''}"
-                oninput="S.logServices[${idx}].buCode=this.value">
-            </div>
-            <div>
-              <label class="form-label" style="margin-bottom:3px">Cost Center <span style="font-weight:400;text-transform:none">(opt.)</span></label>
-              <input class="form-input" type="text" placeholder="Cost Center" value="${s.costCenter||''}"
-                oninput="S.logServices[${idx}].costCenter=this.value">
-            </div>
-            <div>
-              <label class="form-label" style="margin-bottom:3px">Service Line <span style="font-weight:400;text-transform:none">(opt.)</span></label>
-              <input class="form-input" type="text" placeholder="Service Line" value="${s.serviceLine||''}"
-                oninput="S.logServices[${idx}].serviceLine=this.value">
-            </div>
+          <div>
+            <label class="form-label" style="margin-bottom:3px">Service Line <span style="font-weight:400;text-transform:none">(opt.)</span></label>
+            <input class="form-input" type="text" placeholder="Service Line" value="${s.serviceLine||''}"
+              oninput="S.logServices[${idx}].serviceLine=this.value">
           </div>
         </div>`;
     }).join('');
@@ -1662,15 +1622,27 @@ function vCompleteService() {
       <div class="form-group">
         <label class="form-label">Government Fee (from receipt)</label>
         <input class="form-input" type="number" min="0" step="10" placeholder="0" value="${f.govFee}"
-          oninput="S.completeForm.govFee=this.value;render()" style="width:200px">
+          oninput="S.completeForm.govFee=this.value" onblur="render()" style="width:200px">
         <div style="font-size:10px;color:var(--g500);margin-top:3px">The actual amount OPs paid to the government</div>
       </div>
 
       <div class="form-group">
-        <label class="form-label">Government Receipt</label>
-        <input class="form-input" type="text" placeholder="Receipt reference or filename (e.g., GOV-REC-123.pdf)" value="${f.receiptRef||''}"
-          oninput="S.completeForm.receiptRef=this.value">
-        <div style="font-size:10px;color:var(--g500);margin-top:3px">One receipt can cover all selected services</div>
+        <label class="form-label">Government Receipt(s)</label>
+        <label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;padding:8px 14px;border:2px dashed var(--border);border-radius:8px;font-size:12px;color:var(--g500);background:var(--g50)">
+          <span>📎 Upload receipt files</span>
+          <input type="file" accept="application/pdf,image/*" multiple style="display:none"
+            onchange="handleReceiptUpload(this.files)">
+        </label>
+        ${S.uploadedReceipts.length > 0 ? `
+          <div style="margin-top:8px">
+            ${S.uploadedReceipts.map(r => `
+              <div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--navy-lt);border-radius:6px;margin-bottom:4px;font-size:12px">
+                <span style="flex:1">${r.mimeType.startsWith('image/') ? '🖼️' : '📄'} ${r.fileName}</span>
+                <button class="btn btn-ghost btn-xs" onclick="removeUploadedReceipt('${r.id}')" style="color:var(--red)">✕</button>
+              </div>`).join('')}
+          </div>
+        ` : ''}
+        <div style="font-size:10px;color:var(--g500);margin-top:6px">One receipt can cover all selected services. PDF or image files accepted.</div>
       </div>
 
       <div class="form-group">
@@ -1727,14 +1699,100 @@ function vSubmissions() {
 // ═══════════════════════════════════
 function vApprovals() {
   const pending = dbGet().filter(l=>l.status==='pending');
+  const totalValue = pending.reduce((s,l) => s+l.total+(l.govFee||0), 0);
+
+  // Group by client for summary
+  const byClient = {};
+  pending.forEach(l => {
+    if (!byClient[l.clientId]) byClient[l.clientId] = {name:l.clientName, count:0, total:0};
+    byClient[l.clientId].count++;
+    byClient[l.clientId].total += l.total + (l.govFee||0);
+  });
+  const clientSummaries = Object.values(byClient);
+
   return `
-    <div style="margin-bottom:16px">
-      <div style="font-size:15px;font-weight:700;color:var(--navy);margin-bottom:4px">Approval Queue</div>
-      <div style="font-size:12px;color:var(--g500)">${pending.length} submission(s) awaiting your review</div>
+    <div class="stats-row">
+      <div class="stat" style="--sc:var(--orange)">
+        <div class="stat-lbl">Pending Review</div>
+        <div class="stat-val">${pending.length}</div>
+        <div class="stat-sub">${clientSummaries.length} client${clientSummaries.length!==1?'s':''}</div>
+      </div>
+      <div class="stat" style="--sc:var(--navy)">
+        <div class="stat-lbl">Total Value</div>
+        <div class="stat-val">QAR ${fmt(totalValue)}</div>
+        <div class="stat-sub">Prof + Gov fees</div>
+      </div>
     </div>
+
     ${pending.length === 0
       ? `<div class="empty-state"><div class="empty-icon">🎉</div><div class="empty-txt">All clear!</div><div class="empty-sub">No pending submissions.</div></div>`
-      : pending.map(l => renderLogCard(l, true)).join('')
+      : `
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <div style="font-size:11px;font-weight:700;color:var(--g500);text-transform:uppercase;letter-spacing:.5px">Pending Approvals</div>
+          <button class="btn btn-success btn-sm" onclick="if(confirm('Approve all ${pending.length} pending items?')){${pending.map(l=>`approveLog('${l.id}')`).join(';')}}">
+            Approve All (${pending.length})
+          </button>
+        </div>
+        ${pending.map(l => {
+          const expanded = S.expandedApprovalId === l.id;
+          const receipts = getReceiptsForLog(l.id);
+          const empList = (l.employees||[]).filter(e=>e.name);
+          return `
+            <div class="card" style="margin-bottom:10px;overflow:hidden">
+              <div style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:12px 16px;border-bottom:${expanded?'1px solid var(--border)':'none'}"
+                onclick="S.expandedApprovalId=S.expandedApprovalId==='${l.id}'?null:'${l.id}';render()">
+                <span style="font-size:14px;color:var(--g300)">${expanded?'▾':'▸'}</span>
+                <div style="flex:1">
+                  <div style="font-size:13px;font-weight:700">${l.clientName} <span style="font-weight:400;color:var(--g500)">· ${l.serviceName}</span></div>
+                  <div style="font-size:11px;color:var(--g500);margin-top:2px">${fmtDate(l.submittedAt)} · ${l.submittedByName} · Qty: ${l.qty}</div>
+                </div>
+                <div style="text-align:right">
+                  <div style="font-size:13px;font-weight:700;color:var(--navy)">QAR ${fmt(l.total + (l.govFee||0))}</div>
+                  ${l.govFee ? `<div style="font-size:10px;color:var(--red)">Gov: QAR ${fmt(l.govFee)}</div>` : ''}
+                </div>
+                <div style="display:flex;gap:6px;margin-left:8px" onclick="event.stopPropagation()">
+                  <button class="btn btn-success btn-xs" onclick="approveLog('${l.id}')">✓ Approve</button>
+                  <button class="btn btn-xs" style="background:var(--red-lt);color:var(--red)" onclick="set({rejectId:'${l.id}',rejectReason:''})">✕ Reject</button>
+                </div>
+              </div>
+              ${expanded ? `
+                <div style="padding:14px 16px;background:var(--g50);font-size:12px">
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                    <div>
+                      <div style="font-size:10px;font-weight:700;color:var(--g500);text-transform:uppercase;margin-bottom:6px">Payment</div>
+                      <div style="color:var(--g700)">${l.paymentMethod === 'card' ? `💳 ${l.cardLabel}` : l.paymentMethod === 'cash' ? '💵 Cash' : '—'}</div>
+                      ${l.govFee ? `<div style="color:var(--red);margin-top:2px">Gov Fee: QAR ${fmt(l.govFee)}</div>` : ''}
+                    </div>
+                    <div>
+                      <div style="font-size:10px;font-weight:700;color:var(--g500);text-transform:uppercase;margin-bottom:6px">BU / Cost Center</div>
+                      <div style="color:var(--g700)">${l.buCode||'—'} ${l.costCenter ? '· '+l.costCenter : ''}</div>
+                    </div>
+                    ${empList.length > 0 ? `
+                    <div style="grid-column:span 2">
+                      <div style="font-size:10px;font-weight:700;color:var(--g500);text-transform:uppercase;margin-bottom:6px">Employees (${empList.length})</div>
+                      <div>${empList.map(e=>`<span style="display:inline-block;padding:2px 8px;background:white;border:1px solid var(--border);border-radius:4px;margin:2px">${e.name}${e.date?' · '+e.date:''}</span>`).join('')}</div>
+                    </div>` : ''}
+                    ${l.notes ? `
+                    <div style="grid-column:span 2">
+                      <div style="font-size:10px;font-weight:700;color:var(--g500);text-transform:uppercase;margin-bottom:4px">Notes</div>
+                      <div style="color:var(--g700)">${l.notes}</div>
+                    </div>` : ''}
+                    ${receipts.length > 0 ? `
+                    <div style="grid-column:span 2">
+                      <div style="font-size:10px;font-weight:700;color:var(--g500);text-transform:uppercase;margin-bottom:6px">Attached Receipts</div>
+                      <div style="display:flex;gap:8px;flex-wrap:wrap">
+                        ${receipts.map(r => r.mimeType.startsWith('image/') ? `
+                          <img src="${r.base64}" style="width:80px;height:60px;object-fit:cover;border-radius:6px;border:1px solid var(--border)" title="${r.fileName}">
+                        ` : `
+                          <a href="${r.base64}" download="${r.fileName}" style="display:flex;align-items:center;gap:4px;padding:6px 10px;background:white;border:1px solid var(--border);border-radius:6px;text-decoration:none;font-size:11px;color:var(--navy)">📄 ${r.fileName}</a>
+                        `).join('')}
+                      </div>
+                    </div>` : ''}
+                  </div>
+                </div>` : ''}
+            </div>`;
+        }).join('')}
+      `
     }
 
     ${S.rejectId ? renderRejectModal() : ''}`;
@@ -1744,22 +1802,116 @@ function vApprovals() {
 // VIEW: Expense Queue (Gabi)
 // ═══════════════════════════════════
 function vExpense() {
-  const approved = dbGet().filter(l=>l.status==='approved');
-  const done = dbGet().filter(l=>l.status==='expensed'||l.status==='invoiced');
+  const all = dbGet();
+  const approved = all.filter(l=>l.status==='approved');
+  const done = all.filter(l=>l.status==='expensed'||l.status==='invoiced');
+  const totalGov = approved.reduce((s,l)=>s+(l.govFee||0),0);
+  const totalProf = approved.reduce((s,l)=>s+l.total,0);
+
+  // Group approved by client
+  const byClient = {};
+  approved.forEach(l => {
+    if (!byClient[l.clientId]) byClient[l.clientId] = {clientId:l.clientId, clientName:l.clientName, company:CLIENTS.find(c=>c.id===l.clientId)?.company||'Rapid', logs:[]};
+    byClient[l.clientId].logs.push(l);
+  });
+  const clientGroups = Object.values(byClient);
+
+  const selIds = S.selectedExpenseIds || [];
+
   return `
-    <div style="margin-bottom:16px">
-      <div style="font-size:15px;font-weight:700;color:var(--navy);margin-bottom:4px">Expense Tracker</div>
-      <div style="font-size:12px;color:var(--g500)">${approved.length} item(s) ready to mark as expensed</div>
+    <div class="stats-row">
+      <div class="stat" style="--sc:var(--orange)">
+        <div class="stat-lbl">Ready to Expense</div>
+        <div class="stat-val">${approved.length}</div>
+        <div class="stat-sub">${clientGroups.length} client${clientGroups.length!==1?'s':''}</div>
+      </div>
+      <div class="stat" style="--sc:var(--red)">
+        <div class="stat-lbl">Gov Fees</div>
+        <div class="stat-val">QAR ${fmt(totalGov)}</div>
+        <div class="stat-sub">To be expensed</div>
+      </div>
+      <div class="stat" style="--sc:var(--navy)">
+        <div class="stat-lbl">Prof Fees</div>
+        <div class="stat-val">QAR ${fmt(totalProf)}</div>
+        <div class="stat-sub">RCH service fees</div>
+      </div>
+      <div class="stat" style="--sc:var(--green)">
+        <div class="stat-lbl">Processed</div>
+        <div class="stat-val">${done.length}</div>
+        <div class="stat-sub">Expensed or invoiced</div>
+      </div>
     </div>
 
     ${approved.length > 0 ? `
-      <div style="font-size:11px;font-weight:700;color:var(--g500);text-transform:uppercase;margin-bottom:8px;letter-spacing:.5px">Ready to Expense</div>
-      ${approved.map(l => renderLogCard(l, false, 'expense')).join('')}
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div style="font-size:11px;font-weight:700;color:var(--g500);text-transform:uppercase;letter-spacing:.5px">Ready to Expense</div>
+        <div style="display:flex;gap:6px;align-items:center">
+          ${selIds.length > 0 ? `
+            <span style="font-size:12px;color:var(--g500)">${selIds.length} selected</span>
+            <button class="btn btn-success btn-sm" onclick="expenseSelected()">
+              Mark ${selIds.length} as Expensed
+            </button>
+            <button class="btn btn-ghost btn-sm" onclick="S.selectedExpenseIds=[];render()">Clear</button>
+          ` : `
+            <button class="btn btn-ghost btn-sm" onclick="S.selectedExpenseIds=${JSON.stringify(approved.map(l=>l.id))};render()">Select All</button>
+          `}
+        </div>
+      </div>
+
+      ${clientGroups.map(({clientId, clientName, company, logs}) => {
+        const coBadge = company === 'Rapid'
+          ? `<span class="badge" style="background:var(--navy-lt);color:var(--navy)">Rapid</span>`
+          : `<span class="badge" style="background:var(--mag-lt);color:var(--magenta)">RCHBS</span>`;
+        return `
+          <div class="card" style="margin-bottom:12px">
+            <div style="display:flex;align-items:center;gap:8px;padding-bottom:10px;margin-bottom:10px;border-bottom:1px solid var(--border)">
+              ${coBadge}
+              <span style="font-size:13px;font-weight:700;flex:1">${clientName}</span>
+              <span style="font-size:11px;color:var(--g500)">${logs.length} service${logs.length!==1?'s':''}</span>
+              <button class="btn btn-success btn-sm" onclick="${logs.map(l=>`expenseLog('${l.id}')`).join(';')};render()">
+                Mark All Expensed
+              </button>
+            </div>
+            ${logs.map(l => {
+              const isChecked = selIds.includes(l.id);
+              const receipts = getReceiptsForLog(l.id);
+              const empList = (l.employees||[]).filter(e=>e.name);
+              return `
+                <div style="display:flex;align-items:flex-start;gap:10px;padding:10px;border:1px solid ${isChecked?'var(--navy)':'var(--border)'};border-radius:8px;margin-bottom:8px;background:${isChecked?'var(--navy-lt)':'white'};cursor:pointer"
+                  onclick="const idx=S.selectedExpenseIds.indexOf('${l.id}');if(idx===-1)S.selectedExpenseIds.push('${l.id}');else S.selectedExpenseIds.splice(idx,1);render()">
+                  <input type="checkbox" ${isChecked?'checked':''} style="margin-top:2px;cursor:pointer" onclick="event.stopPropagation()">
+                  <div style="flex:1">
+                    <div style="font-size:12px;font-weight:700">${l.serviceName} × ${l.qty}</div>
+                    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:6px;font-size:11px;color:var(--g500)">
+                      <div>💳 ${l.paymentMethod === 'card' ? l.cardLabel : l.paymentMethod === 'cash' ? 'Cash' : '—'}</div>
+                      <div>BU: ${l.buCode||'—'} ${l.costCenter?'· CC: '+l.costCenter:''}</div>
+                      <div style="color:${l.govFee?'var(--red)':'var(--g300)'}">Gov: ${l.govFee ? 'QAR '+fmt(l.govFee) : '—'}</div>
+                    </div>
+                    ${empList.length > 0 ? `<div style="font-size:11px;color:var(--g500);margin-top:4px">👤 ${empList.map(e=>e.name).join(', ')}</div>` : ''}
+                    ${receipts.length > 0 ? `<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">${receipts.map(r=>r.mimeType.startsWith('image/')?`<img src="${r.base64}" style="width:48px;height:36px;object-fit:cover;border-radius:4px;border:1px solid var(--border)">`:`<span style="font-size:10px;padding:2px 6px;background:var(--g50);border:1px solid var(--border);border-radius:4px">📄 ${r.fileName}</span>`).join('')}</div>` : ''}
+                  </div>
+                  <div style="text-align:right">
+                    <div style="font-weight:700;font-size:13px;color:var(--navy)">QAR ${fmt(l.total+(l.govFee||0))}</div>
+                    <button class="btn btn-success btn-xs" style="margin-top:6px" onclick="event.stopPropagation();expenseLog('${l.id}')">Mark Expensed</button>
+                  </div>
+                </div>`;
+            }).join('')}
+          </div>`;
+      }).join('')}
     ` : `<div class="empty-state"><div class="empty-icon">✅</div><div class="empty-txt">Nothing to expense right now</div></div>`}
 
     ${done.length > 0 ? `
-      <div style="font-size:11px;font-weight:700;color:var(--g500);text-transform:uppercase;margin:16px 0 8px;letter-spacing:.5px">Previously Processed</div>
-      ${done.map(l => renderLogCard(l, false)).join('')}
+      <div style="font-size:11px;font-weight:700;color:var(--g500);text-transform:uppercase;margin:16px 0 8px;letter-spacing:.5px">Previously Processed (${done.length})</div>
+      ${done.slice(0,10).map(l => `
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;margin-bottom:6px;font-size:12px">
+          <div style="flex:1">
+            <span style="font-weight:600">${l.clientName}</span>
+            <span style="color:var(--g500)"> · ${l.serviceName} × ${l.qty}</span>
+          </div>
+          <div style="color:var(--navy);font-weight:700">QAR ${fmt(l.total+(l.govFee||0))}</div>
+          ${statusBadge(l.status)}
+        </div>`).join('')}
+      ${done.length > 10 ? `<div style="font-size:11px;color:var(--g500);text-align:center;padding:8px">... and ${done.length-10} more</div>` : ''}
     ` : ''}`;
 }
 
@@ -1774,6 +1926,7 @@ function vFinance() {
   const expensed = all.filter(l => l.status === 'expensed');
   const invoiced  = all.filter(l => l.status === 'invoiced');
   const invGroups = dbGetInvoices().slice().sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+  const pipelineLogs = all.filter(l => ['pending','approved','expensed'].includes(l.status));
 
   // Group expensed logs by clientId
   const byClient = {};
@@ -1809,6 +1962,22 @@ function vFinance() {
         <div class="stat-sub">All time</div>
       </div>
     </div>
+
+    ${pipelineLogs.length > 0 ? `
+      <div style="font-size:11px;font-weight:700;color:var(--g500);text-transform:uppercase;margin-bottom:10px;letter-spacing:.5px">Service Pipeline</div>
+      <div class="card" style="margin-bottom:16px;overflow:hidden">
+        <table class="client-table" style="font-size:12px">
+          <thead><tr><th>Service</th><th>Client</th><th>Status</th><th style="text-align:right">✓ Elena</th><th style="text-align:right">✓ Gabi</th></tr></thead>
+          <tbody>${pipelineLogs.map(l => `<tr>
+            <td style="font-weight:600">${l.serviceName}</td>
+            <td style="color:var(--g500)">${l.clientName}</td>
+            <td>${statusBadge(l.status)}</td>
+            <td style="text-align:right">${l.elenaChecked ? '<span style="color:var(--green);font-weight:700">✓</span>' : '<span style="color:var(--g300)">–</span>'}</td>
+            <td style="text-align:right">${l.gabiChecked ? '<span style="color:var(--green);font-weight:700">✓</span>' : '<span style="color:var(--g300)">–</span>'}</td>
+          </tr>`).join('')}</tbody>
+        </table>
+      </div>
+    ` : ''}
 
     ${clientGroups.length > 0 ? `
       <div style="font-size:11px;font-weight:700;color:var(--g500);text-transform:uppercase;margin-bottom:12px;letter-spacing:.5px">Invoice Queue — Grouped by Client</div>
@@ -1854,6 +2023,10 @@ function vFinance() {
                   const empNames  = l.employees && l.employees.length > 0
                     ? l.employees.map(e => e.name).join(', ')
                     : '—';
+                  const feeOv = (S.feeOverrides||{})[l.id] || {};
+                  const govFeeVal = feeOv.govFee !== undefined ? feeOv.govFee : (l.govFee||0);
+                  const profFeeVal = feeOv.profFee !== undefined ? feeOv.profFee : l.total;
+                  const rowTotal  = profFeeVal + govFeeVal;
                   return `<tr style="${isChecked?'':'opacity:.45'}">
                     <td><input type="checkbox" ${isChecked?'checked':''} onchange="toggleLogSelection(${clientId},'${l.id}')" style="cursor:pointer;width:15px;height:15px"></td>
                     <td>
@@ -1862,10 +2035,14 @@ function vFinance() {
                     </td>
                     <td style="font-size:11px;color:var(--g500);max-width:200px">${empNames}</td>
                     <td class="r">${l.qty}</td>
-                    <td class="r" style="color:${l.govFee?'var(--red)':'var(--g300)'}">
-                      ${l.govFee ? 'QAR '+fmt(l.govFee) : '—'}
+                    <td class="r">
+                      ${isChecked ? `<input type="number" min="0" value="${govFeeVal}" style="width:80px;font-size:11px;text-align:right;border:1px solid var(--border);border-radius:4px;padding:2px 4px"
+                        oninput="if(!S.feeOverrides)S.feeOverrides={};if(!S.feeOverrides['${l.id}'])S.feeOverrides['${l.id}']={};S.feeOverrides['${l.id}'].govFee=parseFloat(this.value)||0">` : `<span style="color:${l.govFee?'var(--red)':'var(--g300)'}">${l.govFee?'QAR '+fmt(l.govFee):'—'}</span>`}
                     </td>
-                    <td class="r">QAR ${fmt(l.total)}</td>
+                    <td class="r">
+                      ${isChecked ? `<input type="number" min="0" value="${profFeeVal}" style="width:80px;font-size:11px;text-align:right;border:1px solid var(--border);border-radius:4px;padding:2px 4px"
+                        oninput="if(!S.feeOverrides)S.feeOverrides={};if(!S.feeOverrides['${l.id}'])S.feeOverrides['${l.id}']={};S.feeOverrides['${l.id}'].profFee=parseFloat(this.value)||0">` : `QAR ${fmt(l.total)}`}
+                    </td>
                     <td class="r" style="font-weight:700">QAR ${fmt(rowTotal)}</td>
                   </tr>`;
                 }).join('')}
@@ -2088,6 +2265,34 @@ function vInvoicePreview() {
         </div>
       </div>
 
+      <!-- Attached Government Receipts -->
+      ${(() => {
+        const allReceipts = [];
+        const seen = new Set();
+        logs.forEach(l => {
+          getReceiptsForLog(l.id).forEach(r => {
+            if (!seen.has(r.id)) { seen.add(r.id); allReceipts.push(r); }
+          });
+        });
+        if (!allReceipts.length) return '';
+        return `
+          <div class="inv-section no-print">
+            <div class="inv-section-hd">Attached Government Receipts</div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+              ${allReceipts.map(r => r.mimeType.startsWith('image/') ? `
+                <div style="text-align:center">
+                  <img src="${r.base64}" style="width:120px;height:90px;object-fit:cover;border-radius:6px;border:1px solid var(--border);display:block;margin-bottom:4px">
+                  <span style="font-size:10px;color:var(--g500)">${r.fileName}</span>
+                </div>
+              ` : `
+                <a href="${r.base64}" download="${r.fileName}" style="display:flex;align-items:center;gap:6px;padding:8px 12px;background:var(--g50);border:1px solid var(--border);border-radius:8px;text-decoration:none;font-size:12px;color:var(--navy)">
+                  📄 ${r.fileName}
+                </a>
+              `).join('')}
+            </div>
+          </div>`;
+      })()}
+
       <!-- Footer -->
       <div class="inv-footer-wrap">
         <div class="inv-footer-thanks">Would Like to Thank You for Your Business</div>
@@ -2103,9 +2308,41 @@ function vInvoicePreview() {
 
       <!-- Actions (hidden on print) -->
       <div class="inv-actions no-print">
-        <div style="font-size:10px;color:var(--g500)">Generated by ${invoice.createdByName} · ${fmtDT(invoice.createdAt)}</div>
-        <button class="btn btn-navy btn-sm" onclick="window.print()">🖨 Print / PDF</button>
+        <div style="font-size:10px;color:var(--g500)">Generated by ${invoice.createdByName} · ${fmtDT(invoice.createdAt)}${invoice.amendments&&invoice.amendments.length>0?' · '+invoice.amendments.length+' amendment(s)':''}</div>
+        <div style="display:flex;gap:8px">
+          ${['accountant','acct_mgr'].includes(S.user?.type) ? `<button class="btn btn-ghost btn-sm" onclick="S.amendingInvoice=!S.amendingInvoice;S.amendedFees={};render()">✎ Amend Invoice</button>` : ''}
+          <button class="btn btn-navy btn-sm" onclick="window.print()">🖨 Print / PDF</button>
+        </div>
       </div>
+
+      ${S.amendingInvoice ? `
+        <div class="no-print" style="margin-top:16px;padding:16px;background:var(--navy-lt);border-radius:12px;border:2px solid var(--navy)">
+          <div style="font-size:13px;font-weight:700;color:var(--navy);margin-bottom:12px">Amend Invoice — Override Fees</div>
+          ${logs.map((l,i) => {
+            const override = S.amendedFees[l.id] || {};
+            return `
+              <div style="margin-bottom:10px;padding:10px;background:white;border-radius:8px;border:1px solid var(--border)">
+                <div style="font-size:12px;font-weight:700;margin-bottom:8px">${l.serviceName} × ${l.qty}</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                  <div>
+                    <label class="form-label" style="font-size:10px">Gov. Fee (was QAR ${fmt(l.govFee||0)})</label>
+                    <input class="form-input" type="number" min="0" value="${override.govFee!==undefined?override.govFee:(l.govFee||0)}"
+                      oninput="if(!S.amendedFees['${l.id}'])S.amendedFees['${l.id}']={};S.amendedFees['${l.id}'].govFee=parseFloat(this.value)||0">
+                  </div>
+                  <div>
+                    <label class="form-label" style="font-size:10px">Prof. Fee (was QAR ${fmt(l.total)})</label>
+                    <input class="form-input" type="number" min="0" value="${override.profFee!==undefined?override.profFee:l.total}"
+                      oninput="if(!S.amendedFees['${l.id}'])S.amendedFees['${l.id}']={};S.amendedFees['${l.id}'].profFee=parseFloat(this.value)||0">
+                  </div>
+                </div>
+              </div>`;
+          }).join('')}
+          <div style="display:flex;gap:8px;margin-top:10px">
+            <button class="btn btn-navy btn-sm" onclick="applyInvoiceAmendment('${invoice.id}')">Save Amendment</button>
+            <button class="btn btn-ghost btn-sm" onclick="S.amendingInvoice=false;render()">Cancel</button>
+          </div>
+        </div>
+      ` : ''}
     </div>`;
 }
 
@@ -2193,6 +2430,26 @@ function vAccountantDashboard() {
         ${expensed.length > 0 ? `<button class="btn btn-navy btn-sm" onclick="set({view:'finance'})">View Queue</button>` : ''}
       </div>
     `}
+
+    <!-- Pipeline Tracker with dual checkmarks -->
+    ${(() => {
+      const pipeline = all.filter(l => ['pending','approved','expensed'].includes(l.status));
+      if (!pipeline.length) return '';
+      return `
+        <div style="font-size:11px;font-weight:700;color:var(--g500);text-transform:uppercase;margin-bottom:10px;letter-spacing:.5px">Service Pipeline</div>
+        <div class="card" style="margin-bottom:16px;overflow:hidden">
+          <table class="client-table" style="font-size:12px">
+            <thead><tr><th>Service</th><th>Client</th><th>Status</th><th style="text-align:right">✓ Elena</th><th style="text-align:right">✓ Gabi</th></tr></thead>
+            <tbody>${pipeline.map(l => `<tr>
+              <td style="font-weight:600">${l.serviceName}</td>
+              <td style="color:var(--g500)">${l.clientName}</td>
+              <td>${statusBadge(l.status)}</td>
+              <td style="text-align:right">${l.elenaChecked ? '<span style="color:var(--green);font-weight:700">✓</span>' : '<span style="color:var(--g300)">–</span>'}</td>
+              <td style="text-align:right">${l.gabiChecked ? '<span style="color:var(--green);font-weight:700">✓</span>' : '<span style="color:var(--g300)">–</span>'}</td>
+            </tr>`).join('')}</tbody>
+          </table>
+        </div>`;
+    })()}
 
     <!-- Pending Invoice Summary by Client -->
     ${agingItems.length > 0 ? (() => {
@@ -2693,6 +2950,130 @@ function renderRejectModal() {
 }
 
 // ═══════════════════════════════════
+// VIEW: Service Catalog (TL / Elena)
+// ═══════════════════════════════════
+const SVC_CUSTOM_KEY = 'rch_services_custom_v1';
+function loadCustomServices() { try { return JSON.parse(localStorage.getItem(SVC_CUSTOM_KEY)||'[]'); } catch(e) { return []; } }
+function saveCustomService(svc) {
+  const custom = loadCustomServices();
+  const idx = custom.findIndex(c=>c.id===svc.id);
+  if (idx !== -1) custom[idx] = svc; else custom.push(svc);
+  localStorage.setItem(SVC_CUSTOM_KEY, JSON.stringify(custom));
+}
+function deleteCustomService(id) {
+  const custom = loadCustomServices().map(c=>c.id===id ? {...c,deleted:true} : c);
+  localStorage.setItem(SVC_CUSTOM_KEY, JSON.stringify(custom));
+}
+function getEffectiveServices() {
+  const custom = loadCustomServices();
+  const customMap = {};
+  custom.forEach(c => { customMap[c.id] = c; });
+  // Start with base, apply overrides, filter deleted
+  const base = SERVICES.map(s => customMap[s.id] ? {...s,...customMap[s.id]} : s).filter(s => !s.deleted);
+  // Add custom-only services (not in base)
+  const baseIds = new Set(SERVICES.map(s=>s.id));
+  custom.filter(c=>!baseIds.has(c.id)&&!c.deleted).forEach(c => base.push(c));
+  return base;
+}
+
+function vServiceCatalog() {
+  const services = getEffectiveServices();
+  const categories = [...new Set(services.map(s=>s.category))].sort();
+  const editId = S.editingServiceId;
+
+  return `
+    <div class="card-hd" style="margin-bottom:14px">
+      <span class="card-title" style="font-size:15px">Service Catalog</span>
+      <button class="btn btn-primary btn-sm" onclick="S.addingService=true;S.newServiceForm={id:'',label:'',category:'',priceRapid:0,priceRCHBS:0};render()">+ Add Service</button>
+    </div>
+
+    ${S.addingService ? `
+      <div class="card" style="margin-bottom:14px;border:2px solid var(--navy)">
+        <div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:10px">New Service</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+          <input class="form-input" placeholder="Service ID (e.g. my-service)" value="${S.newServiceForm.id||''}"
+            oninput="S.newServiceForm.id=this.value">
+          <input class="form-input" placeholder="Service label (full name)" value="${S.newServiceForm.label||''}"
+            oninput="S.newServiceForm.label=this.value">
+          <input class="form-input" placeholder="Category" value="${S.newServiceForm.category||''}"
+            oninput="S.newServiceForm.category=this.value" list="svc-cats">
+          <datalist id="svc-cats">${categories.map(c=>`<option value="${c}">`).join('')}</datalist>
+          <input class="form-input" type="number" min="0" placeholder="Rapid price (QAR)" value="${S.newServiceForm.priceRapid||0}"
+            oninput="S.newServiceForm.priceRapid=parseFloat(this.value)||0">
+          <input class="form-input" type="number" min="0" placeholder="RCHBS price (QAR)" value="${S.newServiceForm.priceRCHBS||0}"
+            oninput="S.newServiceForm.priceRCHBS=parseFloat(this.value)||0">
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-success btn-sm" onclick="
+            if(!S.newServiceForm.id||!S.newServiceForm.label){alert('ID and label required');return;}
+            saveCustomService({...S.newServiceForm});
+            S.addingService=false;render()">Save</button>
+          <button class="btn btn-ghost btn-sm" onclick="S.addingService=false;render()">Cancel</button>
+        </div>
+      </div>
+    ` : ''}
+
+    ${categories.map(cat => {
+      const svcs = services.filter(s=>s.category===cat);
+      return `
+        <div class="card" style="margin-bottom:12px;overflow:hidden">
+          <div style="font-size:11px;font-weight:700;color:var(--g500);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">${cat}</div>
+          <table class="client-table" style="font-size:12px">
+            <thead><tr><th>Service</th><th style="text-align:right">Rapid (QAR)</th><th style="text-align:right">RCHBS (QAR)</th><th style="text-align:right">Actions</th></tr></thead>
+            <tbody>${svcs.map(s => editId===s.id ? `
+              <tr style="background:var(--navy-lt)">
+                <td><input class="form-input" value="${s.label}" oninput="S._editSvc={...S._editSvc,label:this.value}" style="font-size:11px"></td>
+                <td><input class="form-input" type="number" value="${s.priceRapid}" oninput="S._editSvc={...S._editSvc,priceRapid:parseFloat(this.value)||0}" style="font-size:11px;text-align:right;width:90px"></td>
+                <td><input class="form-input" type="number" value="${s.priceRCHBS}" oninput="S._editSvc={...S._editSvc,priceRCHBS:parseFloat(this.value)||0}" style="font-size:11px;text-align:right;width:90px"></td>
+                <td style="text-align:right">
+                  <button class="btn btn-success btn-xs" onclick="saveCustomService({id:'${s.id}',label:S._editSvc.label||'${s.label}',category:'${s.category}',priceRapid:S._editSvc.priceRapid,priceRCHBS:S._editSvc.priceRCHBS});S.editingServiceId=null;render()">Save</button>
+                  <button class="btn btn-ghost btn-xs" onclick="S.editingServiceId=null;render()">Cancel</button>
+                </td>
+              </tr>
+            ` : `
+              <tr>
+                <td>${s.label}</td>
+                <td style="text-align:right">${s.priceRapid > 0 ? fmt(s.priceRapid) : '—'}</td>
+                <td style="text-align:right">${s.priceRCHBS > 0 ? fmt(s.priceRCHBS) : '—'}</td>
+                <td style="text-align:right">
+                  <button class="btn btn-ghost btn-xs" onclick="S.editingServiceId='${s.id}';S._editSvc={label:'${s.label}',priceRapid:${s.priceRapid},priceRCHBS:${s.priceRCHBS}};render()">✎</button>
+                  <button class="btn btn-xs" style="background:var(--red-lt);color:var(--red)" onclick="if(confirm('Delete ${s.label.replace(/'/g,"\\'")}?')){deleteCustomService('${s.id}');render()}">✕</button>
+                </td>
+              </tr>`).join('')}</tbody>
+          </table>
+        </div>`;
+    }).join('')}`;
+}
+
+// ═══════════════════════════════════
+// VIEW: Price List
+// ═══════════════════════════════════
+function vPriceList() {
+  const services = getEffectiveServices();
+  const categories = [...new Set(services.map(s=>s.category))].sort();
+  return `
+    <div class="card-hd" style="margin-bottom:14px">
+      <span class="card-title" style="font-size:15px">Service Price List</span>
+      <button class="btn btn-navy btn-sm no-print" onclick="window.print()">🖨 Print / PDF</button>
+    </div>
+    ${categories.map(cat => {
+      const svcs = services.filter(s=>s.category===cat);
+      return `
+        <div class="card" style="margin-bottom:12px;overflow:hidden">
+          <div style="font-size:11px;font-weight:700;color:var(--g500);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">${cat}</div>
+          <table class="client-table">
+            <thead><tr><th>Service</th><th style="text-align:right">Rapid (QAR)</th><th style="text-align:right">RCHBS (QAR)</th></tr></thead>
+            <tbody>${svcs.map(s=>`<tr>
+              <td>${s.label}</td>
+              <td style="text-align:right">${s.priceRapid>0?fmt(s.priceRapid):'—'}</td>
+              <td style="text-align:right">${s.priceRCHBS>0?fmt(s.priceRCHBS):'—'}</td>
+            </tr>`).join('')}</tbody>
+          </table>
+        </div>`;
+    }).join('')}`;
+}
+
+// ═══════════════════════════════════
 // NAV CONFIG PER ROLE
 // ═══════════════════════════════════
 function getNav(type) {
@@ -2726,6 +3107,8 @@ function getNav(type) {
       item('log','⊕','New Service',''),
       item('approvals','✓','Approval Queue', counts.pending||''),
       item('submissions','📋','All Submissions',''),
+      item('services_catalog','📖','Service Catalog',''),
+      item('price_list','💲','Price List',''),
     ],
     expense: [
       item('expense','💰','Expense Tracker', counts.approved||''),
@@ -2734,21 +3117,26 @@ function getNav(type) {
       item('dashboard','◈','Dashboard',''),
       item('finance','🧾','Invoice Queue', counts.expensed||''),
       item('submissions','📋','All Submissions',''),
+      item('price_list','💲','Price List',''),
     ],
     acct_mgr: [
       item('dashboard','◈','Dashboard',''),
+      item('clients','👥','Clients',''),
       item('finance','🧾','Invoice Queue', counts.expensed||''),
       item('submissions','📋','All Submissions',''),
+      item('price_list','💲','Price List',''),
     ],
     cfo: [
       item('cfo','📊','Overview',''),
+      item('clients','👥','Clients',''),
+      item('price_list','💲','Price List',''),
     ],
   };
   return (defs[type]||[]).join('');
 }
 
 function getViewTitle() {
-  const map = {dashboard:'Dashboard',clients:'Clients',log:'New Service',complete_service:'Complete Service',submissions:'Submissions',approvals:'Approval Queue',expense:'Expense Tracker',finance:'Invoice Queue',cfo:'Management'};
+  const map = {dashboard:'Dashboard',clients:'Clients',log:'New Service',complete_service:'Complete Service',submissions:'Submissions',approvals:'Approval Queue',expense:'Expense Tracker',finance:'Invoice Queue',cfo:'Management',services_catalog:'Service Catalog',price_list:'Price List'};
   if (S.invoiceId) return 'Invoice Preview';
   return map[S.view]||'Dashboard';
 }
@@ -2758,7 +3146,7 @@ function renderView() {
   if (S.view==='dashboard'  && (t==='am'||t==='tl'))              return vDashboardAM();
   if (S.view==='dashboard'  && t==='accountant')                  return vAccountantDashboard();
   if (S.view==='dashboard'  && t==='acct_mgr')                   return vAcctMgrDashboard();
-  if (S.view==='clients'    && (t==='am'||t==='tl'))              return vClients();
+  if (S.view==='clients'    && (t==='am'||t==='tl'||t==='acct_mgr'||t==='cfo')) return vClients();
   if (S.view==='log')                                             return vLogService();
   if (S.view==='complete_service')                                  return vCompleteService();
   if (S.view==='submissions')                                     return vSubmissions();
@@ -2766,6 +3154,8 @@ function renderView() {
   if (S.view==='expense'    && t==='expense')                     return vExpense();
   if (S.view==='finance'    && (t==='accountant'||t==='acct_mgr')) return vFinance();
   if (S.view==='cfo'        && t==='cfo')                         return vCFO();
+  if (S.view==='services_catalog' && t==='tl')                    return vServiceCatalog();
+  if (S.view==='price_list')                                      return vPriceList();
   // Default landing per type
   if (t==='expense')    return vExpense();
   if (t==='accountant') return vAccountantDashboard();
