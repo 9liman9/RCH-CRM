@@ -178,6 +178,65 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .client-table tr:hover td{background:var(--g50)}
 .ar-bar-wrap{width:80px;height:5px;background:var(--g100);border-radius:3px;display:inline-block;vertical-align:middle;margin-right:6px}
 .ar-bar-fill{height:100%;border-radius:3px;background:var(--bc,var(--green))}
+
+/* ── Invoice Queue Groups ── */
+.inv-group{border:1.5px solid var(--border);border-radius:12px;margin-bottom:18px;background:white;overflow:hidden}
+.inv-group-hd{padding:12px 16px;background:var(--navy-lt);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px}
+.inv-group-client{font-size:13px;font-weight:700;color:var(--navy)}
+.inv-group-co{font-size:10px;font-weight:700;border-radius:4px;padding:2px 7px;letter-spacing:.3px}
+.inv-group-tbl{width:100%;border-collapse:collapse}
+.inv-group-tbl th{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--g500);padding:7px 14px;border-bottom:1px solid var(--border);text-align:left}
+.inv-group-tbl th.r,.inv-group-tbl td.r{text-align:right}
+.inv-group-tbl td{padding:8px 14px;font-size:12px;border-bottom:1px solid var(--g100);vertical-align:middle}
+.inv-group-tbl tr:last-child td{border-bottom:none}
+.inv-group-tbl tr:hover td{background:var(--g50)}
+.inv-group-foot{padding:12px 16px;background:var(--g50);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.inv-group-totals{display:flex;gap:20px;align-items:center}
+.inv-group-total-item{font-size:11px;color:var(--g500)}
+.inv-group-total-item span{font-weight:700;color:var(--g900)}
+.inv-group-grand{font-size:14px;font-weight:800;color:var(--navy)}
+
+/* ── Invoice Print Template ── */
+.inv-wrap{border:1px solid var(--border);border-radius:12px;padding:32px;max-width:780px;margin:0 auto;background:white;font-size:13px}
+.inv-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
+.inv-co-name{font-size:16px;font-weight:800;color:var(--navy);margin-top:8px;margin-bottom:3px}
+.inv-co-info{font-size:11px;color:var(--g700);line-height:1.6}
+.inv-title{font-size:34px;font-weight:900;color:var(--magenta);letter-spacing:-1px;text-align:right}
+.inv-divider{border:none;border-top:2.5px solid var(--navy);margin:14px 0}
+.inv-meta-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px;align-items:start}
+.inv-client-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--g500);margin-bottom:5px}
+.inv-client-name{font-size:14px;font-weight:700;color:var(--g900)}
+.inv-client-sub{font-size:11px;color:var(--g500);margin-top:2px}
+.inv-ref-side{text-align:right}
+.inv-ref-tbl{margin-left:auto;border-collapse:collapse}
+.inv-ref-tbl td{padding:2px 0;font-size:12px}
+.inv-ref-tbl td:first-child{color:var(--g500);font-weight:600;padding-right:12px;text-align:right}
+.inv-ref-tbl td:last-child{font-weight:700;color:var(--g900)}
+.inv-tbl{width:100%;border-collapse:collapse;margin-bottom:0}
+.inv-tbl th{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:8px 10px;border-top:2px solid var(--navy);border-bottom:2px solid var(--navy);color:var(--navy);text-align:left}
+.inv-tbl th.r,.inv-tbl td.r{text-align:right}
+.inv-tbl td{padding:7px 10px;font-size:12px;border-bottom:1px solid var(--g100);vertical-align:middle}
+.inv-tbl tfoot tr:first-child td{font-weight:700;background:var(--g50);border-top:2px solid var(--navy);border-bottom:none;padding-top:9px}
+.inv-tbl .inv-words-row td{font-size:11px;font-weight:500;color:var(--g500);border-top:none;padding-top:3px;padding-bottom:8px;font-style:italic;background:var(--g50)}
+.inv-section{margin-top:18px;padding-top:16px;border-top:1px solid var(--border)}
+.inv-section-hd{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--navy);margin-bottom:8px}
+.inv-bank-tbl{border-collapse:collapse;font-size:12px}
+.inv-bank-tbl td{padding:3px 0}
+.inv-bank-tbl td:first-child{color:var(--g500);font-weight:600;min-width:120px;padding-right:10px}
+.inv-notes-list div{font-size:12px;color:var(--g700);line-height:1.8}
+.inv-footer-wrap{margin-top:18px;padding-top:14px;border-top:2px solid var(--navy);text-align:center}
+.inv-footer-thanks{font-size:12px;font-weight:700;color:var(--navy);letter-spacing:1px;text-transform:uppercase}
+.inv-footer-meta{font-size:10px;color:var(--g500);margin-top:5px;display:flex;align-items:center;justify-content:center;gap:8px}
+.inv-actions{display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding-top:12px;border-top:1px solid var(--border)}
+
+@media print {
+  .sidebar,.topbar,.inv-actions,.no-print{display:none!important}
+  .main{overflow:visible!important}
+  .content{padding:10px!important;overflow:visible!important}
+  .inv-wrap{border:none;border-radius:0;max-width:100%;padding:10px;box-shadow:none}
+  .content > .fade{animation:none}
+  body,html{background:white}
+}
 </style>
 </head>
 <body>
@@ -519,6 +578,28 @@ const SEED = [
     invoiceId:null, invoicedBy:null, invoicedAt:null, notes:''
   },
   {
+    id:'LOG-012', clientId:4, clientName:'EY Qatar', serviceId:'medical-test', serviceName:'Medical Test',
+    qty:2, unitPrice:350, total:700, card:'rapid1', cardLabel:'Rapid CC-1 (xxx1001)', paymentMethod:'card', govFee:0, rchFee:350,
+    receiptRef:'', receiptGroupId:'', buCode:'Tax', costCenter:'CC-300', serviceLine:'', department:'Tax',
+    employees:[{name:'Nadia Okafor',date:'2026-03-07'},{name:'James Wei',date:'2026-03-07'}],
+    submittedBy:'violetta', submittedByName:'Violetta A.', submittedAt:'2026-03-07T09:00:00',
+    requestId:'REQ-015', provider:'Rapid',
+    status:'expensed', approvedBy:'elena', approvedByName:'Elena F.', approvedAt:'2026-03-07T13:00:00',
+    rejectedReason:null, expensedBy:'gabi', expensedByName:'Gabi M.', expensedAt:'2026-03-08T09:30:00',
+    invoiceId:null, invoicedBy:null, invoicedAt:null, notes:''
+  },
+  {
+    id:'LOG-013', clientId:5, clientName:'Hitachi Energy', serviceId:'cr-renewal', serviceName:'CR Renewal (incl. Chamber of Commerce)',
+    qty:1, unitPrice:500, total:500, card:'rapid2', cardLabel:'Rapid CC-2 (xxx3139)', paymentMethod:'card', govFee:1200, rchFee:500,
+    receiptRef:'GOV-REC-013.pdf', receiptGroupId:'RG-013', buCode:'', costCenter:'', serviceLine:'', department:'',
+    employees:[],
+    submittedBy:'violetta', submittedByName:'Violetta A.', submittedAt:'2026-03-08T10:00:00',
+    requestId:'REQ-016', provider:'Rapid',
+    status:'expensed', approvedBy:'elena', approvedByName:'Elena F.', approvedAt:'2026-03-08T14:00:00',
+    rejectedReason:null, expensedBy:'gabi', expensedByName:'Gabi M.', expensedAt:'2026-03-09T08:00:00',
+    invoiceId:null, invoicedBy:null, invoicedAt:null, notes:''
+  },
+  {
     id:'LOG-011', clientId:2, clientName:'Acrogym Sport Center', serviceId:'gate-onshore', serviceName:'Onshore Gate Passes',
     qty:2, unitPrice:500, total:1000, card:'rapid2', cardLabel:'Rapid CC-2 (xxx3139)', paymentMethod:'card', govFee:200, rchFee:500,
     receiptRef:'GOV-REC-011.pdf', receiptGroupId:'RG-011', buCode:'', costCenter:'', serviceLine:'', department:'',
@@ -563,8 +644,43 @@ function dbAdd(log) {
 
 function dbReset() {
   localStorage.removeItem(DB_KEY);
+  localStorage.removeItem(INV_KEY);
   clientsReset();
   CLIENTS = clientsGet();
+}
+
+// ── Invoice groups (consolidated invoices) ──
+const INV_KEY = 'rch_invoices_v1';
+function dbGetInvoices() { try { return JSON.parse(localStorage.getItem(INV_KEY)||'[]'); } catch(e) { return []; } }
+function dbSaveInvoices(d) { localStorage.setItem(INV_KEY, JSON.stringify(d)); }
+
+// Migrate old single-log invoiceIds into the new invoice groups store on first load
+function migrateInvoices() {
+  if (dbGetInvoices().length > 0) return;
+  const logs = dbGet();
+  const invoiced = logs.filter(l => l.invoiceId && l.status === 'invoiced');
+  const groups = {};
+  invoiced.forEach(l => {
+    if (!groups[l.invoiceId]) groups[l.invoiceId] = [];
+    groups[l.invoiceId].push(l);
+  });
+  const invoices = Object.entries(groups).map(([invId, grpLogs]) => {
+    const first = grpLogs[0];
+    return {
+      id: invId,
+      clientId: first.clientId,
+      clientName: first.clientName,
+      provider: first.provider,
+      logIds: grpLogs.map(l => l.id),
+      createdAt: first.invoicedAt,
+      createdBy: first.invoicedBy,
+      createdByName: first.invoicedByName,
+      totalProfFee: grpLogs.reduce((s,l) => s + l.total, 0),
+      totalGovFee: grpLogs.reduce((s,l) => s + (l.govFee||0), 0),
+      grandTotal: grpLogs.reduce((s,l) => s + l.total + (l.govFee||0), 0)
+    };
+  });
+  if (invoices.length > 0) dbSaveInvoices(invoices);
 }
 
 // ═══════════════════════════════════
@@ -588,8 +704,9 @@ let S = {
   // approval reject modal
   rejectId: null,
   rejectReason: '',
-  // invoice preview
-  invoiceLogId: null,
+  // invoice — new batch system
+  invoiceId: null,        // id of a record in rch_invoices_v1, e.g. 'INV/2026/0003'
+  selectedLogs: {},       // { [clientId]: string[] } — logIds selected for invoicing
   // editing
   editingLogId: null,
   // clients view
@@ -612,6 +729,21 @@ function set(patch) {
 const fmt = n => Number(n).toLocaleString();
 const fmtDate = iso => { const d = new Date(iso); return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); };
 const fmtDT = iso => { const d = new Date(iso); return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short'})+' '+d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}); };
+const fmtInvDate = iso => { const d = new Date(iso); const mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; return String(d.getDate()).padStart(2,'0')+'-'+mo[d.getMonth()]+'-'+d.getFullYear(); };
+
+function numToWords(n) {
+  const ones=['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'];
+  const tns=['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];
+  function w(x){
+    if(x===0)return'';
+    if(x<20)return ones[x];
+    if(x<100)return tns[Math.floor(x/10)]+(x%10?' '+ones[x%10]:'');
+    if(x<1000)return ones[Math.floor(x/100)]+' Hundred'+(x%100?' and '+w(x%100):'');
+    if(x<1000000)return w(Math.floor(x/1000))+' Thousand'+(x%1000?' '+w(x%1000):'');
+    return w(Math.floor(x/1000000))+' Million'+(x%1000000?' '+w(x%1000000):'');
+  }
+  const r=Math.round(n); return r===0?'Zero':w(r);
+}
 const uid = () => 'LOG-'+String(dbGet().length+1).padStart(3,'0')+'-'+Date.now().toString(36).slice(-4).toUpperCase();
 const statusBadge = s => {
   const map = {ops_pending:'b-ops',am_completing:'b-pending',pending:'b-pending',approved:'b-approved',rejected:'b-rejected',expensed:'b-expensed',invoiced:'b-invoiced',paid:'b-approved'};
@@ -802,10 +934,78 @@ function expenseLog(id) {
   set({});
 }
 
-function generateInvoice(id) {
-  const invId = 'INV-'+new Date().getFullYear()+'-'+String(dbGet().filter(l=>l.invoiceId).length+1).padStart(3,'0');
-  dbUpdate(id, {status:'invoiced', invoiceId:invId, invoicedBy:S.user.id, invoicedByName:S.user.name, invoicedAt:new Date().toISOString()});
-  set({view:'finance', invoiceLogId:id});
+// ── Invoice selection helpers ──
+function getClientSelection(clientId, allLogIds) {
+  // If no selection stored for this client, default to all selected
+  if (!S.selectedLogs[clientId]) return allLogIds.slice();
+  return S.selectedLogs[clientId];
+}
+
+function toggleLogSelection(clientId, logId) {
+  const allLogs = dbGet().filter(l => l.clientId === clientId && l.status === 'expensed').map(l => l.id);
+  const current = getClientSelection(clientId, allLogs);
+  const idx = current.indexOf(logId);
+  const next = idx >= 0 ? current.filter(x => x !== logId) : [...current, logId];
+  const sel = Object.assign({}, S.selectedLogs); sel[clientId] = next;
+  set({selectedLogs: sel});
+}
+
+function selectAllClient(clientId, logIds) {
+  const sel = Object.assign({}, S.selectedLogs); sel[clientId] = logIds.slice();
+  set({selectedLogs: sel});
+}
+
+function deselectAllClient(clientId) {
+  const sel = Object.assign({}, S.selectedLogs); sel[clientId] = [];
+  set({selectedLogs: sel});
+}
+
+// ── Generate consolidated invoice for one client ──
+function generateBatchInvoice(clientId) {
+  migrateInvoices(); // ensure old invoices are migrated first
+  const allLogs = dbGet().filter(l => l.clientId === clientId && l.status === 'expensed');
+  const logIds = getClientSelection(clientId, allLogs.map(l => l.id)).filter(id => allLogs.find(l => l.id === id));
+  if (!logIds.length) return;
+
+  const year = new Date().getFullYear();
+  const serial = String(dbGetInvoices().length + 1).padStart(4, '0');
+  const invId = 'INV/' + year + '/' + serial;
+
+  const grpLogs = allLogs.filter(l => logIds.includes(l.id));
+  const client = CLIENTS.find(c => c.id === clientId);
+  const totalProfFee = grpLogs.reduce((s,l) => s + l.total, 0);
+  const totalGovFee  = grpLogs.reduce((s,l) => s + (l.govFee||0), 0);
+
+  const invoice = {
+    id: invId,
+    clientId,
+    clientName: client ? client.name : grpLogs[0].clientName,
+    provider: grpLogs[0].provider,
+    logIds,
+    createdAt: new Date().toISOString(),
+    createdBy: S.user.id,
+    createdByName: S.user.name,
+    totalProfFee,
+    totalGovFee,
+    grandTotal: totalProfFee + totalGovFee
+  };
+  dbSaveInvoices([...dbGetInvoices(), invoice]);
+
+  // Mark selected logs as invoiced
+  const allDbLogs = dbGet();
+  logIds.forEach(id => {
+    const i = allDbLogs.findIndex(l => l.id === id);
+    if (i >= 0) Object.assign(allDbLogs[i], {
+      status: 'invoiced', invoiceId: invId,
+      invoicedBy: S.user.id, invoicedByName: S.user.name,
+      invoicedAt: new Date().toISOString()
+    });
+  });
+  dbSave(allDbLogs);
+
+  const sel = Object.assign({}, S.selectedLogs);
+  delete sel[clientId];
+  set({view: 'finance', invoiceId: invId, selectedLogs: sel});
 }
 
 function editLog(id) {
@@ -1567,48 +1767,152 @@ function vExpense() {
 // VIEW: Invoice Queue (Suleiman / Arlene)
 // ═══════════════════════════════════
 function vFinance() {
-  if (S.invoiceLogId) return vInvoicePreview();
-  const expensed = dbGet().filter(l=>l.status==='expensed');
-  const invoiced = dbGet().filter(l=>l.status==='invoiced');
-  const totalExpensed = expensed.reduce((s,l)=>s+l.total,0);
+  if (S.invoiceId) return vInvoicePreview();
+  migrateInvoices();
+
+  const all = dbGet();
+  const expensed = all.filter(l => l.status === 'expensed');
+  const invoiced  = all.filter(l => l.status === 'invoiced');
+  const invGroups = dbGetInvoices().slice().sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+  // Group expensed logs by clientId
+  const byClient = {};
+  expensed.forEach(l => {
+    if (!byClient[l.clientId]) byClient[l.clientId] = {clientId: l.clientId, clientName: l.clientName, provider: l.provider, logs: []};
+    byClient[l.clientId].logs.push(l);
+  });
+  const clientGroups = Object.values(byClient);
+
+  const totalExpensed   = expensed.reduce((s,l) => s + l.total + (l.govFee||0), 0);
+  const totalGovPending = expensed.reduce((s,l) => s + (l.govFee||0), 0);
 
   return `
     <div class="stats-row">
       <div class="stat" style="--sc:var(--purple)">
-        <div class="stat-lbl">Ready to Invoice</div>
-        <div class="stat-val">${expensed.length}</div>
-        <div class="stat-sub">QAR ${fmt(totalExpensed)} total</div>
+        <div class="stat-lbl">Clients to Invoice</div>
+        <div class="stat-val">${clientGroups.length}</div>
+        <div class="stat-sub">${expensed.length} service${expensed.length!==1?'s':''} ready</div>
+      </div>
+      <div class="stat" style="--sc:var(--red)">
+        <div class="stat-lbl">Gov. Fees Pending</div>
+        <div class="stat-val">QAR ${fmt(totalGovPending)}</div>
+        <div class="stat-sub">To be recovered from clients</div>
       </div>
       <div class="stat" style="--sc:var(--navy)">
-        <div class="stat-lbl">Invoiced</div>
-        <div class="stat-val">${invoiced.length}</div>
+        <div class="stat-lbl">Total Pending</div>
+        <div class="stat-val">QAR ${fmt(totalExpensed)}</div>
+        <div class="stat-sub">Prof + Gov fees</div>
+      </div>
+      <div class="stat" style="--sc:var(--green)">
+        <div class="stat-lbl">Invoices Issued</div>
+        <div class="stat-val">${invGroups.length}</div>
         <div class="stat-sub">All time</div>
       </div>
     </div>
 
-    ${expensed.length > 0 ? `
-      <div style="font-size:11px;font-weight:700;color:var(--g500);text-transform:uppercase;margin-bottom:8px;letter-spacing:.5px">Ready to Invoice</div>
-      ${expensed.map(l => renderLogCard(l, false, 'invoice')).join('')}
+    ${clientGroups.length > 0 ? `
+      <div style="font-size:11px;font-weight:700;color:var(--g500);text-transform:uppercase;margin-bottom:12px;letter-spacing:.5px">Invoice Queue — Grouped by Client</div>
+      ${clientGroups.map(({clientId, clientName, provider, logs}) => {
+        const allIds = logs.map(l => l.id);
+        const selected = getClientSelection(clientId, allIds);
+        const selectedLogs = logs.filter(l => selected.includes(l.id));
+        const selTotalProf = selectedLogs.reduce((s,l) => s + l.total, 0);
+        const selTotalGov  = selectedLogs.reduce((s,l) => s + (l.govFee||0), 0);
+        const allChecked   = selected.length === allIds.length;
+        const noneChecked  = selected.length === 0;
+        const coBadge = provider === 'Rapid'
+          ? `<span class="inv-group-co" style="background:var(--navy-lt);color:var(--navy)">Rapid</span>`
+          : `<span class="inv-group-co" style="background:var(--mag-lt);color:var(--magenta)">RCHBS</span>`;
+        return `
+          <div class="inv-group">
+            <div class="inv-group-hd">
+              <div style="display:flex;align-items:center;gap:10px">
+                ${coBadge}
+                <span class="inv-group-client">${clientName}</span>
+                <span style="font-size:11px;color:var(--g500)">${logs.length} service${logs.length!==1?'s':''}</span>
+              </div>
+              <div style="display:flex;gap:6px">
+                ${allChecked
+                  ? `<button class="btn btn-ghost btn-xs" onclick="deselectAllClient(${clientId})">Deselect All</button>`
+                  : `<button class="btn btn-ghost btn-xs" onclick="selectAllClient(${clientId},[${allIds.map(id=>"'"+id+"'").join(',')}])">Select All</button>`}
+              </div>
+            </div>
+            <table class="inv-group-tbl">
+              <thead><tr>
+                <th style="width:32px"></th>
+                <th>Service</th>
+                <th>Employees / Details</th>
+                <th class="r">Qty</th>
+                <th class="r">Gov. Fee</th>
+                <th class="r">Prof. Fee</th>
+                <th class="r">Total</th>
+              </tr></thead>
+              <tbody>
+                ${logs.map(l => {
+                  const isChecked = selected.includes(l.id);
+                  const rowTotal  = l.total + (l.govFee||0);
+                  const empNames  = l.employees && l.employees.length > 0
+                    ? l.employees.map(e => e.name).join(', ')
+                    : '—';
+                  return `<tr style="${isChecked?'':'opacity:.45'}">
+                    <td><input type="checkbox" ${isChecked?'checked':''} onchange="toggleLogSelection(${clientId},'${l.id}')" style="cursor:pointer;width:15px;height:15px"></td>
+                    <td>
+                      <div style="font-weight:600;font-size:12px">${l.serviceName}</div>
+                      ${l.buCode ? `<div style="font-size:10px;color:var(--g500)">BU: ${l.buCode}${l.costCenter?' · CC: '+l.costCenter:''}</div>` : ''}
+                    </td>
+                    <td style="font-size:11px;color:var(--g500);max-width:200px">${empNames}</td>
+                    <td class="r">${l.qty}</td>
+                    <td class="r" style="color:${l.govFee?'var(--red)':'var(--g300)'}">
+                      ${l.govFee ? 'QAR '+fmt(l.govFee) : '—'}
+                    </td>
+                    <td class="r">QAR ${fmt(l.total)}</td>
+                    <td class="r" style="font-weight:700">QAR ${fmt(rowTotal)}</td>
+                  </tr>`;
+                }).join('')}
+              </tbody>
+            </table>
+            <div class="inv-group-foot">
+              <div class="inv-group-totals">
+                <div class="inv-group-total-item">Selected: <span>${selected.length} / ${allIds.length}</span></div>
+                <div class="inv-group-total-item">Gov. Fees: <span style="color:var(--red)">QAR ${fmt(selTotalGov)}</span></div>
+                <div class="inv-group-total-item">Prof. Fees: <span>QAR ${fmt(selTotalProf)}</span></div>
+                <div class="inv-group-grand">QAR ${fmt(selTotalProf + selTotalGov)}</div>
+              </div>
+              <button class="btn btn-navy btn-sm" onclick="generateBatchInvoice(${clientId})"
+                ${noneChecked ? 'disabled' : ''}>
+                Generate Invoice →
+              </button>
+            </div>
+          </div>`;
+      }).join('')}
     ` : `<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-txt">Nothing to invoice yet</div><div class="empty-sub">Items will appear here once expenses are recorded.</div></div>`}
 
-    ${invoiced.length > 0 ? `
-      <div style="font-size:11px;font-weight:700;color:var(--g500);text-transform:uppercase;margin:16px 0 8px;letter-spacing:.5px">Invoiced</div>
-      ${invoiced.map(l => `
-        <div class="log-card">
-          <div class="log-card-top">
-            <div><strong style="font-size:13px">${l.clientName}</strong> · ${l.serviceName} <span style="color:var(--g500);font-size:11px">${l.qty} emp.</span></div>
-            <div style="display:flex;align-items:center;gap:8px">
-              ${statusBadge(l.status)}
-              <button class="btn btn-ghost btn-xs" onclick="set({invoiceLogId:'${l.id}'})">View Invoice</button>
+    ${invGroups.length > 0 ? `
+      <div style="font-size:11px;font-weight:700;color:var(--g500);text-transform:uppercase;margin:20px 0 10px;letter-spacing:.5px">Issued Invoices</div>
+      ${invGroups.map(inv => {
+        const co = inv.provider === 'Rapid'
+          ? `<span class="badge" style="background:var(--navy-lt);color:var(--navy)">${inv.provider}</span>`
+          : `<span class="badge" style="background:var(--mag-lt);color:var(--magenta)">${inv.provider}</span>`;
+        return `
+          <div class="log-card">
+            <div class="log-card-top">
+              <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                ${co}
+                <strong style="font-size:13px">${inv.clientName}</strong>
+                <span style="font-size:11px;color:var(--magenta);font-weight:700">${inv.id}</span>
+                <span style="font-size:11px;color:var(--g500)">${inv.logIds.length} service${inv.logIds.length!==1?'s':''}</span>
+              </div>
+              <button class="btn btn-ghost btn-xs" onclick="set({invoiceId:'${inv.id}'})">View Invoice</button>
             </div>
-          </div>
-          <div class="log-meta">
-            <span class="log-meta-item">💰 QAR ${fmt(l.total)}</span>
-            <span class="log-meta-item">🧾 ${l.invoiceId}</span>
-            <span class="log-meta-item">📅 ${fmtDT(l.invoicedAt)}</span>
-            <span class="log-meta-item">👤 ${l.invoicedByName}</span>
-          </div>
-        </div>`).join('')}
+            <div class="log-meta">
+              <span class="log-meta-item">🏦 Gov: QAR ${fmt(inv.totalGovFee)}</span>
+              <span class="log-meta-item">💼 Prof: QAR ${fmt(inv.totalProfFee)}</span>
+              <span class="log-meta-item">💰 Total: QAR ${fmt(inv.grandTotal)}</span>
+              <span class="log-meta-item">📅 ${fmtDT(inv.createdAt)}</span>
+              <span class="log-meta-item">👤 ${inv.createdByName}</span>
+            </div>
+          </div>`;
+      }).join('')}
     ` : ''}`;
 }
 
@@ -1616,58 +1920,190 @@ function vFinance() {
 // VIEW: Invoice Preview
 // ═══════════════════════════════════
 function vInvoicePreview() {
-  const log = dbGet().find(l=>l.id===S.invoiceLogId);
-  if (!log) return '';
-  const now = log.invoicedAt ? new Date(log.invoicedAt) : new Date();
-  const due = new Date(now); due.setDate(due.getDate()+30);
+  const invoice = dbGetInvoices().find(i => i.id === S.invoiceId);
+  if (!invoice) return `<button class="btn btn-ghost btn-sm no-print" onclick="set({invoiceId:null})" style="margin-bottom:16px">← Back to Invoice Queue</button><div class="empty-state"><div class="empty-icon">⚠</div><div class="empty-txt">Invoice not found</div></div>`;
+
+  const allLogs = dbGet();
+  const logs = invoice.logIds.map(id => allLogs.find(l => l.id === id)).filter(Boolean);
+
+  // Company-specific data
+  const companies = {
+    Rapid: {
+      name: 'Rapid Clearing House WLL',
+      cr: '51552',
+      capital: '200,000',
+      address: 'Al Rawabi St., Zone 24, Building 16, Muntazah Area, Doha · P.O.Box 12788',
+      phone: '+974 4464 9507',
+      website: 'www.rch.qa',
+      email: 'info@rch.qa',
+      bank: 'Qatar National Bank',
+      accountName: 'Rapid Clearing House',
+      accountNo: '0260076385001',
+      iban: 'QA77QNBA000000000260076385001',
+      swift: 'QNBAQAQAXXX',
+      branch: 'Corniche Road Doha, Qatar'
+    },
+    RCHBS: {
+      name: 'RCH Business Solution WLL',
+      cr: '109455',
+      capital: '30,000',
+      address: 'Al Rawabi St., Zone 24, Building 16, Muntazah Area, Doha · P.O.Box 12788',
+      phone: '+974 4464 9507',
+      website: 'www.rch.qa',
+      email: 'info@rch.qa',
+      bank: 'Qatar National Bank',
+      accountName: 'RCH Business Solution W.L.L.',
+      accountNo: '0250-195255-001 QAR',
+      iban: 'QA64QNBA000000000250195255001',
+      swift: 'QNBAQAQAXXX',
+      branch: 'Salwa Corporate Branch, Salwa Road, Doha, Qatar'
+    }
+  };
+  const co = companies[invoice.provider] || companies.Rapid;
+
+  const invDate = new Date(invoice.createdAt);
+  const dueDate = new Date(invDate); dueDate.setDate(dueDate.getDate() + 7);
+
+  // Build line items — one row per employee, or one row per service if no employees
+  const lineItems = [];
+  logs.forEach(l => {
+    const hasEmps = l.employees && l.employees.length > 0;
+    if (hasEmps) {
+      const govPerEmp  = (l.govFee||0) / l.qty;
+      const profPerEmp = l.unitPrice;
+      l.employees.forEach(emp => {
+        lineItems.push({
+          desc: `${l.serviceName} — ${emp.name}`,
+          date: emp.date ? fmtInvDate(emp.date + 'T12:00:00') : fmtInvDate(l.submittedAt),
+          govFee: govPerEmp,
+          profFee: profPerEmp,
+          total: govPerEmp + profPerEmp
+        });
+      });
+    } else {
+      lineItems.push({
+        desc: l.serviceName + (l.buCode ? ` (BU: ${l.buCode}${l.costCenter ? ', CC: '+l.costCenter : ''})` : ''),
+        date: fmtInvDate(l.submittedAt),
+        govFee: l.govFee||0,
+        profFee: l.total,
+        total: (l.govFee||0) + l.total
+      });
+    }
+  });
 
   return `
-    <button class="btn btn-ghost btn-sm" onclick="set({invoiceLogId:null})" style="margin-bottom:16px">← Back to Invoice Queue</button>
-    <div class="invoice-box">
-      <div class="invoice-hd">
+    <button class="btn btn-ghost btn-sm no-print" onclick="set({invoiceId:null})" style="margin-bottom:16px">← Back to Invoice Queue</button>
+    <div class="inv-wrap">
+
+      <!-- Header -->
+      <div class="inv-header">
         <div>
-          ${logoSVG(40)}
-          <div style="font-size:18px;font-weight:800;color:var(--navy);margin-top:6px">RCH Business Solutions</div>
-          <div style="font-size:11px;color:var(--g500);margin-top:3px">Doha, Qatar · info@rch.qa</div>
+          ${logoSVG(52)}
+          <div class="inv-co-name">${co.name}</div>
+          <div class="inv-co-info">CR No. ${co.cr} &nbsp;·&nbsp; Authorised Capital QAR ${co.capital}</div>
+          <div class="inv-co-info">${co.address}</div>
+          <div class="inv-co-info">T ${co.phone} &nbsp;·&nbsp; ${co.website}</div>
         </div>
-        <div style="text-align:right">
-          <div style="font-size:22px;font-weight:800;color:var(--magenta)">INVOICE</div>
-          <div style="font-size:13px;font-weight:700;color:var(--navy);margin-top:4px">${log.invoiceId||'DRAFT'}</div>
-          <div style="font-size:11px;color:var(--g500);margin-top:6px">
-            Date: ${fmtDate(now.toISOString())}<br>
-            Due: ${fmtDate(due.toISOString())}
-          </div>
+        <div>
+          <div class="inv-title">INVOICE</div>
         </div>
       </div>
 
-      <div style="padding:14px;background:var(--g50);border-radius:8px;margin-bottom:16px">
-        <div style="font-size:10px;font-weight:700;color:var(--g500);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Bill To</div>
-        <div style="font-size:13px;font-weight:700">${log.clientName}</div>
-        <div style="font-size:11px;color:var(--g500)">${CLIENTS.find(c=>c.id===log.clientId)?.company||''}</div>
+      <hr class="inv-divider">
+
+      <!-- Client + Ref -->
+      <div class="inv-meta-row">
+        <div>
+          <div class="inv-client-lbl">Client Name:</div>
+          <div class="inv-client-name">${invoice.clientName}</div>
+          <div class="inv-client-sub">Doha, Qatar</div>
+        </div>
+        <div class="inv-ref-side">
+          <table class="inv-ref-tbl">
+            <tr><td>Date:</td><td>${fmtInvDate(invoice.createdAt)}</td></tr>
+            <tr><td>Ref. No.:</td><td>${invoice.id}</td></tr>
+            <tr><td>Due Date:</td><td>${fmtInvDate(dueDate.toISOString())}</td></tr>
+          </table>
+        </div>
       </div>
 
-      <table class="invoice-table">
-        <thead><tr><th>Description</th><th>Qty</th><th>RCH Fee</th><th>Gov Fee</th><th>Total</th></tr></thead>
-        <tbody>
+      <!-- Line Items Table -->
+      <table class="inv-tbl">
+        <thead>
           <tr>
-            <td>${log.serviceName}${log.buCode ? `<div style="font-size:10px;color:var(--g500)">BU: ${log.buCode} ${log.costCenter?'· CC: '+log.costCenter:''}</div>` : ''}</td>
-            <td>${log.qty}</td>
-            <td>QAR ${fmt(log.unitPrice)}</td>
-            <td>QAR ${fmt(log.govFee||0)}</td>
-            <td>QAR ${fmt(log.total + (log.govFee||0))}</td>
+            <th style="width:38%">Description</th>
+            <th>Date</th>
+            <th class="r">Govt. Fees</th>
+            <th class="r">Prof. Fees</th>
+            <th class="r">Total (QAR)</th>
           </tr>
+        </thead>
+        <tbody>
+          ${lineItems.map(li => `
+            <tr>
+              <td>${li.desc}</td>
+              <td style="white-space:nowrap;color:var(--g700)">${li.date}</td>
+              <td class="r" style="color:${li.govFee>0?'var(--g900)':'var(--g300)'}">
+                ${li.govFee > 0 ? fmt(li.govFee) : '—'}
+              </td>
+              <td class="r">${fmt(li.profFee)}</td>
+              <td class="r" style="font-weight:600">${fmt(li.total)}</td>
+            </tr>`).join('')}
         </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="2" style="font-size:12px;letter-spacing:.5px">TOTAL</td>
+            <td class="r" style="color:${invoice.totalGovFee>0?'var(--g900)':'var(--g300)'}">
+              ${invoice.totalGovFee > 0 ? fmt(invoice.totalGovFee) : '—'}
+            </td>
+            <td class="r">${fmt(invoice.totalProfFee)}</td>
+            <td class="r" style="font-size:14px;color:var(--navy)">${fmt(invoice.grandTotal)}</td>
+          </tr>
+          <tr class="inv-words-row">
+            <td colspan="4">Amount in Words:</td>
+            <td class="r">${numToWords(invoice.grandTotal)} QAR</td>
+          </tr>
+        </tfoot>
       </table>
 
-      <div class="invoice-total">
-        <div style="font-size:11px;color:var(--g500);margin-bottom:2px">RCH Professional Fee: QAR ${fmt(log.total)}</div>
-        ${log.govFee ? `<div style="font-size:11px;color:var(--g500);margin-bottom:2px">Government Fee: QAR ${fmt(log.govFee)}</div>` : ''}
-        <div style="font-size:11px;color:var(--g500);margin-bottom:4px">Total Amount Due</div>
-        <div style="font-size:24px;font-weight:800;color:var(--navy)">QAR ${fmt(log.total + (log.govFee||0))}</div>
+      <!-- Payment Details -->
+      <div class="inv-section">
+        <div class="inv-section-hd">Payment Details</div>
+        <table class="inv-bank-tbl">
+          <tr><td>Bank Name:</td><td>${co.bank}</td></tr>
+          <tr><td>Account Name:</td><td>${co.accountName}</td></tr>
+          <tr><td>Account No.:</td><td>${co.accountNo}</td></tr>
+          <tr><td>IBAN:</td><td>${co.iban}</td></tr>
+          <tr><td>Swift Code:</td><td>${co.swift}</td></tr>
+          <tr><td>Bank Address:</td><td>${co.branch}</td></tr>
+        </table>
       </div>
 
-      <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
-        <div style="font-size:10px;color:var(--g500)">Generated by ${log.invoicedByName} · ${fmtDT(log.invoicedAt)}</div>
+      <!-- Notes -->
+      <div class="inv-section">
+        <div class="inv-section-hd">Notes</div>
+        <div class="inv-notes-list">
+          <div>a) Bank transfer charges to be borne by the client/beneficiary.</div>
+          <div>b) All Payments received are NON-REFUNDABLE.</div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="inv-footer-wrap">
+        <div class="inv-footer-thanks">Would Like to Thank You for Your Business</div>
+        <div class="inv-footer-meta">
+          ${logoSVG(18)}
+          <span>CR ${co.cr}</span>
+          <span>·</span>
+          <span>${co.email}</span>
+          <span>·</span>
+          <span>${co.website}</span>
+        </div>
+      </div>
+
+      <!-- Actions (hidden on print) -->
+      <div class="inv-actions no-print">
+        <div style="font-size:10px;color:var(--g500)">Generated by ${invoice.createdByName} · ${fmtDT(invoice.createdAt)}</div>
         <button class="btn btn-navy btn-sm" onclick="window.print()">🖨 Print / PDF</button>
       </div>
     </div>`;
@@ -1758,6 +2194,60 @@ function vAccountantDashboard() {
       </div>
     `}
 
+    <!-- Pending Invoice Summary by Client -->
+    ${agingItems.length > 0 ? (() => {
+      const byC = {};
+      agingItems.forEach(l => {
+        if (!byC[l.clientId]) byC[l.clientId] = {name: l.clientName, provider: l.provider, count: 0, govFee: 0, profFee: 0};
+        byC[l.clientId].count++;
+        byC[l.clientId].govFee  += (l.govFee||0);
+        byC[l.clientId].profFee += l.total;
+      });
+      const rows = Object.values(byC).sort((a,b) => (b.govFee+b.profFee) - (a.govFee+a.profFee));
+      const totGov  = rows.reduce((s,r) => s + r.govFee, 0);
+      const totProf = rows.reduce((s,r) => s + r.profFee, 0);
+      return `
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-hd">
+            <span class="card-title">Pending Invoice Summary</span>
+            <button class="btn btn-navy btn-xs" onclick="set({view:'finance'})">Go to Invoice Queue →</button>
+          </div>
+          <table class="client-table">
+            <thead><tr>
+              <th>Client</th>
+              <th>Company</th>
+              <th style="text-align:center"># Services</th>
+              <th style="text-align:right">Gov. Fees</th>
+              <th style="text-align:right">Prof. Fees</th>
+              <th style="text-align:right">Total</th>
+            </tr></thead>
+            <tbody>
+              ${rows.map(r => `<tr>
+                <td style="font-weight:600">${r.name}</td>
+                <td><span class="badge" style="background:${r.provider==='Rapid'?'var(--navy-lt)':'var(--mag-lt)'};color:${r.provider==='Rapid'?'var(--navy)':'var(--magenta)'}">${r.provider}</span></td>
+                <td style="text-align:center">${r.count}</td>
+                <td style="text-align:right;color:${r.govFee>0?'var(--red)':'var(--g500)'};font-weight:${r.govFee>0?'700':'400'}">
+                  ${r.govFee > 0 ? 'QAR '+fmt(r.govFee) : '—'}
+                </td>
+                <td style="text-align:right">QAR ${fmt(r.profFee)}</td>
+                <td style="text-align:right;font-weight:700;color:var(--navy)">QAR ${fmt(r.govFee+r.profFee)}</td>
+              </tr>`).join('')}
+            </tbody>
+            <tfoot>
+              <tr style="background:var(--g50)">
+                <td colspan="2" style="font-weight:700;font-size:12px">Total</td>
+                <td style="text-align:center;font-weight:700">${agingItems.length}</td>
+                <td style="text-align:right;font-weight:700;color:var(--red)">
+                  ${totGov > 0 ? 'QAR '+fmt(totGov) : '—'}
+                </td>
+                <td style="text-align:right;font-weight:700">QAR ${fmt(totProf)}</td>
+                <td style="text-align:right;font-weight:700;color:var(--navy)">QAR ${fmt(totGov+totProf)}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>`;
+    })() : ''}
+
     <div class="grid-2">
       <div class="card">
         <div class="card-hd">
@@ -1770,11 +2260,11 @@ function vAccountantDashboard() {
             <div class="row-item">
               <div style="flex:1">
                 <div style="font-size:12px;font-weight:600">${l.clientName}</div>
-                <div style="font-size:11px;color:var(--g500);margin-top:1px">${l.serviceName} · ${l.qty} emp · QAR ${fmt(l.total)}</div>
+                <div style="font-size:11px;color:var(--g500);margin-top:1px">${l.serviceName} · ${l.qty} emp · QAR ${fmt(l.total)}${l.govFee ? ' + QAR '+fmt(l.govFee)+' gov' : ''}</div>
               </div>
               <div style="text-align:right;display:flex;align-items:center;gap:8px">
                 <span class="badge ${l.ageDays > 5 ? 'b-rejected' : l.ageDays > 2 ? 'b-pending' : 'b-approved'}">${l.ageDays}d ago</span>
-                <button class="btn btn-navy btn-xs" onclick="generateInvoice('${l.id}')">Invoice</button>
+                <button class="btn btn-navy btn-xs" onclick="set({view:'finance'})">Invoice Queue</button>
               </div>
             </div>`).join('')
         }
@@ -1838,23 +2328,26 @@ function vAccountantDashboard() {
         <span class="card-title">Recent Invoices</span>
         <button class="btn btn-ghost btn-xs" onclick="set({view:'finance'})">View All →</button>
       </div>
-      ${invoiced.length === 0
-        ? `<div style="text-align:center;padding:20px;color:var(--g500);font-size:12px">No invoices generated yet</div>`
-        : invoiced.sort((a,b) => new Date(b.invoicedAt) - new Date(a.invoicedAt)).slice(0, 5).map(l => `
-          <div class="row-item">
-            <div style="flex:1">
-              <div style="display:flex;align-items:center;gap:8px">
-                <span style="font-size:12px;font-weight:700;color:var(--magenta)">${l.invoiceId}</span>
-                <span style="font-size:12px;font-weight:600">${l.clientName}</span>
+      ${(() => {
+        migrateInvoices();
+        const recent = dbGetInvoices().slice().sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0,5);
+        return recent.length === 0
+          ? `<div style="text-align:center;padding:20px;color:var(--g500);font-size:12px">No invoices generated yet</div>`
+          : recent.map(inv => `
+            <div class="row-item">
+              <div style="flex:1">
+                <div style="display:flex;align-items:center;gap:8px">
+                  <span style="font-size:12px;font-weight:700;color:var(--magenta)">${inv.id}</span>
+                  <span style="font-size:12px;font-weight:600">${inv.clientName}</span>
+                </div>
+                <div style="font-size:11px;color:var(--g500);margin-top:1px">${inv.logIds.length} service${inv.logIds.length!==1?'s':''} · ${fmtDate(inv.createdAt)} · by ${inv.createdByName}</div>
               </div>
-              <div style="font-size:11px;color:var(--g500);margin-top:1px">${l.serviceName} · ${l.qty} emp · ${fmtDate(l.invoicedAt)} · by ${l.invoicedByName}</div>
-            </div>
-            <div style="display:flex;align-items:center;gap:8px">
-              <span style="font-size:13px;font-weight:700;color:var(--navy)">QAR ${fmt(l.total)}</span>
-              <button class="btn btn-ghost btn-xs" onclick="set({view:'finance',invoiceLogId:'${l.id}'})">View</button>
-            </div>
-          </div>`).join('')
-      }
+              <div style="display:flex;align-items:center;gap:8px">
+                <span style="font-size:13px;font-weight:700;color:var(--navy)">QAR ${fmt(inv.grandTotal)}</span>
+                <button class="btn btn-ghost btn-xs" onclick="set({view:'finance',invoiceId:'${inv.id}'})">View</button>
+              </div>
+            </div>`).join('');
+      })()}
     </div>`;
 }
 
@@ -2153,7 +2646,7 @@ function renderLogCard(l, showActions, action) {
     : action === 'expense'
       ? `<button class="btn btn-primary btn-xs" onclick="expenseLog('${l.id}')">Mark Expensed</button>`
       : action === 'invoice'
-        ? `<button class="btn btn-navy btn-xs" onclick="generateInvoice('${l.id}')">Generate Invoice</button>`
+        ? `<button class="btn btn-navy btn-xs" onclick="set({view:'finance'})">Invoice Queue</button>`
         : '';
 
   const payLabel = l.paymentMethod ? (l.paymentMethod==='card' ? l.cardLabel : l.paymentMethod==='cash' ? 'Cash' : 'Other') : '—';
@@ -2215,7 +2708,7 @@ function getNav(type) {
   })();
 
   const item = (view, icon, label, badge) =>
-    `<div class="nav-item ${S.view===view?'active':''}" onclick="set({view:'${view}',invoiceLogId:null})">
+    `<div class="nav-item ${S.view===view?'active':''}" onclick="set({view:'${view}',invoiceId:null})">
       <span class="nav-icon">${icon}</span><span>${label}</span>
       ${badge ? `<span class="nav-badge">${badge}</span>` : ''}
     </div>`;
@@ -2255,8 +2748,8 @@ function getNav(type) {
 }
 
 function getViewTitle() {
-  const map = {dashboard:'Dashboard',clients:'Clients',log:'New Service',complete_service:'Complete Service',submissions:'Submissions',approvals:'Approval Queue',expense:'Expense Tracker',finance:'Invoice Queue',cfo:'Management',invoiceLogId:'Invoice'};
-  if (S.invoiceLogId) return 'Invoice Preview';
+  const map = {dashboard:'Dashboard',clients:'Clients',log:'New Service',complete_service:'Complete Service',submissions:'Submissions',approvals:'Approval Queue',expense:'Expense Tracker',finance:'Invoice Queue',cfo:'Management'};
+  if (S.invoiceId) return 'Invoice Preview';
   return map[S.view]||'Dashboard';
 }
 
@@ -2348,6 +2841,7 @@ function render() {
 }
 
 // boot
+migrateInvoices();
 render();
 </script>
 </body>
