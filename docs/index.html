@@ -601,12 +601,11 @@ function getServiceOpts(company, selectedId) {
   return base;
 }
 
-function logoSVG(sz) {
-  return `<svg width="${sz}" height="${sz}" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-    <polygon points="8,90 92,10 58,90" fill="#8c0050"/>
-    <polygon points="8,90 92,10 36,54" fill="#C4006A"/>
-    <polygon points="92,10 58,90 36,54" fill="#e0439a"/>
-  </svg>`;
+function logoImg(h, dark) {
+  const style = dark
+    ? `height:${h}px;object-fit:contain;display:inline-block;background:white;border-radius:6px;padding:3px`
+    : `height:${h}px;object-fit:contain;display:inline-block`;
+  return `<img src="rch logo.PNG" alt="RCH logo" style="${style}">`;
 }
 
 // ═══════════════════════════════════
@@ -2174,7 +2173,7 @@ function vInvoicePreview() {
       <!-- Header -->
       <div class="inv-header">
         <div>
-          ${logoSVG(52)}
+          ${logoImg(52)}
           <div class="inv-co-name">${co.name}</div>
           <div class="inv-co-info">CR No. ${co.cr} &nbsp;·&nbsp; Authorised Capital QAR ${co.capital}</div>
           <div class="inv-co-info">${co.address}</div>
@@ -2296,7 +2295,7 @@ function vInvoicePreview() {
       <div class="inv-footer-wrap">
         <div class="inv-footer-thanks">Would Like to Thank You for Your Business</div>
         <div class="inv-footer-meta">
-          ${logoSVG(18)}
+          ${logoImg(18)}
           <span>CR ${co.cr}</span>
           <span>·</span>
           <span>${co.email}</span>
@@ -3174,7 +3173,7 @@ function render() {
       <div class="login-wrap">
         <div class="login-box">
           <div class="login-hd">
-            <div class="login-logo">${logoSVG(44)}<span style="font-size:26px;font-weight:800;color:white">RCH CRM</span></div>
+            <div class="login-logo">${logoImg(44, true)}<span style="font-size:26px;font-weight:800;color:white">RCH CRM</span></div>
             <div style="font-size:14px;color:rgba(255,255,255,.55);margin-top:4px">Service Management Platform</div>
           </div>
           <form class="login-form" onsubmit="handleLogin(event)">
@@ -3199,7 +3198,7 @@ function render() {
     <div class="app">
       <div class="sidebar">
         <div class="sb-brand">
-          ${logoSVG(30)}
+          ${logoImg(30, true)}
           <div><div class="brand-rch">RCH</div><div class="brand-sub">CRM System</div></div>
         </div>
         <div class="sb-nav">
