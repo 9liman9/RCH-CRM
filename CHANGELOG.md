@@ -2,6 +2,17 @@
 
 All notable changes to the RCH CRM System Vision project.
 
+## [0.4.0] - 2026-03-10
+
+### Added
+- **Batch invoice generation** with client-grouped selection UI for efficient bulk invoicing workflows
+- **Multi-service support** in service logging workflow with enhanced Account Manager (AM) completion stage
+- **AM completion stage** improvements enabling Account Managers to mark services as complete with multiple services per session
+
+### Changed
+- Service logging workflow refactored to support simultaneous multi-service logging from Account Managers
+- Invoice generation process streamlined with grouped client selection for improved usability
+
 ## [0.3.0] - 2026-03-05
 
 ### Added

@@ -68,8 +68,8 @@ The main deliverable. 16 sections covering:
 | 3 | The Ideal System: Overview | High-level flow diagram with all roles |
 | 4 | Client Setup | Retainer vs per-job, agreements, custom invoice fields |
 | 5 | Services Offered | Service categories for Rapid and RCHBS |
-| 6 | Service Flow | 12-step flow: Client → AM → OPs → AM logs → Elena → Gabi → Verified |
-| 7 | Invoicing | 3 types: weekly Thursday, scheduled/retainer, annual lookback |
+| 6 | Service Flow | 12-step flow with multi-service support: Client → AM → OPs → AM logs (multiple services) → Elena → Gabi → Verified |
+| 7 | Invoicing | Batch generation with client-grouped selection; 3 types: weekly Thursday, scheduled/retainer, annual lookback |
 | 8 | Price List Management | Managed by Elena, auto-applied, custom rates per client |
 | 9 | Card Management | 7 cards (3 Rapid CC, 1 RCHBS CC, 3 Himyan), payment method tracking |
 | 10 | Payment Tracking | Opening balances, payment matching, receivables, proactive follow-up |
@@ -86,11 +86,11 @@ A fully clickable HTML prototype demonstrating the key CRM screens. **Just doubl
 
 Screens included:
 - **Dashboard** — Finance home screen with uninvoiced services, overdue alerts, invoice status
-- **Invoicing** — Thursday workflow: select client → pick services → generate draft → approve
+- **Invoicing** — Batch invoice workflow with client-grouped selection for efficient processing
 - **Clients** — Spending limits with progress bars, retainer/per-job badges, custom invoice flags
 - **Cards** — All 7 company cards with spending vs limits, low balance warnings
 - **Schedule** — Visual timeline for recurring and annual invoices
-- **AM Demo** — Step-by-step Account Manager service logging flow
+- **AM Demo** — Enhanced Account Manager service logging flow with multi-service support and completion stage
 
 Mock data uses real client names (ABB, Seaquest, EY, Acrogym, Hitachi, Property Finder) and realistic service data.
 
