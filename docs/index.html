@@ -2019,7 +2019,6 @@ function vFinance() {
               <tbody>
                 ${logs.map(l => {
                   const isChecked = selected.includes(l.id);
-                  const rowTotal  = l.total + (l.govFee||0);
                   const empNames  = l.employees && l.employees.length > 0
                     ? l.employees.map(e => e.name).join(', ')
                     : '—';
