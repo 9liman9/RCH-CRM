@@ -243,12 +243,13 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .doc-page-receipt img{max-width:100%;max-height:240mm;object-fit:contain;border:1px solid var(--border);border-radius:6px}
 .doc-page-receipt object,.doc-page-receipt iframe{width:100%;height:250mm;border:1px solid var(--border);border-radius:6px}
 
+@page{size:A4 portrait;margin:12mm}
 @media print {
   .sidebar,.topbar,.inv-actions,.no-print,.doc-viewer-toolbar{display:none!important}
   .main{overflow:visible!important}
   .content{padding:0!important;overflow:visible!important}
   .doc-viewer{background:white!important;padding:0!important;border-radius:0!important}
-  .doc-page{box-shadow:none!important;margin:0!important;padding:10px!important;page-break-after:always;min-height:auto}
+  .doc-page{width:100%!important;box-shadow:none!important;margin:0!important;padding:0!important;page-break-after:always;min-height:auto}
   .doc-page:last-child{page-break-after:auto}
   .doc-page .inv-wrap{border:none;border-radius:0;max-width:100%;padding:0;box-shadow:none}
   .content > .fade{animation:none}
