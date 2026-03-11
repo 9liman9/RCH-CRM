@@ -250,7 +250,7 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
   .main{overflow:visible!important}
   .content{padding:0!important;overflow:visible!important}
   .doc-viewer{background:white!important;padding:0!important;border-radius:0!important}
-  .doc-page{width:100%!important;box-shadow:none!important;margin:0!important;padding:0!important;page-break-after:always;break-after:always;min-height:auto}
+  .doc-page{width:100%!important;box-shadow:none!important;margin:0!important;padding:12mm!important;page-break-after:always;break-after:always;min-height:auto}
   .doc-page:last-child{page-break-after:auto;break-after:auto}
   .doc-page .inv-wrap{border:none;border-radius:0;max-width:100%;padding:0;box-shadow:none}
   .content > .fade{animation:none}
@@ -3138,6 +3138,7 @@ function vAccountantDashboard() {
               <div style="display:flex;align-items:center;gap:8px">
                 <span style="font-size:13px;font-weight:700;color:var(--navy)">QAR ${fmt(inv.grandTotal)}</span>
                 <button class="btn btn-ghost btn-xs" onclick="set({view:'finance',invoiceId:'${inv.id}'})">View</button>
+                ${['accountant','acct_mgr'].includes(S.user?.type) ? `<button class="btn btn-ghost btn-xs" onclick="(function(){set({view:'finance',invoiceId:'${inv.id}'});S.amendingInvoice=true;render();})()">✎ Amend</button>` : ''}
               </div>
             </div>`).join('');
       })()}
