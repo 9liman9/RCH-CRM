@@ -288,7 +288,7 @@ const CLIENTS_SEED = [
   // ── Rapid Clearing House clients ──────────────────────────────────────────
   { id:1,  name:'ABB Qatar WLL',               company:'Rapid', contact:'Ahmed Al-Mannai',   email:'accounts@abb.com.qa',         phone:'+974 4455 1001', type:'retainer', creditLimit:15000, assignedTo:'violetta', address:'Al Sadd Street, Tower 25, Floor 8', city:'Doha', country:'Qatar', poBox:'22177', tin:'300051234', crNumber:'45678', vatNumber:'' },
   { id:2,  name:'EY Qatar',                    company:'Rapid', contact:'Sara Al-Emadi',     email:'info@qa.ey.com',              phone:'+974 4457 4200', type:'retainer', creditLimit:20000, assignedTo:'violetta', address:'Tornado Tower, Floor 23, West Bay', city:'Doha', country:'Qatar', poBox:'164', tin:'300098712', crNumber:'36741', vatNumber:'' },
-  { id:3,  name:'Hitachi Qatar WLL',           company:'Rapid', contact:'Khalid Al-Sulaiti', email:'qatar@hitachi.com',           phone:'+974 4431 0050', type:'per-job',  creditLimit:10000, assignedTo:'violetta', address:'Salwa Road, Building 42, Floor 3', city:'Doha', country:'Qatar', poBox:'9122', tin:'300045678', crNumber:'52341', vatNumber:'' },
+  { id:3,  name:'Hitachi Qatar WLL',           company:'Rapid', contact:'Khalid Al-Sulaiti', email:'qatar@hitachi.com',           phone:'+974 4431 0050', type:'retainer',  creditLimit:10000, assignedTo:'violetta', address:'Salwa Road, Building 42, Floor 3', city:'Doha', country:'Qatar', poBox:'9122', tin:'300045678', crNumber:'52341', vatNumber:'' },
   { id:4,  name:'Industries Qatar QSC',        company:'Rapid', contact:'Faisal Al-Kuwari',  email:'info@iq.com.qa',              phone:'+974 4496 5500', type:'retainer', creditLimit:25000, assignedTo:'violetta', address:'Grand Hamad Street, IQ Tower', city:'Doha', country:'Qatar', poBox:'3212', tin:'300012345', crNumber:'8765', vatNumber:'' },
   { id:5,  name:'Vodafone Qatar PSC',          company:'Rapid', contact:'Reem Al-Ansari',    email:'corporate@vodafone.com.qa',   phone:'+974 7777 0000', type:'retainer', creditLimit:18000, assignedTo:'violetta', address:'West Bay, Al Dafna Tower, Floor 12', city:'Doha', country:'Qatar', poBox:'27727', tin:'300067890', crNumber:'44590', vatNumber:'' },
   { id:6,  name:'Al Meera Consumer Goods',     company:'Rapid', contact:'Mohammed Al-Hajri', email:'hr@almeera.com.qa',           phone:'+974 4012 3456', type:'retainer', creditLimit:12000, assignedTo:'violetta', address:'C Ring Road, Al Meera HQ', city:'Doha', country:'Qatar', poBox:'9521', tin:'300033456', crNumber:'28901', vatNumber:'' },
@@ -2429,6 +2429,7 @@ function vInvoicePreview() {
   const dueDate = new Date(invDate); dueDate.setDate(dueDate.getDate() + 7);
 
   // Build line items — one row per employee, or one row per service if no employees
+  const isRetainer = client.type === 'retainer';
   const lineItems = [];
   logs.forEach(l => {
     const hasEmps = l.employees && l.employees.length > 0;
@@ -2437,11 +2438,16 @@ function vInvoicePreview() {
       : '';
     if (hasEmps) {
       const govPerEmp  = (l.govFee||0) / l.qty;
-      const profPerEmp = l.unitPrice;
+      const profPerEmp = isRetainer ? 0 : l.unitPrice;
       l.employees.forEach(emp => {
+        const empBuCc = emp.buCode || emp.costCenter
+          ? `${emp.buCode?'BU: '+emp.buCode:''}${emp.buCode&&emp.costCenter?' · ':''}${emp.costCenter?'CC: '+emp.costCenter:''}`
+          : '';
         lineItems.push({
           desc: `${l.serviceName} — ${emp.name}`,
-          buCc: buCcNote || (emp.buCode || emp.costCenter ? `${emp.buCode?'BU: '+emp.buCode:''}${emp.buCode&&emp.costCenter?' · ':''}${emp.costCenter?'CC: '+emp.costCenter:''}` : ''),
+          buCc: buCcNote || empBuCc,
+          buCode: emp.buCode || l.buCode || '',
+          costCenter: emp.costCenter || l.costCenter || '',
           date: emp.date ? fmtInvDate(emp.date + 'T12:00:00') : fmtInvDate(l.submittedAt),
           govFee: govPerEmp,
           profFee: profPerEmp,
@@ -2449,16 +2455,22 @@ function vInvoicePreview() {
         });
       });
     } else {
+      const profFee = isRetainer ? 0 : l.total;
       lineItems.push({
         desc: l.serviceName,
         buCc: buCcNote,
+        buCode: l.buCode || '',
+        costCenter: l.costCenter || '',
         date: fmtInvDate(l.submittedAt),
         govFee: l.govFee||0,
-        profFee: l.total,
-        total: (l.govFee||0) + l.total
+        profFee,
+        total: (l.govFee||0) + profFee
       });
     }
   });
+  const displayGovTotal  = lineItems.reduce((s, li) => s + li.govFee, 0);
+  const displayProfTotal = lineItems.reduce((s, li) => s + li.profFee, 0);
+  const displayTotal     = displayGovTotal + displayProfTotal;
 
   // Collect all receipt attachments for additional pages
   const allReceipts = [];
@@ -2589,13 +2601,16 @@ function vInvoicePreview() {
                     <td style="text-align:center;font-size:11px;color:var(--g500);white-space:nowrap">${lineOffset + chunkIdx + 1}</td>
                     <td>
                       <div>${li.desc}</div>
-                      ${li.buCc ? `<div style="font-size:10px;color:var(--g500);margin-top:2px">${li.buCc}</div>` : ''}
+                      ${(li.buCode || li.costCenter) ? `<div style="display:flex;gap:4px;margin-top:3px;flex-wrap:wrap">
+                        ${li.buCode ? `<span style="font-size:9px;font-weight:600;color:var(--g700);background:var(--g100);padding:1px 5px;border-radius:3px;letter-spacing:.3px">BU: ${li.buCode}</span>` : ''}
+                        ${li.costCenter ? `<span style="font-size:9px;font-weight:600;color:var(--g700);background:var(--g100);padding:1px 5px;border-radius:3px;letter-spacing:.3px">CC: ${li.costCenter}</span>` : ''}
+                      </div>` : ''}
                     </td>
                     <td style="white-space:nowrap;color:var(--g700)">${li.date}</td>
                     <td class="r" style="color:${li.govFee>0?'var(--g900)':'var(--g300)'}">
                       ${li.govFee > 0 ? fmt(li.govFee) : '—'}
                     </td>
-                    <td class="r">${fmt(li.profFee)}</td>
+                    <td class="r" style="color:${li.profFee>0?'var(--g900)':'var(--g300)'}">${li.profFee > 0 ? fmt(li.profFee) : '—'}</td>
                     <td class="r" style="font-weight:600">${fmt(li.total)}</td>
                   </tr>`).join('')}
               </tbody>
@@ -2603,11 +2618,13 @@ function vInvoicePreview() {
               <tfoot>
                 <tr>
                   <td colspan="3" style="font-size:11px;letter-spacing:.5px">SUBTOTAL</td>
-                  <td class="r" style="color:${invoice.totalGovFee>0?'var(--g900)':'var(--g300)'}">
-                    ${invoice.totalGovFee > 0 ? fmt(invoice.totalGovFee) : '—'}
+                  <td class="r" style="color:${displayGovTotal>0?'var(--g900)':'var(--g300)'}">
+                    ${displayGovTotal > 0 ? fmt(displayGovTotal) : '—'}
                   </td>
-                  <td class="r">${fmt(invoice.totalProfFee)}</td>
-                  <td class="r" style="color:var(--navy)">${fmt(invoice.grandTotal)}</td>
+                  <td class="r" style="color:${displayProfTotal>0?'var(--g900)':'var(--g300)'}">
+                    ${displayProfTotal > 0 ? fmt(displayProfTotal) : '—'}
+                  </td>
+                  <td class="r" style="color:var(--navy)">${fmt(displayTotal)}</td>
                 </tr>
                 <tr>
                   <td colspan="5" style="font-size:11px;color:var(--g500);background:var(--g50);border-bottom:none;padding-top:4px;padding-bottom:4px;font-style:italic">VAT (0%)</td>
@@ -2615,11 +2632,11 @@ function vInvoicePreview() {
                 </tr>
                 <tr>
                   <td colspan="5" style="font-weight:800;font-size:12px;letter-spacing:.5px;background:var(--g50);border-top:1px solid var(--navy);border-bottom:none;padding-top:9px;color:var(--navy)">TOTAL (QAR)</td>
-                  <td class="r" style="font-size:15px;font-weight:800;color:var(--navy);background:var(--g50);border-top:1px solid var(--navy);border-bottom:none;padding-top:9px">${fmt(invoice.grandTotal)}</td>
+                  <td class="r" style="font-size:15px;font-weight:800;color:var(--navy);background:var(--g50);border-top:1px solid var(--navy);border-bottom:none;padding-top:9px">${fmt(displayTotal)}</td>
                 </tr>
                 <tr class="inv-words-row">
                   <td colspan="5">Amount in Words:</td>
-                  <td class="r">${numToWords(invoice.grandTotal)} QAR</td>
+                  <td class="r">${numToWords(displayTotal)} QAR</td>
                 </tr>
               </tfoot>
               ` : ''}
