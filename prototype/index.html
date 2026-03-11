@@ -1051,7 +1051,8 @@ function generateBatchInvoice(clientId) {
   const providerInvCount = dbGetInvoices().filter(i => i.provider === provider && i.id.includes('/' + year + '/')).length;
   const invId = 'INV/' + prefix + '/' + year + '/' + (startSerial + providerInvCount);
   const client = CLIENTS.find(c => c.id === clientId);
-  const totalProfFee = grpLogs.reduce((s,l) => s + l.total, 0);
+  const isRetainer = client && client.type === 'retainer';
+  const totalProfFee = isRetainer ? 0 : grpLogs.reduce((s,l) => s + l.total, 0);
   const totalGovFee  = grpLogs.reduce((s,l) => s + (l.govFee||0), 0);
 
   const invoice = {
