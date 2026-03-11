@@ -2449,7 +2449,19 @@ function vInvoicePreview() {
       if (!seen.has(r.id)) { seen.add(r.id); allReceipts.push({...r, logName: l.serviceName, clientName: l.clientName}); }
     });
   });
-  const totalPages = 1 + allReceipts.length;
+  // Split line items across A4 pages
+  const ITEMS_FIRST_PAGE = 15;  // first page has full header + client meta
+  const ITEMS_CONT_PAGE  = 25;  // continuation pages have only a compact header
+  const itemChunks = [];
+  if (lineItems.length <= ITEMS_FIRST_PAGE) {
+    itemChunks.push(lineItems);
+  } else {
+    itemChunks.push(lineItems.slice(0, ITEMS_FIRST_PAGE));
+    let rest = lineItems.slice(ITEMS_FIRST_PAGE);
+    while (rest.length) { itemChunks.push(rest.splice(0, ITEMS_CONT_PAGE)); }
+  }
+  const totalInvPages = itemChunks.length;
+  const totalPages = totalInvPages + allReceipts.length;
 
   // Look up client for address/tax details
   const client = CLIENTS.find(c => c.id === invoice.clientId) || {};
@@ -2482,126 +2494,155 @@ function vInvoicePreview() {
         </div>
       </div>
 
-      <!-- Page 1: Invoice -->
-      <div class="doc-page">
-        <div class="inv-wrap">
+      <!-- Invoice Pages (auto-paginated) -->
+      ${itemChunks.map((chunk, pageIdx) => {
+        const isFirst = pageIdx === 0;
+        const isLast  = pageIdx === itemChunks.length - 1;
+        // Running line-item index offset so # column stays consecutive across pages
+        const lineOffset = pageIdx === 0 ? 0 : ITEMS_FIRST_PAGE + (pageIdx - 1) * ITEMS_CONT_PAGE;
+        return `
+        <div class="doc-page">
+          <div class="inv-wrap">
 
-          <!-- Header -->
-          <div class="inv-header">
-            <div>
-              ${logoImg(52)}
-              <div class="inv-co-name">${co.name}</div>
-              <div class="inv-co-info">CR No. ${co.cr} &nbsp;·&nbsp; Authorised Capital QAR ${co.capital}</div>
-              <div class="inv-co-info">${co.address}</div>
-              <div class="inv-co-info">T ${co.phone} &nbsp;·&nbsp; ${co.website}</div>
+            ${isFirst ? `
+            <!-- Header (first page only) -->
+            <div class="inv-header">
+              <div>
+                ${logoImg(52)}
+                <div class="inv-co-name">${co.name}</div>
+                <div class="inv-co-info">CR No. ${co.cr} &nbsp;·&nbsp; Authorised Capital QAR ${co.capital}</div>
+                <div class="inv-co-info">${co.address}</div>
+                <div class="inv-co-info">T ${co.phone} &nbsp;·&nbsp; ${co.website}</div>
+              </div>
+              <div>
+                <div class="inv-title">INVOICE</div>
+              </div>
             </div>
-            <div>
-              <div class="inv-title">INVOICE</div>
+            <hr class="inv-divider">
+            <!-- Client + Ref -->
+            <div class="inv-meta-row">
+              <div>
+                <div class="inv-client-lbl">Client Name:</div>
+                <div class="inv-client-name">${invoice.clientName}</div>
+                ${client.address ? `<div class="inv-client-sub">${client.address}</div>` : ''}
+                <div class="inv-client-sub">${clientLocLine}</div>
+                ${taxParts.length ? `<div class="inv-client-sub" style="margin-top:3px;font-size:10px;color:var(--g500)">${taxParts.join(' &nbsp;·&nbsp; ')}</div>` : ''}
+              </div>
+              <div class="inv-ref-side">
+                <table class="inv-ref-tbl">
+                  <tr><td>Date:</td><td>${fmtInvDate(invoice.createdAt)}</td></tr>
+                  <tr><td>Ref. No.:</td><td>${invoice.id}</td></tr>
+                  <tr><td>Due Date:</td><td>${fmtInvDate(dueDate.toISOString())}</td></tr>
+                </table>
+              </div>
             </div>
-          </div>
+            ` : `
+            <!-- Compact continuation header -->
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid var(--navy)">
+              <div style="display:flex;align-items:center;gap:12px">
+                ${logoImg(28)}
+                <div>
+                  <div style="font-size:13px;font-weight:800;color:var(--navy)">${co.name}</div>
+                  <div style="font-size:10px;color:var(--g500)">${invoice.id} &nbsp;·&nbsp; ${invoice.clientName} &nbsp;·&nbsp; Continued</div>
+                </div>
+              </div>
+              <div style="text-align:right">
+                <div style="font-size:10px;color:var(--g500)">Date: ${fmtInvDate(invoice.createdAt)}</div>
+                <div style="font-size:10px;color:var(--g500)">Due: ${fmtInvDate(dueDate.toISOString())}</div>
+              </div>
+            </div>
+            `}
 
-          <hr class="inv-divider">
+            <!-- Line Items Table -->
+            <table class="inv-tbl">
+              <thead>
+                <tr>
+                  <th style="width:24px;text-align:center;color:var(--g500)">#</th>
+                  <th style="width:38%">Description</th>
+                  <th>Date</th>
+                  <th class="r">Govt. Fees</th>
+                  <th class="r">Prof. Fees</th>
+                  <th class="r">Total (QAR)</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${chunk.map((li, chunkIdx) => `
+                  <tr>
+                    <td style="text-align:center;font-size:11px;color:var(--g500);white-space:nowrap">${lineOffset + chunkIdx + 1}</td>
+                    <td>
+                      <div>${li.desc}</div>
+                      ${li.buCc ? `<div style="font-size:10px;color:var(--g500);margin-top:2px">${li.buCc}</div>` : ''}
+                    </td>
+                    <td style="white-space:nowrap;color:var(--g700)">${li.date}</td>
+                    <td class="r" style="color:${li.govFee>0?'var(--g900)':'var(--g300)'}">
+                      ${li.govFee > 0 ? fmt(li.govFee) : '—'}
+                    </td>
+                    <td class="r">${fmt(li.profFee)}</td>
+                    <td class="r" style="font-weight:600">${fmt(li.total)}</td>
+                  </tr>`).join('')}
+              </tbody>
+              ${isLast ? `
+              <tfoot>
+                <tr>
+                  <td colspan="3" style="font-size:12px;letter-spacing:.5px">TOTAL</td>
+                  <td class="r" style="color:${invoice.totalGovFee>0?'var(--g900)':'var(--g300)'}">
+                    ${invoice.totalGovFee > 0 ? fmt(invoice.totalGovFee) : '—'}
+                  </td>
+                  <td class="r">${fmt(invoice.totalProfFee)}</td>
+                  <td class="r" style="font-size:14px;color:var(--navy)">${fmt(invoice.grandTotal)}</td>
+                </tr>
+                <tr class="inv-words-row">
+                  <td colspan="5">Amount in Words:</td>
+                  <td class="r">${numToWords(invoice.grandTotal)} QAR</td>
+                </tr>
+              </tfoot>
+              ` : ''}
+            </table>
 
-          <!-- Client + Ref -->
-          <div class="inv-meta-row">
-            <div>
-              <div class="inv-client-lbl">Client Name:</div>
-              <div class="inv-client-name">${invoice.clientName}</div>
-              ${client.address ? `<div class="inv-client-sub">${client.address}</div>` : ''}
-              <div class="inv-client-sub">${clientLocLine}</div>
-              ${taxParts.length ? `<div class="inv-client-sub" style="margin-top:3px;font-size:10px;color:var(--g500)">${taxParts.join(' &nbsp;·&nbsp; ')}</div>` : ''}
-            </div>
-            <div class="inv-ref-side">
-              <table class="inv-ref-tbl">
-                <tr><td>Date:</td><td>${fmtInvDate(invoice.createdAt)}</td></tr>
-                <tr><td>Ref. No.:</td><td>${invoice.id}</td></tr>
-                <tr><td>Due Date:</td><td>${fmtInvDate(dueDate.toISOString())}</td></tr>
+            ${isLast ? `
+            <!-- Payment Details -->
+            <div class="inv-section">
+              <div class="inv-section-hd">Payment Details</div>
+              <table class="inv-bank-tbl">
+                <tr><td>Bank Name:</td><td>${co.bank}</td></tr>
+                <tr><td>Account Name:</td><td>${co.accountName}</td></tr>
+                <tr><td>Account No.:</td><td>${co.accountNo}</td></tr>
+                <tr><td>IBAN:</td><td>${co.iban}</td></tr>
+                <tr><td>Swift Code:</td><td>${co.swift}</td></tr>
+                <tr><td>Bank Address:</td><td>${co.branch}</td></tr>
               </table>
             </div>
-          </div>
 
-          <!-- Line Items Table -->
-          <table class="inv-tbl">
-            <thead>
-              <tr>
-                <th style="width:24px;text-align:center;color:var(--g500)">#</th>
-                <th style="width:38%">Description</th>
-                <th>Date</th>
-                <th class="r">Govt. Fees</th>
-                <th class="r">Prof. Fees</th>
-                <th class="r">Total (QAR)</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${lineItems.map((li, lineIdx) => `
-                <tr>
-                  <td style="text-align:center;font-size:11px;color:var(--g500);white-space:nowrap">${lineIdx + 1}</td>
-                  <td>
-                    <div>${li.desc}</div>
-                    ${li.buCc ? `<div style="font-size:10px;color:var(--g500);margin-top:2px">${li.buCc}</div>` : ''}
-                  </td>
-                  <td style="white-space:nowrap;color:var(--g700)">${li.date}</td>
-                  <td class="r" style="color:${li.govFee>0?'var(--g900)':'var(--g300)'}">
-                    ${li.govFee > 0 ? fmt(li.govFee) : '—'}
-                  </td>
-                  <td class="r">${fmt(li.profFee)}</td>
-                  <td class="r" style="font-weight:600">${fmt(li.total)}</td>
-                </tr>`).join('')}
-            </tbody>
-            <tfoot>
-              <tr>
-                <td colspan="3" style="font-size:12px;letter-spacing:.5px">TOTAL</td>
-                <td class="r" style="color:${invoice.totalGovFee>0?'var(--g900)':'var(--g300)'}">
-                  ${invoice.totalGovFee > 0 ? fmt(invoice.totalGovFee) : '—'}
-                </td>
-                <td class="r">${fmt(invoice.totalProfFee)}</td>
-                <td class="r" style="font-size:14px;color:var(--navy)">${fmt(invoice.grandTotal)}</td>
-              </tr>
-              <tr class="inv-words-row">
-                <td colspan="5">Amount in Words:</td>
-                <td class="r">${numToWords(invoice.grandTotal)} QAR</td>
-              </tr>
-            </tfoot>
-          </table>
-
-          <!-- Payment Details -->
-          <div class="inv-section">
-            <div class="inv-section-hd">Payment Details</div>
-            <table class="inv-bank-tbl">
-              <tr><td>Bank Name:</td><td>${co.bank}</td></tr>
-              <tr><td>Account Name:</td><td>${co.accountName}</td></tr>
-              <tr><td>Account No.:</td><td>${co.accountNo}</td></tr>
-              <tr><td>IBAN:</td><td>${co.iban}</td></tr>
-              <tr><td>Swift Code:</td><td>${co.swift}</td></tr>
-              <tr><td>Bank Address:</td><td>${co.branch}</td></tr>
-            </table>
-          </div>
-
-          <!-- Notes -->
-          <div class="inv-section">
-            <div class="inv-section-hd">Notes</div>
-            <div class="inv-notes-list">
-              <div>a) Bank transfer charges to be borne by the client/beneficiary.</div>
-              <div>b) All Payments received are NON-REFUNDABLE.</div>
+            <!-- Notes -->
+            <div class="inv-section">
+              <div class="inv-section-hd">Notes</div>
+              <div class="inv-notes-list">
+                <div>a) Bank transfer charges to be borne by the client/beneficiary.</div>
+                <div>b) All Payments received are NON-REFUNDABLE.</div>
+              </div>
             </div>
-          </div>
 
-          <!-- Footer -->
-          <div class="inv-footer-wrap">
-            <div class="inv-footer-thanks">Would Like to Thank You for Your Business</div>
-            <div class="inv-footer-meta">
-              ${logoImg(18)}
-              <span>CR ${co.cr}</span>
-              <span>·</span>
-              <span>${co.email}</span>
-              <span>·</span>
-              <span>${co.website}</span>
+            <!-- Footer -->
+            <div class="inv-footer-wrap">
+              <div class="inv-footer-thanks">Would Like to Thank You for Your Business</div>
+              <div class="inv-footer-meta">
+                ${logoImg(18)}
+                <span>CR ${co.cr}</span>
+                <span>·</span>
+                <span>${co.email}</span>
+                <span>·</span>
+                <span>${co.website}</span>
+              </div>
             </div>
-          </div>
+            ` : `
+            <!-- Continued notice -->
+            <div style="margin-top:16px;text-align:right;font-size:10px;color:var(--g400);font-style:italic">Continued on next page →</div>
+            `}
 
-        </div>
-        <div class="doc-page-number">Page 1 of ${totalPages}</div>
-      </div>
+          </div>
+          <div class="doc-page-number">Page ${pageIdx + 1} of ${totalPages}</div>
+        </div>`;
+      }).join('')}
 
       <!-- Pages 2+: Attached Government Receipts -->
       ${allReceipts.map((r, i) => r.mimeType === 'application/pdf'
@@ -2617,7 +2658,7 @@ function vInvoicePreview() {
               <div style="font-size:11px;color:var(--g700)">${invoice.id} · ${r.clientName||invoice.clientName}</div>
             </div>
             <div style="text-align:right">
-              <div class="dyn-page-num" style="font-size:18px;font-weight:900;color:var(--magenta)">Page ${i+2}</div>
+              <div class="dyn-page-num" style="font-size:18px;font-weight:900;color:var(--magenta)">Page ${totalInvPages + i + 1}</div>
               <div class="dyn-page-total" style="font-size:10px;color:var(--g500)">of ${totalPages}</div>
             </div>
           </div>
@@ -2629,7 +2670,7 @@ function vInvoicePreview() {
             <div style="font-size:13px">Preparing PDF for print…</div>
             <div style="font-size:11px;margin-top:4px;color:var(--g400)">${r.fileName}</div>
           </div>
-          <div class="doc-page-number">Page ${i+2} of ${totalPages}</div>
+          <div class="doc-page-number">Page ${totalInvPages + i + 1} of ${totalPages}</div>
         </div>`
         : `
         <div class="doc-page doc-page-receipt">
@@ -2639,7 +2680,7 @@ function vInvoicePreview() {
               <div style="font-size:11px;color:var(--g700)">${invoice.id} · ${r.clientName}</div>
             </div>
             <div style="text-align:right">
-              <div style="font-size:18px;font-weight:900;color:var(--magenta)">Page ${i+2}</div>
+              <div style="font-size:18px;font-weight:900;color:var(--magenta)">Page ${totalInvPages + i + 1}</div>
               <div style="font-size:10px;color:var(--g500)">of ${totalPages}</div>
             </div>
           </div>
@@ -2653,7 +2694,7 @@ function vInvoicePreview() {
                 Attachment: ${r.fileName}
               </div>`
           }
-          <div class="doc-page-number">Page ${i+2} of ${totalPages}</div>
+          <div class="doc-page-number">Page ${totalInvPages + i + 1} of ${totalPages}</div>
         </div>`
       ).join('')}
 
