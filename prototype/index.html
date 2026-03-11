@@ -2468,10 +2468,7 @@ function vInvoicePreview() {
   const client = CLIENTS.find(c => c.id === invoice.clientId) || {};
 
   // Build client info lines (only show fields that have values)
-  const clientLocParts = [];
-  if (client.city || client.country) clientLocParts.push(`${client.city||'Doha'}, ${client.country||'Qatar'}`);
-  if (client.poBox) clientLocParts.push(`P.O. Box ${client.poBox}`);
-  const clientLocLine = clientLocParts.length ? clientLocParts.join(' · ') : 'Doha, Qatar';
+  const clientLocLine = (client.city || client.country) ? `${client.city||'Doha'}, ${client.country||'Qatar'}` : 'Doha, Qatar';
 
   const taxParts = [];
   if (client.tin) taxParts.push('TIN: ' + client.tin);
@@ -2527,6 +2524,7 @@ function vInvoicePreview() {
                 <div class="inv-client-name">${invoice.clientName}</div>
                 ${client.address ? `<div class="inv-client-sub">${client.address}</div>` : ''}
                 <div class="inv-client-sub">${clientLocLine}</div>
+                ${client.poBox ? `<div class="inv-client-sub">P.O. Box ${client.poBox}</div>` : ''}
                 ${taxParts.length ? `<div class="inv-client-sub" style="margin-top:3px;font-size:10px;color:var(--g500)">${taxParts.join(' &nbsp;·&nbsp; ')}</div>` : ''}
               </div>
               <div class="inv-ref-side">
@@ -2585,12 +2583,20 @@ function vInvoicePreview() {
               ${isLast ? `
               <tfoot>
                 <tr>
-                  <td colspan="3" style="font-size:12px;letter-spacing:.5px">TOTAL</td>
+                  <td colspan="3" style="font-size:11px;letter-spacing:.5px">SUBTOTAL</td>
                   <td class="r" style="color:${invoice.totalGovFee>0?'var(--g900)':'var(--g300)'}">
                     ${invoice.totalGovFee > 0 ? fmt(invoice.totalGovFee) : '—'}
                   </td>
                   <td class="r">${fmt(invoice.totalProfFee)}</td>
-                  <td class="r" style="font-size:14px;color:var(--navy)">${fmt(invoice.grandTotal)}</td>
+                  <td class="r" style="color:var(--navy)">${fmt(invoice.grandTotal)}</td>
+                </tr>
+                <tr>
+                  <td colspan="5" style="font-size:11px;color:var(--g500);background:var(--g50);border-bottom:none;padding-top:4px;padding-bottom:4px;font-style:italic">VAT (0%)</td>
+                  <td class="r" style="font-size:11px;color:var(--g500);background:var(--g50);border-bottom:none;padding-top:4px;padding-bottom:4px">—</td>
+                </tr>
+                <tr>
+                  <td colspan="5" style="font-weight:800;font-size:12px;letter-spacing:.5px;background:var(--g50);border-top:1px solid var(--navy);border-bottom:none;padding-top:9px;color:var(--navy)">TOTAL (QAR)</td>
+                  <td class="r" style="font-size:15px;font-weight:800;color:var(--navy);background:var(--g50);border-top:1px solid var(--navy);border-bottom:none;padding-top:9px">${fmt(invoice.grandTotal)}</td>
                 </tr>
                 <tr class="inv-words-row">
                   <td colspan="5">Amount in Words:</td>
