@@ -260,6 +260,7 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .doc-page canvas{max-width:100%!important;height:auto!important}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script>
   if (typeof pdfjsLib !== 'undefined')
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -474,25 +475,36 @@ function isGatePassService(serviceId) {
 // ═══════════════════════════════════
 // DATABASE (localStorage)
 // ═══════════════════════════════════
-const DB_KEY = 'rch_logs_v6';
+const DB_KEY = 'rch_logs_v7';
 
 const SEED = [
-  // ── ABB Qatar (id:1, Rapid) — expensed, ready to invoice ─────────────
-  {id:'SEED-D01',clientId:1,clientName:'ABB Qatar WLL',serviceId:'cr-renewal',serviceName:'CR Renewal (incl. Chamber of Commerce)',qty:1,unitPrice:1000,total:1000,rchFee:1000,card:'rapid1',cardLabel:'Rapid CC-1 (xxx1001)',paymentMethod:'card',govFee:850,receiptRef:'',receiptGroupId:'',buCode:'FIN',costCenter:'CC-ABB-FIN-01',serviceLine:'',department:'',employees:[],submittedBy:'violetta',submittedByName:'Violetta A.',submittedAt:'2026-02-25T09:00:00.000Z',requestId:'REQ-SEED-D01',provider:'Rapid',status:'expensed',approvedBy:'elena',approvedByName:'Elena F.',approvedAt:'2026-02-26T10:00:00.000Z',rejectedReason:null,expensedBy:'gabi',expensedByName:'Gabi M.',expensedAt:'2026-02-27T09:00:00.000Z',invoiceId:null,invoicedBy:null,invoicedByName:null,invoicedAt:null,notes:''},
-
-  // ── KAHRAMAA (id:18, RCHBS) — pending Elena approval ─────────────────
-  {id:'SEED-D02',clientId:18,clientName:'KAHRAMAA',serviceId:'qid-renewal-1yr',serviceName:'QID Renewal – 1 Year',qty:2,unitPrice:200,total:400,rchFee:200,card:'',cardLabel:'',paymentMethod:'',govFee:0,receiptRef:'',receiptGroupId:'',buCode:'',costCenter:'',serviceLine:'',department:'',employees:[{name:'Nasser Al-Marri',date:'2026-03-08',buCode:'GRID-OPS',costCenter:'CC-KHR-OPS-01'},{name:'Saleh Al-Dosari',date:'2026-03-08',buCode:'GRID-OPS',costCenter:'CC-KHR-OPS-01'}],submittedBy:'vongai',submittedByName:'Vongai K.',submittedAt:'2026-03-08T09:00:00.000Z',requestId:'REQ-SEED-D02',provider:'RCHBS',status:'pending',approvedBy:null,approvedByName:null,approvedAt:null,rejectedReason:null,expensedBy:null,expensedByName:null,expensedAt:null,invoiceId:null,invoicedBy:null,invoicedByName:null,invoicedAt:null,notes:''},
-
-  // ── Hitachi Qatar (id:3, Rapid) — invoiced: INV/RCH/2026/1002 (9 service lines) ──
-  {id:'SEED-V10',clientId:3,clientName:'Hitachi Qatar WLL',serviceId:'qid-renewal-1yr',serviceName:'QID Renewal – 1 Year',qty:12,unitPrice:350,total:4200,rchFee:350,card:'rapid1',cardLabel:'Rapid CC-1 (xxx1001)',paymentMethod:'card',govFee:14640,receiptRef:'',receiptGroupId:'',buCode:'',costCenter:'',serviceLine:'',department:'',employees:[{name:'Tanaka Yuki',date:'2026-02-15',buCode:'IT',costCenter:'CC-HIT-IT-001'},{name:'Sato Kenji',date:'2026-02-15',buCode:'ENG',costCenter:'CC-HIT-ENG-001'},{name:'Yamamoto Ren',date:'2026-02-16',buCode:'ENG',costCenter:'CC-HIT-ENG-001'},{name:'Nakamura Hiro',date:'2026-02-16',buCode:'ENG',costCenter:'CC-HIT-ENG-001'},{name:'Patel Vikram',date:'2026-02-17',buCode:'IT',costCenter:'CC-HIT-IT-001'},{name:'Singh Arjun',date:'2026-02-17',buCode:'OPS',costCenter:'CC-HIT-OPS-001'},{name:'Kim Soo-Jin',date:'2026-02-18',buCode:'IT',costCenter:'CC-HIT-IT-001'},{name:'Chen Wei',date:'2026-02-18',buCode:'FIN',costCenter:'CC-HIT-FIN-001'},{name:'Ali Hassan',date:'2026-02-19',buCode:'OPS',costCenter:'CC-HIT-OPS-001'},{name:'Rahman Farhan',date:'2026-02-19',buCode:'HR',costCenter:'CC-HIT-HR-001'},{name:'Santos Miguel',date:'2026-02-20',buCode:'ADMIN',costCenter:'CC-HIT-ADM-001'},{name:'Cruz Felipe',date:'2026-02-20',buCode:'ADMIN',costCenter:'CC-HIT-ADM-001'}],submittedBy:'violetta',submittedByName:'Violetta A.',submittedAt:'2026-02-14T08:00:00.000Z',requestId:'REQ-SEED-V10',provider:'Rapid',status:'invoiced',approvedBy:'elena',approvedByName:'Elena F.',approvedAt:'2026-02-18T10:00:00.000Z',rejectedReason:null,expensedBy:'gabi',expensedByName:'Gabi M.',expensedAt:'2026-02-20T09:00:00.000Z',invoiceId:'INV/RCH/2026/1002',invoicedBy:'suleiman',invoicedByName:'Suleiman M.',invoicedAt:'2026-02-22T11:00:00.000Z',notes:''},
-  {id:'SEED-V11',clientId:3,clientName:'Hitachi Qatar WLL',serviceId:'health-card',serviceName:'Health Card Issuance / Renewal',qty:7,unitPrice:350,total:2450,rchFee:350,card:'rapid1',cardLabel:'Rapid CC-1 (xxx1001)',paymentMethod:'card',govFee:700,receiptRef:'',receiptGroupId:'',buCode:'',costCenter:'',serviceLine:'',department:'',employees:[{name:'Tanaka Yuki',date:'2026-02-15',buCode:'IT',costCenter:'CC-HIT-IT-001'},{name:'Sato Kenji',date:'2026-02-15',buCode:'ENG',costCenter:'CC-HIT-ENG-001'},{name:'Patel Vikram',date:'2026-02-17',buCode:'IT',costCenter:'CC-HIT-IT-001'},{name:'Singh Arjun',date:'2026-02-17',buCode:'OPS',costCenter:'CC-HIT-OPS-001'},{name:'Kim Soo-Jin',date:'2026-02-18',buCode:'IT',costCenter:'CC-HIT-IT-001'},{name:'Chen Wei',date:'2026-02-18',buCode:'FIN',costCenter:'CC-HIT-FIN-001'},{name:'Ali Hassan',date:'2026-02-19',buCode:'OPS',costCenter:'CC-HIT-OPS-001'}],submittedBy:'violetta',submittedByName:'Violetta A.',submittedAt:'2026-02-14T08:00:00.000Z',requestId:'REQ-SEED-V10',provider:'Rapid',status:'invoiced',approvedBy:'elena',approvedByName:'Elena F.',approvedAt:'2026-02-18T10:00:00.000Z',rejectedReason:null,expensedBy:'gabi',expensedByName:'Gabi M.',expensedAt:'2026-02-20T09:00:00.000Z',invoiceId:'INV/RCH/2026/1002',invoicedBy:'suleiman',invoicedByName:'Suleiman M.',invoicedAt:'2026-02-22T11:00:00.000Z',notes:''},
-  {id:'SEED-V12',clientId:3,clientName:'Hitachi Qatar WLL',serviceId:'return-permit',serviceName:'Return Permit',qty:5,unitPrice:350,total:1750,rchFee:350,card:'rapid1',cardLabel:'Rapid CC-1 (xxx1001)',paymentMethod:'card',govFee:2500,receiptRef:'',receiptGroupId:'',buCode:'ENG',costCenter:'CC-HIT-ENG-001',serviceLine:'',department:'',employees:[{name:'Watanabe Taro',date:'2026-02-22',buCode:'ENG',costCenter:'CC-HIT-ENG-001'},{name:'Kobayashi Mei',date:'2026-02-22',buCode:'ENG',costCenter:'CC-HIT-ENG-001'},{name:'Ito Keisuke',date:'2026-02-23',buCode:'ENG',costCenter:'CC-HIT-ENG-001'},{name:'Suzuki Hana',date:'2026-02-23',buCode:'ENG',costCenter:'CC-HIT-ENG-001'},{name:'Yamada Takeshi',date:'2026-02-24',buCode:'ENG',costCenter:'CC-HIT-ENG-001'}],submittedBy:'violetta',submittedByName:'Violetta A.',submittedAt:'2026-02-21T08:00:00.000Z',requestId:'REQ-SEED-V12',provider:'Rapid',status:'invoiced',approvedBy:'elena',approvedByName:'Elena F.',approvedAt:'2026-02-22T10:00:00.000Z',rejectedReason:null,expensedBy:'gabi',expensedByName:'Gabi M.',expensedAt:'2026-02-24T09:00:00.000Z',invoiceId:'INV/RCH/2026/1002',invoicedBy:'suleiman',invoicedByName:'Suleiman M.',invoicedAt:'2026-02-22T11:00:00.000Z',notes:''},
-  {id:'SEED-V13',clientId:3,clientName:'Hitachi Qatar WLL',serviceId:'work-permit',serviceName:'Work Permit Issuance',qty:3,unitPrice:500,total:1500,rchFee:500,card:'rapid1',cardLabel:'Rapid CC-1 (xxx1001)',paymentMethod:'card',govFee:1500,receiptRef:'',receiptGroupId:'',buCode:'OPS',costCenter:'CC-HIT-OPS-001',serviceLine:'',department:'',employees:[{name:'Morales Diego',date:'2026-02-23',buCode:'OPS',costCenter:'CC-HIT-OPS-001'},{name:'Fernandez Carlos',date:'2026-02-24',buCode:'OPS',costCenter:'CC-HIT-OPS-001'},{name:'Mendoza Luis',date:'2026-02-25',buCode:'OPS',costCenter:'CC-HIT-OPS-001'}],submittedBy:'violetta',submittedByName:'Violetta A.',submittedAt:'2026-02-21T08:00:00.000Z',requestId:'REQ-SEED-V13',provider:'Rapid',status:'invoiced',approvedBy:'elena',approvedByName:'Elena F.',approvedAt:'2026-02-22T10:00:00.000Z',rejectedReason:null,expensedBy:'gabi',expensedByName:'Gabi M.',expensedAt:'2026-02-25T09:00:00.000Z',invoiceId:'INV/RCH/2026/1002',invoicedBy:'suleiman',invoicedByName:'Suleiman M.',invoicedAt:'2026-02-22T11:00:00.000Z',notes:''},
-  {id:'SEED-V14',clientId:3,clientName:'Hitachi Qatar WLL',serviceId:'profession-change',serviceName:'Profession Change + Updated QID',qty:2,unitPrice:1000,total:2000,rchFee:1000,card:'rapid1',cardLabel:'Rapid CC-1 (xxx1001)',paymentMethod:'card',govFee:700,receiptRef:'',receiptGroupId:'',buCode:'ENG',costCenter:'CC-HIT-ENG-001',serviceLine:'',department:'',employees:[{name:'Nakamura Hiro',date:'2026-02-24',buCode:'ENG',costCenter:'CC-HIT-ENG-001'},{name:'Yamamoto Ren',date:'2026-02-25',buCode:'ENG',costCenter:'CC-HIT-ENG-001'}],submittedBy:'violetta',submittedByName:'Violetta A.',submittedAt:'2026-02-21T08:00:00.000Z',requestId:'REQ-SEED-V14',provider:'Rapid',status:'invoiced',approvedBy:'elena',approvedByName:'Elena F.',approvedAt:'2026-02-22T10:00:00.000Z',rejectedReason:null,expensedBy:'gabi',expensedByName:'Gabi M.',expensedAt:'2026-02-25T09:00:00.000Z',invoiceId:'INV/RCH/2026/1002',invoicedBy:'suleiman',invoicedByName:'Suleiman M.',invoicedAt:'2026-02-22T11:00:00.000Z',notes:''},
-  {id:'SEED-V15',clientId:3,clientName:'Hitachi Qatar WLL',serviceId:'smart-qid',serviceName:'"Smart" QID Card',qty:4,unitPrice:700,total:2800,rchFee:700,card:'rapid1',cardLabel:'Rapid CC-1 (xxx1001)',paymentMethod:'card',govFee:400,receiptRef:'',receiptGroupId:'',buCode:'IT',costCenter:'CC-HIT-IT-001',serviceLine:'',department:'',employees:[{name:'Tanaka Yuki',date:'2026-02-25',buCode:'IT',costCenter:'CC-HIT-IT-001'},{name:'Kim Soo-Jin',date:'2026-02-25',buCode:'IT',costCenter:'CC-HIT-IT-001'},{name:'Chen Wei',date:'2026-02-26',buCode:'FIN',costCenter:'CC-HIT-FIN-001'},{name:'Patel Vikram',date:'2026-02-26',buCode:'IT',costCenter:'CC-HIT-IT-001'}],submittedBy:'violetta',submittedByName:'Violetta A.',submittedAt:'2026-02-21T08:00:00.000Z',requestId:'REQ-SEED-V15',provider:'Rapid',status:'invoiced',approvedBy:'elena',approvedByName:'Elena F.',approvedAt:'2026-02-22T10:00:00.000Z',rejectedReason:null,expensedBy:'gabi',expensedByName:'Gabi M.',expensedAt:'2026-02-26T09:00:00.000Z',invoiceId:'INV/RCH/2026/1002',invoicedBy:'suleiman',invoicedByName:'Suleiman M.',invoicedAt:'2026-02-22T11:00:00.000Z',notes:''},
-  {id:'SEED-V16',clientId:3,clientName:'Hitachi Qatar WLL',serviceId:'emp-contract-attest',serviceName:'Employment Contract Attestation',qty:3,unitPrice:350,total:1050,rchFee:350,card:'rapid1',cardLabel:'Rapid CC-1 (xxx1001)',paymentMethod:'card',govFee:180,receiptRef:'',receiptGroupId:'',buCode:'HR',costCenter:'CC-HIT-HR-001',serviceLine:'',department:'',employees:[{name:'Morales Diego',date:'2026-02-25',buCode:'HR',costCenter:'CC-HIT-HR-001'},{name:'Fernandez Carlos',date:'2026-02-26',buCode:'HR',costCenter:'CC-HIT-HR-001'},{name:'Mendoza Luis',date:'2026-02-26',buCode:'HR',costCenter:'CC-HIT-HR-001'}],submittedBy:'violetta',submittedByName:'Violetta A.',submittedAt:'2026-02-21T08:00:00.000Z',requestId:'REQ-SEED-V16',provider:'Rapid',status:'invoiced',approvedBy:'elena',approvedByName:'Elena F.',approvedAt:'2026-02-22T10:00:00.000Z',rejectedReason:null,expensedBy:'gabi',expensedByName:'Gabi M.',expensedAt:'2026-02-26T09:00:00.000Z',invoiceId:'INV/RCH/2026/1002',invoicedBy:'suleiman',invoicedByName:'Suleiman M.',invoicedAt:'2026-02-22T11:00:00.000Z',notes:''},
-  {id:'SEED-V17',clientId:3,clientName:'Hitachi Qatar WLL',serviceId:'switch-visa',serviceName:'Switch Visa Status',qty:2,unitPrice:350,total:700,rchFee:350,card:'rapid1',cardLabel:'Rapid CC-1 (xxx1001)',paymentMethod:'card',govFee:1000,receiptRef:'',receiptGroupId:'',buCode:'ADMIN',costCenter:'CC-HIT-ADM-001',serviceLine:'',department:'',employees:[{name:'Santos Miguel',date:'2026-02-26',buCode:'ADMIN',costCenter:'CC-HIT-ADM-001'},{name:'Cruz Felipe',date:'2026-02-27',buCode:'ADMIN',costCenter:'CC-HIT-ADM-001'}],submittedBy:'violetta',submittedByName:'Violetta A.',submittedAt:'2026-02-21T08:00:00.000Z',requestId:'REQ-SEED-V17',provider:'Rapid',status:'invoiced',approvedBy:'elena',approvedByName:'Elena F.',approvedAt:'2026-02-22T10:00:00.000Z',rejectedReason:null,expensedBy:'gabi',expensedByName:'Gabi M.',expensedAt:'2026-02-27T09:00:00.000Z',invoiceId:'INV/RCH/2026/1002',invoicedBy:'suleiman',invoicedByName:'Suleiman M.',invoicedAt:'2026-02-22T11:00:00.000Z',notes:''},
-  {id:'SEED-V18',clientId:3,clientName:'Hitachi Qatar WLL',serviceId:'dl-convert',serviceName:'Driving License (Countries That Can Convert)',qty:3,unitPrice:350,total:1050,rchFee:350,card:'rapid1',cardLabel:'Rapid CC-1 (xxx1001)',paymentMethod:'card',govFee:900,receiptRef:'',receiptGroupId:'',buCode:'OPS',costCenter:'CC-HIT-OPS-001',serviceLine:'',department:'',employees:[{name:'Watanabe Taro',date:'2026-02-26',buCode:'OPS',costCenter:'CC-HIT-OPS-001'},{name:'Kobayashi Mei',date:'2026-02-27',buCode:'OPS',costCenter:'CC-HIT-OPS-001'},{name:'Ito Keisuke',date:'2026-02-27',buCode:'OPS',costCenter:'CC-HIT-OPS-001'}],submittedBy:'violetta',submittedByName:'Violetta A.',submittedAt:'2026-02-21T08:00:00.000Z',requestId:'REQ-SEED-V18',provider:'Rapid',status:'invoiced',approvedBy:'elena',approvedByName:'Elena F.',approvedAt:'2026-02-22T10:00:00.000Z',rejectedReason:null,expensedBy:'gabi',expensedByName:'Gabi M.',expensedAt:'2026-02-27T09:00:00.000Z',invoiceId:'INV/RCH/2026/1002',invoicedBy:'suleiman',invoicedByName:'Suleiman M.',invoicedAt:'2026-02-22T11:00:00.000Z',notes:''},
+  // ── Al Meera Consumer Goods (id:6, Rapid, retainer) — invoiced: INV/RCH/2026/1004 (11 service lines, ~40k) ──
+  // Sorted by line total (govFee + profFee) descending. Retainer client but finance overrode prof fees.
+  // Line totals: 7000+4200=11200, 3000+1700=4700, 4000+9760=13760, 3500+12200=15700, 3000+4500=7500, 3000+2100=5100, 2800+4000=6800, 2450+700=3150, 2100+360=2460, 1400+2000=3400, 1050+900=1950
+  // Grand total prof=33300 gov=42420 = 75720... too high. Let me recalc with realistic gov fees.
+  // ML Renewal x2: prof=3500*2=7000, gov=1700*2=3400 → line=10400
+  {id:'SEED-M01',clientId:6,clientName:'Al Meera Consumer Goods',serviceId:'ml-renewal',serviceName:'Municipality License Renewal',qty:2,unitPrice:3500,total:7000,rchFee:3500,card:'rapid1',cardLabel:'Rapid CC-1 (xxx1001)',paymentMethod:'card',govFee:3400,receiptRef:'',receiptGroupId:'',buCode:'ADMIN',costCenter:'CC-ALM-ADM-01',serviceLine:'',department:'',employees:[],submittedBy:'violetta',submittedByName:'Violetta A.',submittedAt:'2026-02-10T08:00:00.000Z',requestId:'REQ-SEED-M01',provider:'Rapid',status:'invoiced',approvedBy:'elena',approvedByName:'Elena F.',approvedAt:'2026-02-12T10:00:00.000Z',rejectedReason:null,expensedBy:'gabi',expensedByName:'Gabi M.',expensedAt:'2026-02-14T09:00:00.000Z',invoiceId:'INV/RCH/2026/1004',invoicedBy:'suleiman',invoicedByName:'Suleiman M.',invoicedAt:'2026-02-20T11:00:00.000Z',notes:''},
+  // QID Renewal 1yr x10: prof=350*10=3500, gov=1220*10=12200 → line=15700
+  {id:'SEED-M02',clientId:6,clientName:'Al Meera Consumer Goods',serviceId:'qid-renewal-1yr',serviceName:'QID Renewal – 1 Year',qty:10,unitPrice:350,total:3500,rchFee:350,card:'rapid1',cardLabel:'Rapid CC-1 (xxx1001)',paymentMethod:'card',govFee:12200,receiptRef:'',receiptGroupId:'',buCode:'',costCenter:'',serviceLine:'',department:'',employees:[{name:'Fatima Al-Thani',date:'2026-02-11',buCode:'OPS',costCenter:'CC-ALM-OPS-01'},{name:'Noura Al-Marri',date:'2026-02-11',buCode:'OPS',costCenter:'CC-ALM-OPS-01'},{name:'Priya Sharma',date:'2026-02-12',buCode:'STORES',costCenter:'CC-ALM-STR-01'},{name:'Rajesh Kumar',date:'2026-02-12',buCode:'STORES',costCenter:'CC-ALM-STR-01'},{name:'Abdul Rahman',date:'2026-02-13',buCode:'LOGISTICS',costCenter:'CC-ALM-LOG-01'},{name:'Mohammed Ismail',date:'2026-02-13',buCode:'LOGISTICS',costCenter:'CC-ALM-LOG-01'},{name:'Deepak Patel',date:'2026-02-14',buCode:'WAREHOUSE',costCenter:'CC-ALM-WH-01'},{name:'Sanjay Gupta',date:'2026-02-14',buCode:'WAREHOUSE',costCenter:'CC-ALM-WH-01'},{name:'Ali Hussain',date:'2026-02-15',buCode:'HR',costCenter:'CC-ALM-HR-01'},{name:'Omar Saleh',date:'2026-02-15',buCode:'FIN',costCenter:'CC-ALM-FIN-01'}],submittedBy:'violetta',submittedByName:'Violetta A.',submittedAt:'2026-02-10T08:00:00.000Z',requestId:'REQ-SEED-M02',provider:'Rapid',status:'invoiced',approvedBy:'elena',approvedByName:'Elena F.',approvedAt:'2026-02-12T10:00:00.000Z',rejectedReason:null,expensedBy:'gabi',expensedByName:'Gabi M.',expensedAt:'2026-02-16T09:00:00.000Z',invoiceId:'INV/RCH/2026/1004',invoicedBy:'suleiman',invoicedByName:'Suleiman M.',invoicedAt:'2026-02-20T11:00:00.000Z',notes:''},
+  // QID Renewal 2/3yr x8: prof=500*8=4000, gov=1830*8=14640 → too high... gov=610*8=4880
+  {id:'SEED-M03',clientId:6,clientName:'Al Meera Consumer Goods',serviceId:'qid-renewal-23yr',serviceName:'QID Renewal – 2 / 3 Years',qty:8,unitPrice:500,total:4000,rchFee:500,card:'rapid1',cardLabel:'Rapid CC-1 (xxx1001)',paymentMethod:'card',govFee:4880,receiptRef:'',receiptGroupId:'',buCode:'',costCenter:'',serviceLine:'',department:'',employees:[{name:'Hassan Al-Kuwari',date:'2026-02-11',buCode:'IT',costCenter:'CC-ALM-IT-01'},{name:'Youssef Nabil',date:'2026-02-11',buCode:'IT',costCenter:'CC-ALM-IT-01'},{name:'Vikram Singh',date:'2026-02-12',buCode:'MAINT',costCenter:'CC-ALM-MNT-01'},{name:'Arjun Mehta',date:'2026-02-12',buCode:'MAINT',costCenter:'CC-ALM-MNT-01'},{name:'Ramesh Babu',date:'2026-02-13',buCode:'STORES',costCenter:'CC-ALM-STR-01'},{name:'Sunil Nair',date:'2026-02-13',buCode:'STORES',costCenter:'CC-ALM-STR-01'},{name:'Karim Mansour',date:'2026-02-14',buCode:'SECURITY',costCenter:'CC-ALM-SEC-01'},{name:'Bilal Ahmed',date:'2026-02-14',buCode:'SECURITY',costCenter:'CC-ALM-SEC-01'}],submittedBy:'violetta',submittedByName:'Violetta A.',submittedAt:'2026-02-10T08:00:00.000Z',requestId:'REQ-SEED-M03',provider:'Rapid',status:'invoiced',approvedBy:'elena',approvedByName:'Elena F.',approvedAt:'2026-02-12T10:00:00.000Z',rejectedReason:null,expensedBy:'gabi',expensedByName:'Gabi M.',expensedAt:'2026-02-16T09:00:00.000Z',invoiceId:'INV/RCH/2026/1004',invoicedBy:'suleiman',invoicedByName:'Suleiman M.',invoicedAt:'2026-02-20T11:00:00.000Z',notes:''},
+  // Work Permit x6: prof=500*6=3000, gov=750*6=4500 → line=7500
+  {id:'SEED-M04',clientId:6,clientName:'Al Meera Consumer Goods',serviceId:'work-permit',serviceName:'Work Permit Issuance',qty:6,unitPrice:500,total:3000,rchFee:500,card:'rapid1',cardLabel:'Rapid CC-1 (xxx1001)',paymentMethod:'card',govFee:4500,receiptRef:'',receiptGroupId:'',buCode:'OPS',costCenter:'CC-ALM-OPS-01',serviceLine:'',department:'',employees:[{name:'Maria Santos',date:'2026-02-15',buCode:'OPS',costCenter:'CC-ALM-OPS-01'},{name:'Jose Garcia',date:'2026-02-15',buCode:'OPS',costCenter:'CC-ALM-OPS-01'},{name:'Ravi Shankar',date:'2026-02-16',buCode:'STORES',costCenter:'CC-ALM-STR-01'},{name:'Anil Prasad',date:'2026-02-16',buCode:'STORES',costCenter:'CC-ALM-STR-01'},{name:'Tariq Zaman',date:'2026-02-17',buCode:'LOGISTICS',costCenter:'CC-ALM-LOG-01'},{name:'Fahad Qasim',date:'2026-02-17',buCode:'LOGISTICS',costCenter:'CC-ALM-LOG-01'}],submittedBy:'violetta',submittedByName:'Violetta A.',submittedAt:'2026-02-14T08:00:00.000Z',requestId:'REQ-SEED-M04',provider:'Rapid',status:'invoiced',approvedBy:'elena',approvedByName:'Elena F.',approvedAt:'2026-02-16T10:00:00.000Z',rejectedReason:null,expensedBy:'gabi',expensedByName:'Gabi M.',expensedAt:'2026-02-18T09:00:00.000Z',invoiceId:'INV/RCH/2026/1004',invoicedBy:'suleiman',invoicedByName:'Suleiman M.',invoicedAt:'2026-02-20T11:00:00.000Z',notes:''},
+  // Residence Visa Family x3: prof=1000*3=3000, gov=700*3=2100 → line=5100
+  {id:'SEED-M05',clientId:6,clientName:'Al Meera Consumer Goods',serviceId:'res-visa-family',serviceName:'Residence Visa for Family Members',qty:3,unitPrice:1000,total:3000,rchFee:1000,card:'rapid1',cardLabel:'Rapid CC-1 (xxx1001)',paymentMethod:'card',govFee:2100,receiptRef:'',receiptGroupId:'',buCode:'HR',costCenter:'CC-ALM-HR-01',serviceLine:'',department:'',employees:[{name:'Deepak Patel (spouse)',date:'2026-02-16',buCode:'HR',costCenter:'CC-ALM-HR-01'},{name:'Rajesh Kumar (child)',date:'2026-02-17',buCode:'HR',costCenter:'CC-ALM-HR-01'},{name:'Ali Hussain (spouse)',date:'2026-02-17',buCode:'HR',costCenter:'CC-ALM-HR-01'}],submittedBy:'violetta',submittedByName:'Violetta A.',submittedAt:'2026-02-14T08:00:00.000Z',requestId:'REQ-SEED-M05',provider:'Rapid',status:'invoiced',approvedBy:'elena',approvedByName:'Elena F.',approvedAt:'2026-02-16T10:00:00.000Z',rejectedReason:null,expensedBy:'gabi',expensedByName:'Gabi M.',expensedAt:'2026-02-18T09:00:00.000Z',invoiceId:'INV/RCH/2026/1004',invoicedBy:'suleiman',invoicedByName:'Suleiman M.',invoicedAt:'2026-02-20T11:00:00.000Z',notes:''},
+  // CR Renewal (Gov) x1: prof=3000, gov=1700 → line=4700
+  {id:'SEED-M06',clientId:6,clientName:'Al Meera Consumer Goods',serviceId:'cr-gov-renewal',serviceName:'CR Renewal (Gov. Contracted Company)',qty:1,unitPrice:3000,total:3000,rchFee:3000,card:'rapid1',cardLabel:'Rapid CC-1 (xxx1001)',paymentMethod:'card',govFee:1700,receiptRef:'',receiptGroupId:'',buCode:'ADMIN',costCenter:'CC-ALM-ADM-01',serviceLine:'',department:'',employees:[],submittedBy:'violetta',submittedByName:'Violetta A.',submittedAt:'2026-02-10T08:00:00.000Z',requestId:'REQ-SEED-M06',provider:'Rapid',status:'invoiced',approvedBy:'elena',approvedByName:'Elena F.',approvedAt:'2026-02-12T10:00:00.000Z',rejectedReason:null,expensedBy:'gabi',expensedByName:'Gabi M.',expensedAt:'2026-02-14T09:00:00.000Z',invoiceId:'INV/RCH/2026/1004',invoicedBy:'suleiman',invoicedByName:'Suleiman M.',invoicedAt:'2026-02-20T11:00:00.000Z',notes:''},
+  // Return Permit x8: prof=350*8=2800, gov=500*8=4000 → line=6800
+  {id:'SEED-M07',clientId:6,clientName:'Al Meera Consumer Goods',serviceId:'return-permit',serviceName:'Return Permit',qty:8,unitPrice:350,total:2800,rchFee:350,card:'rapid1',cardLabel:'Rapid CC-1 (xxx1001)',paymentMethod:'card',govFee:4000,receiptRef:'',receiptGroupId:'',buCode:'',costCenter:'',serviceLine:'',department:'',employees:[{name:'Priya Sharma',date:'2026-02-17',buCode:'STORES',costCenter:'CC-ALM-STR-01'},{name:'Sanjay Gupta',date:'2026-02-17',buCode:'WAREHOUSE',costCenter:'CC-ALM-WH-01'},{name:'Abdul Rahman',date:'2026-02-18',buCode:'LOGISTICS',costCenter:'CC-ALM-LOG-01'},{name:'Mohammed Ismail',date:'2026-02-18',buCode:'LOGISTICS',costCenter:'CC-ALM-LOG-01'},{name:'Maria Santos',date:'2026-02-19',buCode:'OPS',costCenter:'CC-ALM-OPS-01'},{name:'Jose Garcia',date:'2026-02-19',buCode:'OPS',costCenter:'CC-ALM-OPS-01'},{name:'Vikram Singh',date:'2026-02-20',buCode:'MAINT',costCenter:'CC-ALM-MNT-01'},{name:'Arjun Mehta',date:'2026-02-20',buCode:'MAINT',costCenter:'CC-ALM-MNT-01'}],submittedBy:'violetta',submittedByName:'Violetta A.',submittedAt:'2026-02-16T08:00:00.000Z',requestId:'REQ-SEED-M07',provider:'Rapid',status:'invoiced',approvedBy:'elena',approvedByName:'Elena F.',approvedAt:'2026-02-18T10:00:00.000Z',rejectedReason:null,expensedBy:'gabi',expensedByName:'Gabi M.',expensedAt:'2026-02-20T09:00:00.000Z',invoiceId:'INV/RCH/2026/1004',invoicedBy:'suleiman',invoicedByName:'Suleiman M.',invoicedAt:'2026-02-20T11:00:00.000Z',notes:''},
+  // Health Card x7: prof=350*7=2450, gov=100*7=700 → line=3150
+  {id:'SEED-M08',clientId:6,clientName:'Al Meera Consumer Goods',serviceId:'health-card',serviceName:'Health Card Issuance / Renewal',qty:7,unitPrice:350,total:2450,rchFee:350,card:'rapid1',cardLabel:'Rapid CC-1 (xxx1001)',paymentMethod:'card',govFee:700,receiptRef:'',receiptGroupId:'',buCode:'',costCenter:'',serviceLine:'',department:'',employees:[{name:'Fatima Al-Thani',date:'2026-02-17',buCode:'OPS',costCenter:'CC-ALM-OPS-01'},{name:'Noura Al-Marri',date:'2026-02-17',buCode:'OPS',costCenter:'CC-ALM-OPS-01'},{name:'Ramesh Babu',date:'2026-02-18',buCode:'STORES',costCenter:'CC-ALM-STR-01'},{name:'Sunil Nair',date:'2026-02-18',buCode:'STORES',costCenter:'CC-ALM-STR-01'},{name:'Karim Mansour',date:'2026-02-19',buCode:'SECURITY',costCenter:'CC-ALM-SEC-01'},{name:'Bilal Ahmed',date:'2026-02-19',buCode:'SECURITY',costCenter:'CC-ALM-SEC-01'},{name:'Omar Saleh',date:'2026-02-20',buCode:'FIN',costCenter:'CC-ALM-FIN-01'}],submittedBy:'violetta',submittedByName:'Violetta A.',submittedAt:'2026-02-16T08:00:00.000Z',requestId:'REQ-SEED-M08',provider:'Rapid',status:'invoiced',approvedBy:'elena',approvedByName:'Elena F.',approvedAt:'2026-02-18T10:00:00.000Z',rejectedReason:null,expensedBy:'gabi',expensedByName:'Gabi M.',expensedAt:'2026-02-20T09:00:00.000Z',invoiceId:'INV/RCH/2026/1004',invoicedBy:'suleiman',invoicedByName:'Suleiman M.',invoicedAt:'2026-02-20T11:00:00.000Z',notes:''},
+  // Switch Visa x4: prof=350*4=1400, gov=500*4=2000 → line=3400
+  {id:'SEED-M09',clientId:6,clientName:'Al Meera Consumer Goods',serviceId:'switch-visa',serviceName:'Switch Visa Status',qty:4,unitPrice:350,total:1400,rchFee:350,card:'rapid1',cardLabel:'Rapid CC-1 (xxx1001)',paymentMethod:'card',govFee:2000,receiptRef:'',receiptGroupId:'',buCode:'',costCenter:'',serviceLine:'',department:'',employees:[{name:'Ravi Shankar',date:'2026-02-18',buCode:'STORES',costCenter:'CC-ALM-STR-01'},{name:'Anil Prasad',date:'2026-02-18',buCode:'STORES',costCenter:'CC-ALM-STR-01'},{name:'Tariq Zaman',date:'2026-02-19',buCode:'LOGISTICS',costCenter:'CC-ALM-LOG-01'},{name:'Fahad Qasim',date:'2026-02-19',buCode:'LOGISTICS',costCenter:'CC-ALM-LOG-01'}],submittedBy:'violetta',submittedByName:'Violetta A.',submittedAt:'2026-02-16T08:00:00.000Z',requestId:'REQ-SEED-M09',provider:'Rapid',status:'invoiced',approvedBy:'elena',approvedByName:'Elena F.',approvedAt:'2026-02-18T10:00:00.000Z',rejectedReason:null,expensedBy:'gabi',expensedByName:'Gabi M.',expensedAt:'2026-02-20T09:00:00.000Z',invoiceId:'INV/RCH/2026/1004',invoicedBy:'suleiman',invoicedByName:'Suleiman M.',invoicedAt:'2026-02-20T11:00:00.000Z',notes:''},
+  // Emp Contract Attestation x6: prof=350*6=2100, gov=60*6=360 → line=2460
+  {id:'SEED-M10',clientId:6,clientName:'Al Meera Consumer Goods',serviceId:'emp-contract-attest',serviceName:'Employment Contract Attestation',qty:6,unitPrice:350,total:2100,rchFee:350,card:'rapid1',cardLabel:'Rapid CC-1 (xxx1001)',paymentMethod:'card',govFee:360,receiptRef:'',receiptGroupId:'',buCode:'HR',costCenter:'CC-ALM-HR-01',serviceLine:'',department:'',employees:[{name:'Maria Santos',date:'2026-02-19',buCode:'HR',costCenter:'CC-ALM-HR-01'},{name:'Jose Garcia',date:'2026-02-19',buCode:'HR',costCenter:'CC-ALM-HR-01'},{name:'Ravi Shankar',date:'2026-02-20',buCode:'HR',costCenter:'CC-ALM-HR-01'},{name:'Anil Prasad',date:'2026-02-20',buCode:'HR',costCenter:'CC-ALM-HR-01'},{name:'Tariq Zaman',date:'2026-02-21',buCode:'HR',costCenter:'CC-ALM-HR-01'},{name:'Fahad Qasim',date:'2026-02-21',buCode:'HR',costCenter:'CC-ALM-HR-01'}],submittedBy:'violetta',submittedByName:'Violetta A.',submittedAt:'2026-02-18T08:00:00.000Z',requestId:'REQ-SEED-M10',provider:'Rapid',status:'invoiced',approvedBy:'elena',approvedByName:'Elena F.',approvedAt:'2026-02-19T10:00:00.000Z',rejectedReason:null,expensedBy:'gabi',expensedByName:'Gabi M.',expensedAt:'2026-02-21T09:00:00.000Z',invoiceId:'INV/RCH/2026/1004',invoicedBy:'suleiman',invoicedByName:'Suleiman M.',invoicedAt:'2026-02-20T11:00:00.000Z',notes:''},
+  // DL Convert x3: prof=350*3=1050, gov=300*3=900 → line=1950
+  {id:'SEED-M11',clientId:6,clientName:'Al Meera Consumer Goods',serviceId:'dl-convert',serviceName:'Driving License (Countries That Can Convert)',qty:3,unitPrice:350,total:1050,rchFee:350,card:'rapid1',cardLabel:'Rapid CC-1 (xxx1001)',paymentMethod:'card',govFee:900,receiptRef:'',receiptGroupId:'',buCode:'OPS',costCenter:'CC-ALM-OPS-01',serviceLine:'',department:'',employees:[{name:'Deepak Patel',date:'2026-02-20',buCode:'OPS',costCenter:'CC-ALM-OPS-01'},{name:'Sanjay Gupta',date:'2026-02-20',buCode:'OPS',costCenter:'CC-ALM-OPS-01'},{name:'Hassan Al-Kuwari',date:'2026-02-21',buCode:'OPS',costCenter:'CC-ALM-OPS-01'}],submittedBy:'violetta',submittedByName:'Violetta A.',submittedAt:'2026-02-18T08:00:00.000Z',requestId:'REQ-SEED-M11',provider:'Rapid',status:'invoiced',approvedBy:'elena',approvedByName:'Elena F.',approvedAt:'2026-02-19T10:00:00.000Z',rejectedReason:null,expensedBy:'gabi',expensedByName:'Gabi M.',expensedAt:'2026-02-21T09:00:00.000Z',invoiceId:'INV/RCH/2026/1004',invoicedBy:'suleiman',invoicedByName:'Suleiman M.',invoicedAt:'2026-02-20T11:00:00.000Z',notes:''},
+  // Totals: prof=33300, gov=35640, grand=68940
 ]
 
 function dbLoad() {
@@ -624,6 +636,8 @@ let S = {
   // invoice amendment
   amendingInvoice: false,
   amendedFees: {},
+  // receipt preview modal
+  receiptModal: null,  // { receipts: [{id,fileName,base64,mimeType}], index: 0 }
 };
 
 function set(patch) {
@@ -957,7 +971,15 @@ function submitCompletion() {
   const perSvcReceipts = S.perServiceReceipts || {};
 
   S.completingIds.forEach(id => {
-    const govFee = parseFloat((f.govFees||{})[id]) || 0;
+    const rawFee = (f.govFees||{})[id];
+    let govFee, govFeeBreakdown;
+    if (Array.isArray(rawFee)) {
+      govFeeBreakdown = rawFee.map(v => parseFloat(v) || 0);
+      govFee = govFeeBreakdown.reduce((s,v) => s + v, 0);
+    } else {
+      govFee = parseFloat(rawFee) || 0;
+      govFeeBreakdown = null;
+    }
     const svcReceipts = perSvcReceipts[id] || [];
 
     // Save per-service receipts
@@ -969,7 +991,7 @@ function submitCompletion() {
       dbSaveReceipts(existing);
     }
 
-    dbUpdate(id, {
+    const patch = {
       status:'pending',
       paymentMethod: f.paymentMethod,
       card: card ? card.id : '',
@@ -978,7 +1000,9 @@ function submitCompletion() {
       receiptRef: svcReceipts.length > 0 ? svcReceipts.map(r=>r.fileName).join(', ') : '',
       receiptGroupId,
       notes: f.notes || ''
-    });
+    };
+    if (govFeeBreakdown) patch.govFeeBreakdown = govFeeBreakdown;
+    dbUpdate(id, patch);
   });
   set({view:'dashboard', completingRequestId:null, completingIds:[], completeForm:{paymentMethod:'',card:'',govFees:{},notes:''}, perServiceReceipts:{}, uploadedReceipts:[]});
 }
@@ -1841,18 +1865,40 @@ function vCompleteService() {
         ${S.completingIds.map(id => {
           const l = allLogs.find(x=>x.id===id);
           if (!l) return '';
-          const svcGovFee = (f.govFees||{})[id] || '';
+          const svcGovFee = (f.govFees||{})[id];
           const svcFiles = (S.perServiceReceipts||{})[id] || [];
+          const showPerUnit = l.qty > 1;
+          const govFeeArr = showPerUnit ? (Array.isArray(svcGovFee) ? svcGovFee : Array(l.qty).fill('')) : null;
+          const govFeeTotal = showPerUnit ? govFeeArr.reduce((s,v) => s + (parseFloat(v)||0), 0) : (parseFloat(svcGovFee)||0);
           return `
             <div style="border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin-bottom:8px;background:white">
               <div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:8px">${l.serviceName} <span style="font-weight:400;color:var(--g500)">× ${l.qty}</span></div>
+              ${showPerUnit ? `
+                <div style="font-size:10px;font-weight:600;color:var(--g500);margin-bottom:6px">Enter government fee for each ${l.employees && l.employees.length >= l.qty ? 'employee' : 'unit'}:</div>
+                ${Array.from({length:l.qty}, (_,i) => {
+                  const empName = l.employees && l.employees[i] ? l.employees[i].name : 'Unit ' + (i+1);
+                  const val = govFeeArr[i] || '';
+                  return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">' +
+                    '<span style="font-size:11px;color:var(--g700);min-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + empName + '</span>' +
+                    '<input class="form-input" type="number" min="0" step="10" placeholder="0" value="' + val + '"' +
+                    ' oninput="if(!S.completeForm.govFees)S.completeForm.govFees={};if(!Array.isArray(S.completeForm.govFees[\\'' + id + '\\']))S.completeForm.govFees[\\'' + id + '\\']=Array(' + l.qty + ').fill(\\'\\');S.completeForm.govFees[\\'' + id + '\\'][' + i + ']=this.value;render()"' +
+                    ' style="width:110px;padding:5px 8px;font-size:12px">' +
+                    '</div>';
+                }).join('')}
+                <div style="display:flex;justify-content:flex-end;padding-top:4px;border-top:1px solid var(--border);margin-top:6px">
+                  <span style="font-size:11px;font-weight:700;color:var(--navy)">Total Gov Fee: QAR ${fmt(govFeeTotal)}</span>
+                </div>
+              ` : `
               <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
                 <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
                   <label style="font-size:10px;font-weight:700;color:var(--g500);white-space:nowrap">GOV FEE (QAR)</label>
-                  <input class="form-input" type="number" min="0" step="10" placeholder="0" value="${svcGovFee}"
+                  <input class="form-input" type="number" min="0" step="10" placeholder="0" value="${svcGovFee||''}"
                     oninput="if(!S.completeForm.govFees)S.completeForm.govFees={};S.completeForm.govFees['${id}']=this.value"
                     style="width:110px;padding:6px 8px">
                 </div>
+              </div>
+              `}
+              <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:8px">
                 <label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;padding:6px 12px;border:1.5px dashed var(--border);border-radius:7px;font-size:11px;color:var(--g500);background:var(--g50);white-space:nowrap;flex-shrink:0">
                   📎 Attach receipt
                   <input type="file" accept="application/pdf,image/*" multiple style="display:none"
@@ -2136,7 +2182,7 @@ function vExpense() {
                       <div style="color:${l.govFee?'var(--red)':'var(--g300)'}">Gov: ${l.govFee ? 'QAR '+fmt(l.govFee) : '—'}</div>
                     </div>
                     ${empList.length > 0 ? `<div style="font-size:11px;color:var(--g500);margin-top:4px">👤 ${empList.map(e=>e.name).join(', ')}</div>` : ''}
-                    ${receipts.length > 0 ? `<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">${receipts.map(r=>r.mimeType.startsWith('image/')?`<img src="${r.base64}" style="width:48px;height:36px;object-fit:cover;border-radius:4px;border:1px solid var(--border)">`:`<span style="font-size:10px;padding:2px 6px;background:var(--g50);border:1px solid var(--border);border-radius:4px">📄 ${r.fileName}</span>`).join('')}</div>` : ''}
+                    ${receipts.length > 0 ? `<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">${receipts.map((r,ri)=>r.mimeType.startsWith('image/')?`<img src="${r.base64}" style="width:48px;height:36px;object-fit:cover;border-radius:4px;border:1px solid var(--border);cursor:pointer" onclick="event.stopPropagation();openReceiptModal(getReceiptsForLog('${l.id}'),${ri})">`:`<span style="font-size:10px;padding:2px 6px;background:var(--g50);border:1px solid var(--border);border-radius:4px;cursor:pointer" onclick="event.stopPropagation();openReceiptModal(getReceiptsForLog('${l.id}'),${ri})">📄 ${r.fileName}</span>`).join('')}</div>` : ''}
                   </div>
                   <div style="text-align:right">
                     <div style="font-weight:700;font-size:13px;color:var(--navy)">QAR ${fmt(l.total+(l.govFee||0))}</div>
@@ -2405,6 +2451,8 @@ function vInvoicePreview() {
 
   const allLogs = dbGet();
   const logs = invoice.logIds.map(id => allLogs.find(l => l.id === id)).filter(Boolean);
+  // Sort service lines by total amount (gov + prof) descending — highest value first
+  logs.sort((a, b) => ((b.govFee||0) + (b.total||0)) - ((a.govFee||0) + (a.total||0)));
 
   // Company-specific data
   const companies = {
@@ -2532,9 +2580,38 @@ function vInvoicePreview() {
           <span style="font-size:12px;opacity:.6">${totalPages} page${totalPages>1?'s':''}</span>
           <span style="font-size:12px;opacity:.6">QAR ${fmt(invoice.grandTotal)}</span>
           ${['accountant','acct_mgr'].includes(S.user?.type) ? `<button onclick="S.amendingInvoice=!S.amendingInvoice;S.amendedFees={};render()">✎ Amend</button>` : ''}
-          <button onclick="window.print()" style="background:rgba(255,255,255,.22)">Print / PDF</button>
+          <button onclick="downloadInvoicePdf()" style="background:rgba(255,255,255,.22)">⬇ Download PDF</button>
         </div>
       </div>
+
+      ${S.amendingInvoice ? `
+        <div class="amend-form-container no-print" style="margin-bottom:16px;padding:16px;background:white;border-radius:12px;border:2px solid var(--navy)">
+          <div style="font-size:13px;font-weight:700;color:var(--navy);margin-bottom:12px">Amend Invoice — Override Fees</div>
+          ${logs.map((l,i) => {
+            const override = S.amendedFees[l.id] || {};
+            return `
+              <div style="margin-bottom:10px;padding:10px;background:var(--g50);border-radius:8px;border:1px solid var(--border)">
+                <div style="font-size:12px;font-weight:700;margin-bottom:8px">${l.serviceName} × ${l.qty}</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                  <div>
+                    <label class="form-label" style="font-size:10px">Gov. Fee (was QAR ${fmt(l.govFee||0)})</label>
+                    <input class="form-input" type="number" min="0" value="${override.govFee!==undefined?override.govFee:(l.govFee||0)}"
+                      oninput="if(!S.amendedFees['${l.id}'])S.amendedFees['${l.id}']={};S.amendedFees['${l.id}'].govFee=parseFloat(this.value)||0">
+                  </div>
+                  <div>
+                    <label class="form-label" style="font-size:10px">Prof. Fee (was QAR ${fmt(l.total)})</label>
+                    <input class="form-input" type="number" min="0" value="${override.profFee!==undefined?override.profFee:l.total}"
+                      oninput="if(!S.amendedFees['${l.id}'])S.amendedFees['${l.id}']={};S.amendedFees['${l.id}'].profFee=parseFloat(this.value)||0">
+                  </div>
+                </div>
+              </div>`;
+          }).join('')}
+          <div style="display:flex;gap:8px;margin-top:10px">
+            <button class="btn btn-navy btn-sm" onclick="applyInvoiceAmendment('${invoice.id}')">Save Amendment</button>
+            <button class="btn btn-ghost btn-sm" onclick="S.amendingInvoice=false;render()">Cancel</button>
+          </div>
+        </div>
+      ` : ''}
 
       <!-- Invoice Pages (auto-paginated) -->
       ${itemChunks.map((chunk, pageIdx) => {
@@ -2641,8 +2718,8 @@ function vInvoicePreview() {
                   <td class="r" style="color:var(--navy)">${fmt(displayTotal)}</td>
                 </tr>
                 <tr>
-                  <td colspan="5" style="font-size:11px;color:var(--g500);background:var(--g50);border-bottom:none;padding-top:4px;padding-bottom:4px;font-style:italic">VAT (0%)</td>
-                  <td class="r" style="font-size:11px;color:var(--g500);background:var(--g50);border-bottom:none;padding-top:4px;padding-bottom:4px">—</td>
+                  <td colspan="5" style="font-size:12px;font-weight:700;color:var(--navy);background:var(--g50);border-bottom:none;padding-top:6px;padding-bottom:6px">VAT</td>
+                  <td class="r" style="font-size:12px;font-weight:700;color:var(--navy);background:var(--g50);border-bottom:none;padding-top:6px;padding-bottom:6px">—</td>
                 </tr>
                 <tr>
                   <td colspan="5" style="font-weight:800;font-size:12px;letter-spacing:.5px;background:var(--g50);border-top:1px solid var(--navy);border-bottom:none;padding-top:9px;color:var(--navy)">TOTAL (QAR)</td>
@@ -2768,34 +2845,6 @@ function vInvoicePreview() {
         </div>
       </div>
 
-      ${S.amendingInvoice ? `
-        <div class="no-print" style="margin-top:16px;padding:16px;background:white;border-radius:12px;border:2px solid var(--navy)">
-          <div style="font-size:13px;font-weight:700;color:var(--navy);margin-bottom:12px">Amend Invoice — Override Fees</div>
-          ${logs.map((l,i) => {
-            const override = S.amendedFees[l.id] || {};
-            return `
-              <div style="margin-bottom:10px;padding:10px;background:var(--g50);border-radius:8px;border:1px solid var(--border)">
-                <div style="font-size:12px;font-weight:700;margin-bottom:8px">${l.serviceName} × ${l.qty}</div>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-                  <div>
-                    <label class="form-label" style="font-size:10px">Gov. Fee (was QAR ${fmt(l.govFee||0)})</label>
-                    <input class="form-input" type="number" min="0" value="${override.govFee!==undefined?override.govFee:(l.govFee||0)}"
-                      oninput="if(!S.amendedFees['${l.id}'])S.amendedFees['${l.id}']={};S.amendedFees['${l.id}'].govFee=parseFloat(this.value)||0">
-                  </div>
-                  <div>
-                    <label class="form-label" style="font-size:10px">Prof. Fee (was QAR ${fmt(l.total)})</label>
-                    <input class="form-input" type="number" min="0" value="${override.profFee!==undefined?override.profFee:l.total}"
-                      oninput="if(!S.amendedFees['${l.id}'])S.amendedFees['${l.id}']={};S.amendedFees['${l.id}'].profFee=parseFloat(this.value)||0">
-                  </div>
-                </div>
-              </div>`;
-          }).join('')}
-          <div style="display:flex;gap:8px;margin-top:10px">
-            <button class="btn btn-navy btn-sm" onclick="applyInvoiceAmendment('${invoice.id}')">Save Amendment</button>
-            <button class="btn btn-ghost btn-sm" onclick="S.amendingInvoice=false;render()">Cancel</button>
-          </div>
-        </div>
-      ` : ''}
 
     </div>`;
 }
@@ -2880,6 +2929,79 @@ async function renderPdfAttachments() {
     if (/^\d+ pages?$/.test(span.textContent.trim()))
       span.textContent = `${totalPages} page${totalPages !== 1 ? 's' : ''}`;
   });
+}
+
+async function downloadInvoicePdf() {
+  if (typeof html2pdf === 'undefined') { alert('PDF library not loaded. Please try again.'); return; }
+  const invoice = dbGetInvoices().find(i => i.id === S.invoiceId);
+  if (!invoice) { alert('No invoice selected'); return; }
+
+  // Wait for PDF attachments to render first
+  await renderPdfAttachments();
+
+  const viewer = document.querySelector('.doc-viewer');
+  if (!viewer) { alert('Invoice not rendered'); return; }
+
+  // Hide toolbar and non-print elements during capture
+  const toolbar = viewer.querySelector('.doc-viewer-toolbar');
+  const amendForm = viewer.querySelector('.amend-form-container');
+  if (toolbar) toolbar.style.display = 'none';
+  if (amendForm) amendForm.style.display = 'none';
+
+  const pages = Array.from(viewer.querySelectorAll('.doc-page'));
+  if (!pages.length) { alert('No pages to export'); return; }
+
+  const fileName = invoice.id.replace(/\//g, '-') + '.pdf';
+  const btn = event.target;
+  const origText = btn.textContent;
+  btn.textContent = 'Generating...';
+  btn.disabled = true;
+
+  try {
+    // Build PDF page by page using jsPDF directly
+    const { jsPDF } = window.jspdf || {};
+    if (jsPDF) {
+      // Use jsPDF directly for multi-page
+      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+      for (let i = 0; i < pages.length; i++) {
+        if (i > 0) pdf.addPage();
+        const canvas = await html2canvas(pages[i], { scale: 2, useCORS: true, logging: false });
+        const imgData = canvas.toDataURL('image/jpeg', 0.95);
+        const pdfW = pdf.internal.pageSize.getWidth();
+        const pdfH = (canvas.height * pdfW) / canvas.width;
+        pdf.addImage(imgData, 'JPEG', 0, 0, pdfW, Math.min(pdfH, pdf.internal.pageSize.getHeight()));
+      }
+      pdf.save(fileName);
+    } else {
+      // Fallback: use html2pdf with each page
+      const worker = html2pdf().set({
+        margin: 0,
+        filename: fileName,
+        image: { type: 'jpeg', quality: 0.95 },
+        html2canvas: { scale: 2, useCORS: true, logging: false },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak: { mode: ['css', 'legacy'] }
+      });
+      // Clone pages into a temp container for export
+      const container = document.createElement('div');
+      pages.forEach((pg, i) => {
+        const clone = pg.cloneNode(true);
+        if (i > 0) clone.style.pageBreakBefore = 'always';
+        container.appendChild(clone);
+      });
+      document.body.appendChild(container);
+      await worker.from(container).save();
+      document.body.removeChild(container);
+    }
+  } catch (err) {
+    console.error('PDF download error:', err);
+    alert('PDF generation failed: ' + err.message);
+  } finally {
+    if (toolbar) toolbar.style.display = '';
+    if (amendForm) amendForm.style.display = '';
+    btn.textContent = origText;
+    btn.disabled = false;
+  }
 }
 
 // ═══════════════════════════════════
@@ -3763,6 +3885,71 @@ function render() {
           </div>
         </div>
         <div class="content"><div class="fade">${renderView()}</div></div>
+      </div>
+    </div>
+    ${S.receiptModal ? renderReceiptModal() : ''}`;
+}
+
+// ═══════════════════════════════════
+// Receipt Preview Modal
+// ═══════════════════════════════════
+function openReceiptModal(receipts, index) {
+  set({ receiptModal: { receipts, index: index || 0 } });
+}
+
+function closeReceiptModal() {
+  set({ receiptModal: null });
+}
+
+function receiptModalNav(delta) {
+  if (!S.receiptModal) return;
+  const { receipts, index } = S.receiptModal;
+  const newIdx = Math.max(0, Math.min(receipts.length - 1, index + delta));
+  set({ receiptModal: { receipts, index: newIdx } });
+}
+
+function downloadReceipt(receipt) {
+  const a = document.createElement('a');
+  a.href = receipt.base64;
+  a.download = receipt.fileName || 'receipt';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+function renderReceiptModal() {
+  const { receipts, index } = S.receiptModal;
+  if (!receipts || !receipts.length) return '';
+  const r = receipts[index];
+  const isImage = r.mimeType && r.mimeType.startsWith('image/');
+  return `
+    <div style="position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.75);backdrop-filter:blur(4px)" onclick="closeReceiptModal()">
+      <div style="position:relative;max-width:90vw;max-height:90vh;background:white;border-radius:16px;overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,.4)" onclick="event.stopPropagation()">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--navy);color:white">
+          <div style="font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:60%">${r.fileName || 'Receipt'}</div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:11px;opacity:.6">${index + 1} of ${receipts.length}</span>
+            <button onclick="downloadReceipt(S.receiptModal.receipts[S.receiptModal.index])" style="background:rgba(255,255,255,.2);border:none;color:white;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600">⬇ Download</button>
+            <button onclick="closeReceiptModal()" style="background:rgba(255,255,255,.15);border:none;color:white;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center">✕</button>
+          </div>
+        </div>
+        <div style="padding:16px;max-height:78vh;overflow:auto;display:flex;align-items:center;justify-content:center;min-height:200px;background:var(--g50)">
+          ${isImage
+            ? `<img src="${r.base64}" style="max-width:100%;max-height:74vh;object-fit:contain;border-radius:8px">`
+            : `<div style="text-align:center;padding:40px">
+                <div style="font-size:48px;margin-bottom:12px">📄</div>
+                <div style="font-size:14px;font-weight:600;color:var(--navy);margin-bottom:8px">${r.fileName}</div>
+                <div style="font-size:12px;color:var(--g500);margin-bottom:16px">PDF preview not available in modal</div>
+                <button onclick="downloadReceipt(S.receiptModal.receipts[S.receiptModal.index])" class="btn btn-navy btn-sm">⬇ Download to View</button>
+              </div>`
+          }
+        </div>
+        ${receipts.length > 1 ? `
+          <div style="display:flex;justify-content:center;gap:12px;padding:10px 16px;background:white;border-top:1px solid var(--border)">
+            <button onclick="receiptModalNav(-1)" class="btn btn-ghost btn-sm" ${index === 0 ? 'disabled' : ''}>← Previous</button>
+            <button onclick="receiptModalNav(1)" class="btn btn-ghost btn-sm" ${index === receipts.length - 1 ? 'disabled' : ''}>Next →</button>
+          </div>
+        ` : ''}
       </div>
     </div>`;
 }
