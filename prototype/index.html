@@ -728,7 +728,8 @@ function updateServiceField(idx, field, value) {
   svc[field] = value;
   if (field === 'serviceId' && value) {
     const sv = SERVICES.find(s=>s.id===value);
-    if (sv) svc.unitPrice = svcPrice(sv, S.logProvider);
+    const client = CLIENTS.find(c=>c.id===S.logClient);
+    if (sv) svc.unitPrice = (client && client.type === 'retainer') ? 0 : svcPrice(sv, S.logProvider);
   }
   if (field === 'qty') {
     const qty = Math.max(1, Math.min(20, parseInt(value)||1));
@@ -1538,6 +1539,11 @@ function vLogService() {
           ${providerLabel}
          </div>`
       : '';
+    const clientTypeChip = client ? (
+      client.type === 'retainer'
+        ? `<span style="font-size:11px;font-weight:700;color:var(--green);background:var(--green-lt);padding:3px 9px;border-radius:20px">Retainer</span>`
+        : `<span style="font-size:11px;font-weight:700;color:var(--orange);background:var(--orange-lt);padding:3px 9px;border-radius:20px">Per-Job</span>`
+    ) : '';
     body = `
       <div class="form-group">
         <label class="form-label">Client / Company</label>
@@ -1548,20 +1554,24 @@ function vLogService() {
           S.logProvider=cl?cl.company:null;
           render()">
           <option value="">Choose a client...</option>
-          ${allClients.map(c=>`<option value="${c.id}" ${S.logClient===c.id?'selected':''}>${c.name}</option>`).join('')}
+          ${allClients.map(c=>{
+            const typeTag = c.type === 'retainer' ? ' · Retainer' : c.type === 'per-job' ? ' · Per-Job' : '';
+            return `<option value="${c.id}" ${S.logClient===c.id?'selected':''}>${c.name}${typeTag}</option>`;
+          }).join('')}
         </select>
-        ${providerChipEl}
+        ${providerChipEl || clientTypeChip ? `<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">${providerChipEl}${clientTypeChip}</div>` : ''}
       </div>`;
   }
 
   // ── STEP 1: Services ───────────────────────────────────────────────────
   if (S.logStep === 1) {
+    const isRetainerClient = client && client.type === 'retainer';
     const svcRows = S.logServices.map((s, idx) => {
       const svc = SERVICES.find(sv=>sv.id===s.serviceId);
       const listPrice = svc ? svcPrice(svc, S.logProvider) : 0;
-      const up = s.unitPrice !== '' ? parseFloat(s.unitPrice)||0 : listPrice;
+      const up = s.unitPrice !== '' ? parseFloat(s.unitPrice)||0 : (isRetainerClient ? 0 : listPrice);
       const lineTotal = up * s.qty;
-      const priceEdited = !!(svc && s.unitPrice !== '' && parseFloat(s.unitPrice) !== listPrice);
+      const priceEdited = !!(svc && !isRetainerClient && s.unitPrice !== '' && parseFloat(s.unitPrice) !== listPrice);
       return `
         <div style="border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;background:var(--g50);position:relative">
           ${S.logServices.length > 1 ? `<button onclick="removeServiceRow(${idx})" style="position:absolute;top:8px;right:10px;background:var(--red-lt);color:var(--red);border:none;border-radius:50%;width:22px;height:22px;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center" title="Remove">✕</button>` : ''}
@@ -1581,9 +1591,9 @@ function vLogService() {
             <div>
               <label class="form-label" style="margin-bottom:3px;display:flex;justify-content:space-between">
                 <span>RCH Fee (QAR)</span>
-                ${priceEdited ? `<span style="font-size:9px;color:var(--orange)">Custom</span>` : ''}
+                ${isRetainerClient ? `<span style="font-size:9px;font-weight:700;color:var(--green)">Retainer — 0</span>` : priceEdited ? `<span style="font-size:9px;color:var(--orange)">Custom</span>` : ''}
               </label>
-              <input class="form-input" type="number" min="0" step="50" value="${s.unitPrice !== '' ? s.unitPrice : listPrice}"
+              <input class="form-input" type="number" min="0" step="50" value="${s.unitPrice !== '' ? s.unitPrice : (isRetainerClient ? 0 : listPrice)}"
                 oninput="S.logServices[${idx}].unitPrice=this.value;render()">
             </div>
           </div>
@@ -1594,11 +1604,17 @@ function vLogService() {
     const grandTotal = S.logServices.reduce((sum, s) => {
       const svc = SERVICES.find(sv=>sv.id===s.serviceId);
       const listPrice = svc ? svcPrice(svc, S.logProvider) : 0;
-      const up = s.unitPrice !== '' ? parseFloat(s.unitPrice)||0 : listPrice;
+      const up = s.unitPrice !== '' ? parseFloat(s.unitPrice)||0 : (isRetainerClient ? 0 : listPrice);
       return sum + up * s.qty;
     }, 0);
 
+    const retainerNotice = isRetainerClient ? `
+      <div style="display:flex;align-items:center;gap:8px;padding:9px 12px;background:var(--green-lt);border:1px solid var(--green);border-radius:8px;margin-bottom:14px;font-size:12px;color:var(--green);font-weight:600">
+        <span>Retainer client — RCH professional fees auto-set to 0. Finance can adjust on the invoice if needed.</span>
+      </div>` : '';
+
     body = `
+      ${retainerNotice}
       <div style="font-size:12px;color:var(--g500);margin-bottom:14px">Add the services being requested. You can add multiple services at once.</div>
       ${svcRows}
       <button class="btn btn-ghost btn-sm" onclick="addServiceRow()" style="width:100%;justify-content:center;margin-bottom:12px">+ Add Another Service</button>
@@ -2429,7 +2445,6 @@ function vInvoicePreview() {
   const dueDate = new Date(invDate); dueDate.setDate(dueDate.getDate() + 7);
 
   // Build line items — one row per employee, or one row per service if no employees
-  const isRetainer = client.type === 'retainer';
   const lineItems = [];
   logs.forEach(l => {
     const hasEmps = l.employees && l.employees.length > 0;
@@ -2438,7 +2453,7 @@ function vInvoicePreview() {
       : '';
     if (hasEmps) {
       const govPerEmp  = (l.govFee||0) / l.qty;
-      const profPerEmp = isRetainer ? 0 : l.unitPrice;
+      const profPerEmp = l.unitPrice;
       l.employees.forEach(emp => {
         const empBuCc = emp.buCode || emp.costCenter
           ? `${emp.buCode?'BU: '+emp.buCode:''}${emp.buCode&&emp.costCenter?' · ':''}${emp.costCenter?'CC: '+emp.costCenter:''}`
@@ -2455,7 +2470,6 @@ function vInvoicePreview() {
         });
       });
     } else {
-      const profFee = isRetainer ? 0 : l.total;
       lineItems.push({
         desc: l.serviceName,
         buCc: buCcNote,
@@ -2463,8 +2477,8 @@ function vInvoicePreview() {
         costCenter: l.costCenter || '',
         date: fmtInvDate(l.submittedAt),
         govFee: l.govFee||0,
-        profFee,
-        total: (l.govFee||0) + profFee
+        profFee: l.total,
+        total: (l.govFee||0) + l.total
       });
     }
   });
