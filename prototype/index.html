@@ -1317,7 +1317,6 @@ function vDashboardAM() {
     </div>
 
     ${(() => {
-      // Needs-attention banner
       const rejected = historyLogs.filter(l=>l.rejectedReason && l.status==='rejected');
       const rejectedBanner = rejected.length > 0 ? `
         <div style="padding:10px 14px;background:var(--red-lt);border-radius:8px;border:1px solid rgba(192,39,45,.15);margin-bottom:12px">
@@ -1329,13 +1328,7 @@ function vDashboardAM() {
             </div>`).join('')}
         </div>` : '';
 
-      if (historyLogs.length === 0) return `
-        <div class="card" style="margin-bottom:20px">
-          <div class="card-hd"><span class="card-title">Activity by Client</span></div>
-          <div class="empty-state"><div class="empty-icon">📋</div><div class="empty-txt">No activity yet</div><div class="empty-sub">Create your first service request to get started.</div></div>
-        </div>`;
-
-      // Group by client
+      // Group by client for activity section
       const byClient = {};
       historyLogs.forEach(l => {
         if (!byClient[l.clientId]) byClient[l.clientId] = {
@@ -1351,58 +1344,68 @@ function vDashboardAM() {
         return bDate - aDate;
       });
 
-      return `
-        <div style="font-size:11px;font-weight:700;color:var(--g500);text-transform:uppercase;margin-bottom:10px;letter-spacing:.5px">Activity by Client</div>
-        ${rejectedBanner}
-        ${groups.map(({clientId, clientName, company, logs}) => {
+      const activitySection = historyLogs.length === 0 ? `
+        <div class="empty-state"><div class="empty-icon">📋</div><div class="empty-txt">No activity yet</div><div class="empty-sub">Create your first service request to get started.</div></div>`
+        : groups.map(({clientId, clientName, company, logs}) => {
           const expanded = S.expandedClients[clientId];
           const readyCount = logs.filter(l=>l.status==='am_completing').length;
           const totalFees = logs.reduce((s,l)=>s+l.total,0);
           const coBadge = company === 'Rapid'
-            ? `<span style="font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;background:var(--navy-lt);color:var(--navy)">Rapid</span>`
-            : `<span style="font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;background:var(--mag-lt);color:var(--magenta)">RCHBS</span>`;
+            ? `<span style="font-size:10px;font-weight:700;padding:2px 5px;border-radius:4px;background:var(--navy-lt);color:var(--navy)">Rapid</span>`
+            : `<span style="font-size:10px;font-weight:700;padding:2px 5px;border-radius:4px;background:var(--mag-lt);color:var(--magenta)">RCHBS</span>`;
           return `
-            <div class="card" style="margin-bottom:10px;overflow:hidden">
-              <div style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:12px 16px;border-bottom:${expanded?'1px solid var(--border)':'none'}"
+            <div style="border:1px solid var(--border);border-radius:8px;margin-bottom:8px;overflow:hidden">
+              <div style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:9px 12px;background:${expanded?'var(--g50)':'white'}"
                 onclick="S.expandedClients[${clientId}]=!S.expandedClients[${clientId}];render()">
-                <span style="font-size:14px;color:var(--g300)">${expanded?'▾':'▸'}</span>
+                <span style="font-size:12px;color:var(--g400)">${expanded?'▾':'▸'}</span>
                 ${coBadge}
-                <span style="font-weight:700;font-size:13px;flex:1">${clientName}</span>
-                <span style="font-size:11px;color:var(--g500)">${logs.length} service${logs.length!==1?'s':''}</span>
+                <span style="font-weight:700;font-size:12px;flex:1">${clientName}</span>
+                <span style="font-size:11px;color:var(--g500)">${logs.length} svc</span>
                 <span style="font-size:12px;font-weight:700;color:var(--navy)">QAR ${fmt(totalFees)}</span>
                 ${readyCount > 0 ? `
                   <button class="btn btn-primary btn-xs" onclick="event.stopPropagation();startBatchComplete(${clientId})">
-                    Complete ${readyCount} Ready
+                    Complete ${readyCount}
                   </button>` : ''}
               </div>
               ${expanded ? `
-                <table class="client-table" style="margin:0">
+                <table class="client-table" style="margin:0;font-size:11px">
                   <thead><tr>
-                    <th>Date</th><th>Service</th><th>Qty</th><th>RCH Fee</th><th>Status</th><th style="text-align:right">Actions</th>
+                    <th>Date</th><th>Service</th><th>Qty</th><th>Fee</th><th>Status</th><th style="text-align:right">Actions</th>
                   </tr></thead>
                   <tbody>${logs.map(l => {
-                    const editBtn = canEdit(l) ? `<button class="btn btn-ghost btn-xs" onclick="editLog('${l.id}')">✎ Edit</button>` : '';
+                    const editBtn = canEdit(l) ? `<button class="btn btn-ghost btn-xs" onclick="editLog('${l.id}')">✎</button>` : '';
                     const deleteBtn = canDelete(l) ? `<button class="btn btn-xs" style="background:var(--red-lt);color:var(--red)" onclick="deleteLog('${l.id}')">✕</button>` : '';
                     const completeBtn = l.status === 'am_completing' ? `<button class="btn btn-primary btn-xs" onclick="startCompleteService('${l.id}')">Complete</button>` : '';
                     return `<tr>
-                      <td style="font-size:11px;color:var(--g500)">${fmtDate(l.submittedAt)}</td>
-                      <td style="font-size:12px">${l.serviceName}</td>
-                      <td style="font-size:12px;text-align:center">${l.qty}</td>
-                      <td style="font-weight:700;font-size:12px;color:var(--navy)">QAR ${fmt(l.total)}</td>
+                      <td style="color:var(--g500)">${fmtDate(l.submittedAt)}</td>
+                      <td>${l.serviceName}</td>
+                      <td style="text-align:center">${l.qty}</td>
+                      <td style="font-weight:700;color:var(--navy)">QAR ${fmt(l.total)}</td>
                       <td>${statusBadge(l.status)}</td>
                       <td style="text-align:right"><div style="display:flex;gap:4px;justify-content:flex-end">${completeBtn}${editBtn}${deleteBtn}</div></td>
                     </tr>`;
                   }).join('')}</tbody>
                 </table>` : ''}
             </div>`;
-        }).join('')}`;
-    })()}
+        }).join('');
 
-    <div class="card-hd" style="margin-bottom:10px">
-      <span class="card-title" style="font-size:14px">Service Pipeline</span>
-      <span style="font-size:10px;color:var(--g500)">Active service logs by stage · paid services removed automatically</span>
-    </div>
-    <div class="kanban-wrap">${kanbanHTML}</div>`;
+      return `
+        ${rejectedBanner}
+        <div class="card" style="margin-bottom:14px">
+          <div class="card-hd" style="padding-bottom:10px;margin-bottom:10px;border-bottom:1px solid var(--border)">
+            <span class="card-title" style="font-size:14px">Service Pipeline</span>
+            <span style="font-size:10px;color:var(--g500)">Active by stage · paid removed automatically</span>
+          </div>
+          <div class="kanban-wrap" style="gap:8px">${kanbanHTML}</div>
+        </div>
+        <div class="card" style="margin-bottom:14px">
+          <div class="card-hd" style="padding-bottom:10px;margin-bottom:10px;border-bottom:1px solid var(--border)">
+            <span class="card-title" style="font-size:14px">Activity by Client</span>
+            <span style="font-size:10px;color:var(--g500)">${groups.length} client${groups.length!==1?'s':''} · ${historyLogs.length} service${historyLogs.length!==1?'s':''}</span>
+          </div>
+          ${activitySection}
+        </div>`;
+    })()}`;
 }
 
 // ═══════════════════════════════════
@@ -2376,6 +2379,140 @@ function vApprovals() {
 }
 
 // ═══════════════════════════════════
+// Card Management Tab (Gabi)
+// ═══════════════════════════════════
+function vCardManagement(cardBals, recentTopups, allLogs) {
+  const topups = dbGetTopups();
+  const expandedCard = S.expandedCard || null;
+
+  function cardTile(c) {
+    const isLow = c.type === 'prepaid' ? c.available < 500 : c.pct >= 0.9;
+    const isMed = !isLow && (c.type === 'prepaid' ? c.available < 2000 : c.pct >= 0.7);
+    const barColor = isLow ? 'var(--red)' : isMed ? 'var(--orange)' : 'var(--green)';
+    const isExpanded = expandedCard === c.id;
+
+    // Build combined ledger (transactions + topups) sorted by date desc
+    const cardLogs = allLogs.filter(l => l.card === c.id && l.status !== 'rejected')
+      .map(l => ({ type:'tx', date: l.submittedAt, label: l.serviceName, sub: l.clientName, amount: -(l.govFee||0), id: l.id, status: l.status }));
+    const cardTopups = topups.filter(t => t.cardId === c.id)
+      .map(t => ({ type:'topup', date: t.date+'T00:00:00', label: 'Top-Up', sub: t.note||'', amount: t.amount, id: t.id }));
+    const ledger = [...cardLogs, ...cardTopups].sort((a,b) => new Date(b.date) - new Date(a.date)).slice(0, 30);
+
+    const balanceLabel = c.type === 'prepaid'
+      ? `<span style="font-size:14px;font-weight:800;color:${isLow?'var(--red)':isMed?'var(--orange)':'var(--green)'}">QAR ${fmt(c.available)}</span><div style="font-size:10px;color:var(--g500)">Balance</div>`
+      : `<span style="font-size:14px;font-weight:800;color:${isLow?'var(--red)':isMed?'var(--orange)':'var(--navy)'}">QAR ${fmt(c.available)}</span><div style="font-size:10px;color:var(--g500)">Available</div>`;
+
+    return `
+      <div style="border:1px solid ${isExpanded?'var(--navy)':isLow?'var(--red)':'var(--border)'};border-radius:10px;overflow:hidden;background:white;${isLow?'box-shadow:0 0 0 1px var(--red)':''}">
+        <div style="padding:12px 14px;cursor:pointer;background:${isExpanded?'var(--navy-lt)':'white'}"
+          onclick="S.expandedCard=${isExpanded?'null':"'"+c.id+"'"};render()">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px">
+            <div>
+              <div style="font-size:12px;font-weight:700;color:var(--g900)">${c.label}</div>
+              <div style="display:flex;gap:4px;margin-top:3px">
+                <span class="badge" style="background:${c.company==='Rapid'?'var(--navy-lt)':'var(--mag-lt)'};color:${c.company==='Rapid'?'var(--navy)':'var(--magenta)'};font-size:9px">${c.company}</span>
+                <span class="badge" style="background:var(--g50);color:var(--g600);font-size:9px">${c.type==='prepaid'?'Prepaid':'Credit'}</span>
+              </div>
+            </div>
+            <div style="text-align:right">${balanceLabel}</div>
+          </div>
+          <div style="height:5px;background:var(--g100);border-radius:3px;overflow:hidden">
+            <div style="height:100%;width:${Math.round(c.pct*100)}%;background:${barColor};border-radius:3px;transition:width .3s"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">
+            <div style="font-size:10px;color:var(--g400)">
+              ${c.type === 'credit' ? `QAR ${fmt(c.spent)} spent of ${fmt(c.limit)} limit` : `QAR ${fmt(c.spent)} spent${c.credited>0?' · QAR '+fmt(c.credited)+' loaded':''}`}
+            </div>
+            <div style="font-size:10px;color:${isExpanded?'var(--navy)':'var(--g400)'}">
+              ${isExpanded?'▲ Hide history':'▼ Show history'} · ${ledger.length} entries
+            </div>
+          </div>
+          ${isLow ? `<div style="font-size:10px;color:var(--red);font-weight:600;margin-top:3px">Low — top up needed</div>` : ''}
+        </div>
+        ${isExpanded ? `
+          <div style="border-top:1px solid var(--border);padding:10px 14px 4px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+              <div style="font-size:10px;font-weight:700;color:var(--g500);text-transform:uppercase;letter-spacing:.4px">Transaction History</div>
+              <button class="btn btn-navy btn-xs" onclick="event.stopPropagation();S.addingTopup=true;S.topupPreselect='${c.id}';render()">+ Top-Up</button>
+            </div>
+            ${ledger.length === 0 ? `<div style="font-size:11px;color:var(--g400);padding:8px 0">No transactions yet</div>` :
+              ledger.map(entry => `
+                <div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--g50);font-size:11px">
+                  <div style="width:20px;text-align:center;font-size:13px">${entry.type==='topup'?'⬆':'💳'}</div>
+                  <div style="flex:1">
+                    <div style="font-weight:600;color:var(--g800)">${entry.label}</div>
+                    <div style="font-size:10px;color:var(--g400)">${entry.sub ? entry.sub+' · ' : ''}${fmtDate(entry.date)}</div>
+                  </div>
+                  <div style="font-weight:700;color:${entry.type==='topup'?'var(--green)':'var(--g700)'}">
+                    ${entry.type==='topup'?'+':''}QAR ${fmt(Math.abs(entry.amount))}
+                  </div>
+                </div>`).join('')}
+          </div>
+        ` : ''}
+      </div>`;
+  }
+
+  const addingTopup = S.addingTopup || false;
+  const preselect = S.topupPreselect || '';
+
+  return `
+    ${addingTopup ? `
+      <div class="card" style="margin-bottom:16px;border:2px solid var(--navy)">
+        <div class="card-hd" style="margin-bottom:10px"><span class="card-title">Record Card Top-Up / Payment</span></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+          <div style="grid-column:span 2">
+            <label class="form-label" style="font-size:10px">Card</label>
+            <select class="form-input" id="topup-card" style="padding:6px 8px">
+              <option value="">Select card...</option>
+              <optgroup label="Rapid">
+                ${CARDS.filter(c=>c.company==='Rapid').map(c=>`<option value="${c.id}" ${preselect===c.id?'selected':''}>${c.label}</option>`).join('')}
+              </optgroup>
+              <optgroup label="RCHBS">
+                ${CARDS.filter(c=>c.company==='RCHBS').map(c=>`<option value="${c.id}" ${preselect===c.id?'selected':''}>${c.label} (${c.type==='prepaid'?'Prepaid':'Credit'})</option>`).join('')}
+              </optgroup>
+            </select>
+          </div>
+          <div>
+            <label class="form-label" style="font-size:10px">Amount (QAR)</label>
+            <input class="form-input" id="topup-amount" type="number" min="1" step="0.01" placeholder="0.00" style="padding:6px 8px">
+          </div>
+          <div>
+            <label class="form-label" style="font-size:10px">Date</label>
+            <input class="form-input" id="topup-date" type="date" value="${new Date().toISOString().slice(0,10)}" style="padding:6px 8px">
+          </div>
+          <div style="grid-column:span 2">
+            <label class="form-label" style="font-size:10px">Notes (optional)</label>
+            <input class="form-input" id="topup-note" type="text" placeholder="e.g. Monthly top-up via bank transfer" style="padding:6px 8px">
+          </div>
+        </div>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-success btn-sm" onclick="submitTopup()">Save Top-Up</button>
+          <button class="btn btn-ghost btn-sm" onclick="S.addingTopup=false;S.topupPreselect='';render()">Cancel</button>
+        </div>
+      </div>
+    ` : `
+      <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+        <button class="btn btn-navy btn-sm" onclick="S.addingTopup=true;S.topupPreselect='';render()">+ Record Top-Up</button>
+      </div>
+    `}
+
+    ${['Rapid','RCHBS'].map(co => {
+      const coLabel = co==='Rapid' ? 'Rapid Clearing House' : 'RCH Business Solutions';
+      const coClrVar = co==='Rapid' ? 'var(--navy)' : 'var(--magenta)';
+      const coCards = cardBals.filter(c=>c.company===co);
+      return `
+        <div style="margin-bottom:20px">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:${coClrVar};letter-spacing:.5px;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid ${coClrVar}">
+            ${coLabel}
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px">
+            ${coCards.map(c=>cardTile(c)).join('')}
+          </div>
+        </div>`;
+    }).join('')}`;
+}
+
+// ═══════════════════════════════════
 // VIEW: Expense Queue (Gabi)
 // ═══════════════════════════════════
 function vExpense() {
@@ -2401,7 +2538,21 @@ function vExpense() {
   const selIds = S.selectedExpenseIds || [];
   const addingTopup = S.addingTopup || false;
 
+  const gabiTab = S.gabiTab || 'expense';
+
   return `
+    <!-- ── Tab Bar ───────────────────────────────────────────────────── -->
+    <div style="display:flex;gap:4px;margin-bottom:16px;border-bottom:2px solid var(--border);padding-bottom:0">
+      <button onclick="S.gabiTab='expense';render()" style="padding:8px 16px;font-size:12px;font-weight:${gabiTab==='expense'?'700':'500'};border:none;border-bottom:2px solid ${gabiTab==='expense'?'var(--navy)':'transparent'};background:none;color:${gabiTab==='expense'?'var(--navy)':'var(--g500)'};cursor:pointer;margin-bottom:-2px">
+        Expense Dashboard
+      </button>
+      <button onclick="S.gabiTab='cards';render()" style="padding:8px 16px;font-size:12px;font-weight:${gabiTab==='cards'?'700':'500'};border:none;border-bottom:2px solid ${gabiTab==='cards'?'var(--navy)':'transparent'};background:none;color:${gabiTab==='cards'?'var(--navy)':'var(--g500)'};cursor:pointer;margin-bottom:-2px">
+        Card Management
+      </button>
+    </div>
+
+    ${gabiTab === 'cards' ? vCardManagement(cardBals, recentTopups, all) : `
+
     <!-- ── Card Balances & Top-Ups ─────────────────────────────────────── -->
     <div class="card" style="margin-bottom:16px">
       <div class="card-hd">
@@ -2445,36 +2596,45 @@ function vExpense() {
         </div>
       ` : ''}
 
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:${recentTopups.length>0?'14px':'0'}">
-        ${cardBals.map(c => {
-          const isLow = c.type === 'prepaid' ? c.available < 500 : c.pct >= 0.9;
-          const isMed = !isLow && (c.type === 'prepaid' ? c.available < 2000 : c.pct >= 0.7);
-          const barColor = isLow ? 'var(--red)' : isMed ? 'var(--orange)' : 'var(--green)';
-          const coBg = c.company === 'Rapid' ? 'var(--navy-lt)' : 'var(--mag-lt)';
-          const coClr = c.company === 'Rapid' ? 'var(--navy)' : 'var(--magenta)';
-          const balanceLabel = c.type === 'prepaid'
-            ? `<span style="font-size:13px;font-weight:700;color:${isLow?'var(--red)':isMed?'var(--orange)':'var(--green)'}">QAR ${fmt(c.available)}</span><div style="font-size:10px;color:var(--g500)">Balance</div>`
-            : `<span style="font-size:13px;font-weight:700;color:${isLow?'var(--red)':isMed?'var(--orange)':'var(--navy)'}">QAR ${fmt(c.available)}</span><div style="font-size:10px;color:var(--g500)">Available</div>`;
-          return `
-            <div style="border:1px solid ${isLow?'var(--red)':'var(--border)'};border-radius:8px;padding:10px 12px;background:${isLow?'#fff5f5':'white'}">
-              <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px">
-                <div>
-                  <div style="font-size:11px;font-weight:700;color:var(--g800)">${c.label}</div>
-                  <div style="display:flex;gap:4px;margin-top:2px">
-                    <span class="badge" style="background:${coBg};color:${coClr};font-size:9px">${c.company}</span>
-                    <span class="badge" style="background:var(--g50);color:var(--g600);font-size:9px">${c.type==='prepaid'?'Prepaid':'Credit'}</span>
-                  </div>
-                </div>
-                <div style="text-align:right">${balanceLabel}</div>
-              </div>
-              <div style="height:4px;background:var(--g100);border-radius:2px;overflow:hidden">
-                <div style="height:100%;width:${Math.round(c.pct*100)}%;background:${barColor};border-radius:2px"></div>
-              </div>
-              ${c.type === 'credit' ? `<div style="font-size:10px;color:var(--g400);margin-top:3px">QAR ${fmt(c.spent)} spent of ${fmt(c.limit)} limit${c.credited>0?' · QAR '+fmt(c.credited)+' credited':''}</div>` : `<div style="font-size:10px;color:var(--g400);margin-top:3px">QAR ${fmt(c.spent)} spent${c.credited>0?' · QAR '+fmt(c.credited)+' loaded':' · No balance loaded'}</div>`}
-              ${isLow ? `<div style="font-size:10px;color:var(--red);font-weight:600;margin-top:3px">Low — top up needed</div>` : ''}
-            </div>`;
-        }).join('')}
-      </div>
+      ${['Rapid','RCHBS'].map(co => {
+        const coCards = cardBals.filter(c=>c.company===co);
+        const coLabel = co==='Rapid' ? 'Rapid Clearing House' : 'RCH Business Solutions';
+        const coClrVar = co==='Rapid' ? 'var(--navy)' : 'var(--magenta)';
+        return `
+          <div style="margin-bottom:${recentTopups.length>0||co==='Rapid'?'12px':'0'}">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:${coClrVar};letter-spacing:.4px;margin-bottom:7px">${coLabel}</div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px">
+              ${coCards.map(c => {
+                const isLow = c.type === 'prepaid' ? c.available < 500 : c.pct >= 0.9;
+                const isMed = !isLow && (c.type === 'prepaid' ? c.available < 2000 : c.pct >= 0.7);
+                const barColor = isLow ? 'var(--red)' : isMed ? 'var(--orange)' : 'var(--green)';
+                const coBg = co === 'Rapid' ? 'var(--navy-lt)' : 'var(--mag-lt)';
+                const balanceLabel = c.type === 'prepaid'
+                  ? `<span style="font-size:13px;font-weight:700;color:${isLow?'var(--red)':isMed?'var(--orange)':'var(--green)'}">QAR ${fmt(c.available)}</span><div style="font-size:10px;color:var(--g500)">Balance</div>`
+                  : `<span style="font-size:13px;font-weight:700;color:${isLow?'var(--red)':isMed?'var(--orange)':'var(--navy)'}">QAR ${fmt(c.available)}</span><div style="font-size:10px;color:var(--g500)">Available</div>`;
+                return `
+                  <div style="border:1px solid ${isLow?'var(--red)':'var(--border)'};border-radius:8px;padding:10px 12px;background:${isLow?'#fff5f5':'white'}">
+                    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px">
+                      <div>
+                        <div style="font-size:11px;font-weight:700;color:var(--g800)">${c.label}</div>
+                        <div style="display:flex;gap:4px;margin-top:2px">
+                          <span class="badge" style="background:${coBg};color:${coClrVar};font-size:9px">${c.company}</span>
+                          <span class="badge" style="background:var(--g50);color:var(--g600);font-size:9px">${c.type==='prepaid'?'Prepaid':'Credit'}</span>
+                        </div>
+                      </div>
+                      <div style="text-align:right">${balanceLabel}</div>
+                    </div>
+                    <div style="height:4px;background:var(--g100);border-radius:2px;overflow:hidden">
+                      <div style="height:100%;width:${Math.round(c.pct*100)}%;background:${barColor};border-radius:2px"></div>
+                    </div>
+                    ${c.type === 'credit' ? `<div style="font-size:10px;color:var(--g400);margin-top:3px">QAR ${fmt(c.spent)} spent of ${fmt(c.limit)} limit${c.credited>0?' · QAR '+fmt(c.credited)+' credited':''}</div>` : `<div style="font-size:10px;color:var(--g400);margin-top:3px">QAR ${fmt(c.spent)} spent${c.credited>0?' · QAR '+fmt(c.credited)+' loaded':' · No balance loaded'}</div>`}
+                    ${isLow ? `<div style="font-size:10px;color:var(--red);font-weight:600;margin-top:3px">Low — top up needed</div>` : ''}
+                  </div>`;
+              }).join('')}
+            </div>
+          </div>`;
+      }).join('')}
+      ${recentTopups.length > 0 ? '<div style="height:2px"></div>' : ''}
 
       ${recentTopups.length > 0 ? `
         <div style="border-top:1px solid var(--border);padding-top:10px">
@@ -2578,18 +2738,29 @@ function vExpense() {
               const isChecked = selIds.includes(l.id);
               const receipts = getReceiptsForLog(l.id);
               const empList = (l.employees||[]).filter(e=>e.name);
+              const clientInfo = CLIENTS.find(c=>c.id===l.clientId);
+              const clientType = clientInfo?.type;
+              const typeBadge = clientType === 'retainer'
+                ? `<span style="font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;background:#e8f5e9;color:#2e7d32">Retainer</span>`
+                : clientType === 'per-job'
+                ? `<span style="font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;background:var(--mag-lt);color:var(--magenta)">Per-Job</span>`
+                : '';
               return `
                 <div style="display:flex;align-items:flex-start;gap:10px;padding:10px;border:1px solid ${isChecked?'var(--navy)':'var(--border)'};border-radius:8px;margin-bottom:8px;background:${isChecked?'var(--navy-lt)':'white'};cursor:pointer"
                   onclick="const idx=S.selectedExpenseIds.indexOf('${l.id}');if(idx===-1)S.selectedExpenseIds.push('${l.id}');else S.selectedExpenseIds.splice(idx,1);render()">
                   <input type="checkbox" ${isChecked?'checked':''} style="margin-top:2px;cursor:pointer" onclick="event.stopPropagation()">
                   <div style="flex:1">
-                    <div style="font-size:12px;font-weight:700">${l.serviceName} × ${l.qty}</div>
+                    <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+                      <span style="font-size:12px;font-weight:700">${l.serviceName} × ${l.qty}</span>
+                      ${typeBadge}
+                    </div>
                     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:6px;font-size:11px;color:var(--g500)">
                       <div>💳 ${l.paymentMethod === 'card' ? l.cardLabel : l.paymentMethod === 'cash' ? 'Cash' : '—'}</div>
                       <div>BU: ${l.buCode||'—'} ${l.costCenter?'· CC: '+l.costCenter:''}</div>
                       <div style="color:${l.govFee?'var(--red)':'var(--g300)'}">Gov: ${l.govFee ? 'QAR '+fmt(l.govFee) : '—'}</div>
                     </div>
                     ${empList.length > 0 ? `<div style="font-size:11px;color:var(--g500);margin-top:4px">👤 ${empList.map(e=>e.name).join(', ')}</div>` : ''}
+                    ${l.notes ? `<div style="font-size:11px;color:var(--g700);margin-top:5px;padding:4px 8px;background:var(--g50);border-radius:4px;border-left:2px solid var(--g300)">📝 ${l.notes}</div>` : ''}
                     ${receipts.length > 0 ? `<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">${receipts.map((r,ri)=>r.mimeType.startsWith('image/')?`<img src="${r.base64}" style="width:48px;height:36px;object-fit:cover;border-radius:4px;border:1px solid var(--border);cursor:pointer" onclick="event.stopPropagation();openReceiptModal(getReceiptsForLog('${l.id}'),${ri})">`:`<span style="font-size:10px;padding:2px 6px;background:var(--g50);border:1px solid var(--border);border-radius:4px;cursor:pointer" onclick="event.stopPropagation();openReceiptModal(getReceiptsForLog('${l.id}'),${ri})">📄 ${r.fileName}</span>`).join('')}</div>` : ''}
                   </div>
                   <div style="text-align:right">
@@ -2663,7 +2834,8 @@ function vExpense() {
           </div>`;
       }).join('')}
       ${done.length > 20 ? `<div style="font-size:11px;color:var(--g500);text-align:center;padding:8px">... and ${done.length-20} more</div>` : ''}
-    ` : ''}`;
+    ` : ''}
+  `}`;
 }
 
 // ═══════════════════════════════════
@@ -2988,6 +3160,7 @@ function vInvoicePreview() {
           <span style="font-size:12px;opacity:.6">${totalPages} page${totalPages>1?'s':''}</span>
           <span style="font-size:12px;opacity:.6">QAR ${fmt(invoice.grandTotal)}</span>
           ${['accountant','acct_mgr'].includes(S.user?.type) ? `<button onclick="S.amendingInvoice=!S.amendingInvoice;S.amendedFees={};render()">✎ Amend</button>` : ''}
+          <button onclick="printInvoice()" style="background:rgba(255,255,255,.22)">🖨 Print</button>
           <button onclick="downloadInvoicePdf()" style="background:rgba(255,255,255,.22)">⬇ Download PDF</button>
         </div>
       </div>
@@ -3289,6 +3462,12 @@ async function renderPdfAttachments() {
         canvas.style.cssText = 'max-width:100%;border:1px solid #e5e7eb;border-radius:6px;display:block';
         await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
 
+        // Convert canvas to img immediately — canvas contexts can be cleared
+        // by the browser when off-screen, causing blank pages in PDF export.
+        const imgEl = document.createElement('img');
+        imgEl.src = canvas.toDataURL('image/jpeg', 0.95);
+        imgEl.style.cssText = 'max-width:100%;border:1px solid #e5e7eb;border-radius:6px;display:block';
+
         const pageDiv = document.createElement('div');
         pageDiv.className = 'doc-page doc-page-receipt';
         pageDiv.innerHTML = `
@@ -3306,7 +3485,7 @@ async function renderPdfAttachments() {
             Attached Receipt${numPages > 1 ? ` (${pNum} of ${numPages})` : ''} — ${logName}
           </div>
         `;
-        pageDiv.appendChild(canvas);
+        pageDiv.appendChild(imgEl);
         pageDiv.insertAdjacentHTML('beforeend', '<div class="doc-page-number">— of —</div>');
         newPages.push(pageDiv);
       }
@@ -3410,6 +3589,18 @@ async function downloadInvoicePdf() {
     btn.textContent = origText;
     btn.disabled = false;
   }
+}
+
+function printInvoice() {
+  const toolbar = document.querySelector('.doc-viewer-toolbar');
+  const amendForm = document.querySelector('.amend-form-container');
+  if (toolbar) toolbar.style.display = 'none';
+  if (amendForm) amendForm.style.display = 'none';
+  window.print();
+  setTimeout(() => {
+    if (toolbar) toolbar.style.display = '';
+    if (amendForm) amendForm.style.display = '';
+  }, 500);
 }
 
 // ═══════════════════════════════════
@@ -4244,6 +4435,7 @@ function renderView() {
 // ═══════════════════════════════════
 // RENDER
 // ═══════════════════════════════════
+let _lastRenderKey = null;
 function render() {
   const root = document.getElementById('app');
 
@@ -4309,6 +4501,11 @@ function render() {
     return;
   }
 
+  // Preserve scroll position for same-view re-renders (e.g. checkbox toggles)
+  const _scrollEl = document.querySelector('.content');
+  const _renderKey = JSON.stringify({ u: S.user?.id, v: S.view, inv: S.invoiceId });
+  const _savedScroll = (_scrollEl && _lastRenderKey === _renderKey) ? _scrollEl.scrollTop : 0;
+
   root.innerHTML = `
     <div class="app">
       <div class="sidebar">
@@ -4342,6 +4539,14 @@ function render() {
       </div>
     </div>
     ${S.receiptModal ? renderReceiptModal() : ''}`;
+
+  _lastRenderKey = _renderKey;
+  if (_savedScroll > 0) {
+    requestAnimationFrame(() => {
+      const el = document.querySelector('.content');
+      if (el) el.scrollTop = _savedScroll;
+    });
+  }
 }
 
 // ═══════════════════════════════════
