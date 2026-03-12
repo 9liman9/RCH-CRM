@@ -35,8 +35,8 @@
 body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--g900);-webkit-font-smoothing:antialiased}
 
 /* ── Login ── */
-.login-wrap{display:flex;align-items:center;justify-content:center;height:100vh;
-  background:linear-gradient(135deg,var(--navy) 0%,var(--navy-dk) 100%);padding:20px}
+.login-wrap{display:flex;align-items:flex-start;justify-content:center;min-height:100vh;
+  background:linear-gradient(135deg,var(--navy) 0%,var(--navy-dk) 100%);padding:40px 20px;overflow-y:auto}
 .login-box{width:100%;max-width:440px}
 .login-hd{text-align:center;margin-bottom:40px}
 .login-logo{display:inline-flex;align-items:center;gap:12px;margin-bottom:18px}
@@ -44,6 +44,18 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .login-form h2{font-size:17px;font-weight:700;color:var(--navy);margin-bottom:22px;text-align:center}
 .login-hint{font-size:11px;color:var(--g500);margin-top:18px;padding-top:16px;border-top:1px solid var(--border);text-align:center}
 .login-err{color:var(--red);font-size:12px;margin-top:6px;font-weight:500}
+.login-changelog{margin-top:16px;border-radius:12px;overflow:hidden;background:rgba(255,255,255,.1);backdrop-filter:blur(4px)}
+.login-changelog-hd{font-size:10px;font-weight:700;color:rgba(255,255,255,.5);letter-spacing:.8px;text-transform:uppercase;padding:10px 14px 8px}
+.login-changelog-body{max-height:190px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.2) transparent}
+.login-changelog-body::-webkit-scrollbar{width:4px}
+.login-changelog-body::-webkit-scrollbar-thumb{background:rgba(255,255,255,.2);border-radius:2px}
+.login-changelog-tbl{width:100%;border-collapse:collapse;font-size:11px}
+.login-changelog-tbl thead th{position:sticky;top:0;background:rgba(255,255,255,.08);color:rgba(255,255,255,.45);font-weight:600;font-size:10px;letter-spacing:.4px;text-transform:uppercase;padding:6px 14px;text-align:left}
+.login-changelog-tbl tbody td{padding:7px 14px;color:rgba(255,255,255,.75);vertical-align:top;border-top:1px solid rgba(255,255,255,.06)}
+.login-changelog-tbl tbody tr:hover td{background:rgba(255,255,255,.05)}
+.login-changelog-tbl .cl-ver{white-space:nowrap;font-weight:700;color:rgba(255,255,255,.9);font-family:monospace;font-size:11px}
+.login-changelog-tbl .cl-date{white-space:nowrap;color:rgba(255,255,255,.4);font-size:10px}
+.login-changelog-tbl .cl-desc{line-height:1.5}
 
 /* ── Layout ── */
 .app{display:flex;height:100vh;overflow:hidden}
@@ -3836,6 +3848,7 @@ function render() {
           <div class="login-hd">
             <div class="login-logo">${logoImg(44, true)}<span style="font-size:26px;font-weight:800;color:white">RCH CRM</span></div>
             <div style="font-size:14px;color:rgba(255,255,255,.55);margin-top:4px">Service Management Platform</div>
+            <div style="margin-top:10px"><span style="font-size:11px;background:rgba(255,255,255,.15);color:rgba(255,255,255,.85);padding:3px 12px;border-radius:20px;letter-spacing:.4px;font-weight:600">v0.5.0</span></div>
           </div>
           <form class="login-form" onsubmit="handleLogin(event)">
             <h2>Sign In</h2>
@@ -3850,6 +3863,41 @@ function render() {
             <button type="submit" class="btn btn-primary" style="width:100%;margin-top:6px;padding:12px;font-size:14px">Enter</button>
             <div class="login-hint">Demo mode — select any role to continue</div>
           </form>
+          <div class="login-changelog">
+            <div class="login-changelog-hd">Changelog</div>
+            <div class="login-changelog-body">
+              <table class="login-changelog-tbl">
+                <thead><tr><th>Version</th><th>Date</th><th>Changes</th></tr></thead>
+                <tbody>
+                  <tr>
+                    <td class="cl-ver">v0.5.0</td>
+                    <td class="cl-date">2026-03-12</td>
+                    <td class="cl-desc">PDF export, receipt preview modal, invoice amendments, Purchase Order number field, multi-page A4 invoices, PDF.js receipt rendering, retainer fee auto-zero, BU/CC pill tags</td>
+                  </tr>
+                  <tr>
+                    <td class="cl-ver">v0.4.0</td>
+                    <td class="cl-date">2026-03-10</td>
+                    <td class="cl-desc">Batch invoice generation with client-grouped UI, multi-service support in service logging, AM completion stage improvements</td>
+                  </tr>
+                  <tr>
+                    <td class="cl-ver">v0.3.0</td>
+                    <td class="cl-date">2026-03-05</td>
+                    <td class="cl-desc">Services offered section, custom invoice requirements (cost codes, BU, tax PIN), VAT readiness (Qatar June 2026), interactive HTML prototype with 6 screens</td>
+                  </tr>
+                  <tr>
+                    <td class="cl-ver">v0.2.0</td>
+                    <td class="cl-date">2026-03-04</td>
+                    <td class="cl-desc">Full service flow (Client→AM→OPs→Finance), client setup, invoice draft status, role-based dashboards (Finance, AM, Elena, Gabi, Management), three invoice triggers</td>
+                  </tr>
+                  <tr>
+                    <td class="cl-ver">v0.1.0</td>
+                    <td class="cl-date">2026-03-04</td>
+                    <td class="cl-desc">Initial current-state documentation, credit card details, CFO objectives (zero errors, real-time visibility), client spending limits, process flowcharts</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>`;
     return;
