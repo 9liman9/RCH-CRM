@@ -297,37 +297,9 @@ const USERS = [
 // ═══════════════════════════════════
 // REFERENCE DATA
 // ═══════════════════════════════════
-const CLIENTS_SEED = [
-  // ── Rapid Clearing House clients ──────────────────────────────────────────
-  { id:1,  name:'ABB Qatar WLL',               company:'Rapid', contact:'Ahmed Al-Mannai',   email:'accounts@abb.com.qa',         phone:'+974 4455 1001', type:'retainer', creditLimit:15000, assignedTo:'violetta', address:'Al Sadd Street, Tower 25, Floor 8', city:'Doha', country:'Qatar', poBox:'22177', tin:'300051234', crNumber:'45678', vatNumber:'' },
-  { id:2,  name:'EY Qatar',                    company:'Rapid', contact:'Sara Al-Emadi',     email:'info@qa.ey.com',              phone:'+974 4457 4200', type:'retainer', creditLimit:20000, assignedTo:'violetta', address:'Tornado Tower, Floor 23, West Bay', city:'Doha', country:'Qatar', poBox:'164', tin:'300098712', crNumber:'36741', vatNumber:'' },
-  { id:3,  name:'Hitachi Qatar WLL',           company:'Rapid', contact:'Khalid Al-Sulaiti', email:'qatar@hitachi.com',           phone:'+974 4431 0050', type:'retainer',  creditLimit:10000, assignedTo:'violetta', address:'Salwa Road, Building 42, Floor 3', city:'Doha', country:'Qatar', poBox:'9122', tin:'300045678', crNumber:'52341', vatNumber:'' },
-  { id:4,  name:'Industries Qatar QSC',        company:'Rapid', contact:'Faisal Al-Kuwari',  email:'info@iq.com.qa',              phone:'+974 4496 5500', type:'retainer', creditLimit:25000, assignedTo:'violetta', address:'Grand Hamad Street, IQ Tower', city:'Doha', country:'Qatar', poBox:'3212', tin:'300012345', crNumber:'8765', vatNumber:'' },
-  { id:5,  name:'Vodafone Qatar PSC',          company:'Rapid', contact:'Reem Al-Ansari',    email:'corporate@vodafone.com.qa',   phone:'+974 7777 0000', type:'retainer', creditLimit:18000, assignedTo:'violetta', address:'West Bay, Al Dafna Tower, Floor 12', city:'Doha', country:'Qatar', poBox:'27727', tin:'300067890', crNumber:'44590', vatNumber:'' },
-  { id:6,  name:'Al Meera Consumer Goods',     company:'Rapid', contact:'Mohammed Al-Hajri', email:'hr@almeera.com.qa',           phone:'+974 4012 3456', type:'retainer', creditLimit:12000, assignedTo:'violetta', address:'C Ring Road, Al Meera HQ', city:'Doha', country:'Qatar', poBox:'9521', tin:'300033456', crNumber:'28901', vatNumber:'' },
-  { id:7,  name:'Qatar Steel Company WLL',     company:'Rapid', contact:'Saif Al-Sada',      email:'admin@qatarsteel.com.qa',     phone:'+974 4477 2255', type:'retainer', creditLimit:20000, assignedTo:'violetta', address:'Mesaieed Industrial City', city:'Mesaieed', country:'Qatar', poBox:'50090', tin:'300078901', crNumber:'12345', vatNumber:'' },
-  { id:8,  name:'Property Finder Qatar',       company:'Rapid', contact:'Layla Al-Dossari',  email:'ops@propertyfinder.qa',       phone:'+974 4465 1234', type:'per-job',  creditLimit:8000,  assignedTo:'vongai',   address:'The Pearl, Tower 1, Floor 5', city:'Doha', country:'Qatar', poBox:'31100', tin:'', crNumber:'67890', vatNumber:'' },
-  { id:9,  name:'Acrogym Qatar',               company:'Rapid', contact:'Nadia Beshir',      email:'info@acrogym.qa',             phone:'+974 5556 7890', type:'per-job',  creditLimit:5000,  assignedTo:'violetta', address:'Lusail Boulevard, Sports Complex', city:'Lusail', country:'Qatar', poBox:'', tin:'', crNumber:'71234', vatNumber:'' },
-  { id:10, name:'Ooredoo Qatar PSC',           company:'Rapid', contact:'Tariq Al-Kaabi',    email:'corporate@ooredoo.com.qa',    phone:'+974 4466 0000', type:'retainer', creditLimit:22000, assignedTo:'vongai',   address:'West Bay, Ooredoo Tower', city:'Doha', country:'Qatar', poBox:'217', tin:'300055555', crNumber:'23456', vatNumber:'' },
-  { id:11, name:'Gulf International Bank',     company:'Rapid', contact:'Hana Al-Muftah',    email:'hr@gibonline.com',            phone:'+974 4496 3000', type:'retainer', creditLimit:16000, assignedTo:'violetta', address:'QFC Tower 1, Floor 19, West Bay', city:'Doha', country:'Qatar', poBox:'1017', tin:'300044444', crNumber:'34567', vatNumber:'' },
-  { id:12, name:'Lulu Hypermarket Qatar WLL',  company:'Rapid', contact:'Priya Nair',        email:'hr.qatar@luluhypermarket.com',phone:'+974 4432 8800', type:'retainer', creditLimit:14000, assignedTo:'violetta', address:'D Ring Road, Lulu HQ Building', city:'Doha', country:'Qatar', poBox:'7450', tin:'300066666', crNumber:'56789', vatNumber:'' },
-  { id:13, name:'Milaha (Qatar Navigation)',   company:'Rapid', contact:'Jaber Al-Marri',    email:'crewing@milaha.com',          phone:'+974 4445 3888', type:'retainer', creditLimit:19000, assignedTo:'vongai',   address:'Old Salata, Milaha Tower', city:'Doha', country:'Qatar', poBox:'153', tin:'300077777', crNumber:'6890', vatNumber:'' },
-  // ── RCH Business Solutions clients ───────────────────────────────────────
-  { id:14, name:'Seaquest Qatar',              company:'RCHBS', contact:'James O\'Brien',    email:'admin@seaquest.qa',           phone:'+974 4455 2002', type:'per-job',  creditLimit:9000,  assignedTo:'vongai',   address:'Ras Laffan Industrial City, Gate 2', city:'Ras Laffan', country:'Qatar', poBox:'50500', tin:'', crNumber:'78901', vatNumber:'' },
-  { id:15, name:'QatarEnergy',                 company:'RCHBS', contact:'Ali Al-Mohannadi',  email:'govt.affairs@qatarenergy.qa', phone:'+974 4449 0000', type:'retainer', creditLimit:30000, assignedTo:'violetta', address:'QatarEnergy Tower, West Bay', city:'Doha', country:'Qatar', poBox:'3212', tin:'300011111', crNumber:'1234', vatNumber:'' },
-  { id:16, name:'Hamad Medical Corporation',   company:'RCHBS', contact:'Dr. Nour Al-Said',  email:'admin@hamad.qa',              phone:'+974 4439 4444', type:'retainer', creditLimit:25000, assignedTo:'vongai',   address:'Hamad General Hospital, Al Rayyan Rd', city:'Doha', country:'Qatar', poBox:'3050', tin:'300022222', crNumber:'9012', vatNumber:'' },
-  { id:17, name:'Nakilat QSC',                 company:'RCHBS', contact:'Ibrahim Al-Buainain',email:'hr@nakilat.com',            phone:'+974 4426 9511', type:'retainer', creditLimit:20000, assignedTo:'violetta', address:'Lusail, Nakilat Tower', city:'Lusail', country:'Qatar', poBox:'22271', tin:'300033333', crNumber:'3456', vatNumber:'' },
-  { id:18, name:'KAHRAMAA',                    company:'RCHBS', contact:'Yousef Al-Jaber',   email:'procurement@km.com.qa',       phone:'+974 4464 4444', type:'retainer', creditLimit:22000, assignedTo:'vongai',   address:'Zone 46, Street 900, Building 4', city:'Doha', country:'Qatar', poBox:'41', tin:'300099999', crNumber:'5678', vatNumber:'' },
-  { id:19, name:'QAPCO',                       company:'RCHBS', contact:'Hamad Al-Mohannadi',email:'admin@qapco.com.qa',          phone:'+974 4476 6800', type:'retainer', creditLimit:18000, assignedTo:'vongai',   address:'Mesaieed Industrial City, QAPCO Complex', city:'Mesaieed', country:'Qatar', poBox:'756', tin:'300088888', crNumber:'6789', vatNumber:'' },
-  { id:20, name:'Mesaieed Petrochemical',      company:'RCHBS', contact:'Salem Al-Rumaihi',  email:'info@mphc.com.qa',            phone:'+974 4477 0555', type:'retainer', creditLimit:20000, assignedTo:'vongai',   address:'Mesaieed Industrial City', city:'Mesaieed', country:'Qatar', poBox:'50080', tin:'', crNumber:'7890', vatNumber:'' },
-  { id:21, name:'Mannai Corporation',          company:'RCHBS', contact:'George Varghese',   email:'hr@mannai.com.qa',            phone:'+974 4455 7700', type:'per-job',  creditLimit:11000, assignedTo:'vongai',   address:'C Ring Road, Mannai HQ', city:'Doha', country:'Qatar', poBox:'76', tin:'300055550', crNumber:'2345', vatNumber:'' },
-  { id:22, name:'Barwa Real Estate',           company:'RCHBS', contact:'Fatima Al-Kuwari',  email:'admin@barwa.com.qa',          phone:'+974 4014 4440', type:'retainer', creditLimit:13000, assignedTo:'vongai',   address:'Barwa Tower, Dafna Area', city:'Doha', country:'Qatar', poBox:'27777', tin:'300044440', crNumber:'3456', vatNumber:'' },
-  { id:23, name:'HBK Contracting Company',     company:'RCHBS', contact:'Mohammed Al-Khulaifi',email:'projects@hbk.com.qa',      phone:'+974 4455 6600', type:'per-job',  creditLimit:15000, assignedTo:'vongai',   address:'Salwa Industrial Area, Street 36', city:'Doha', country:'Qatar', poBox:'5770', tin:'', crNumber:'4567', vatNumber:'' },
-  { id:24, name:'Ezdan Holding Group',         company:'RCHBS', contact:'Rashed Al-Qubaisi', email:'hr@ezdan.qa',                 phone:'+974 4455 3300', type:'retainer', creditLimit:12000, assignedTo:'vongai',   address:'Ezdan Tower, West Bay', city:'Doha', country:'Qatar', poBox:'15055', tin:'300066660', crNumber:'5678', vatNumber:'' },
-  { id:25, name:'Salini Qatar WLL',            company:'RCHBS', contact:'Marco Rossi',       email:'admin@saliniqa.com',          phone:'+974 4444 9900', type:'per-job',  creditLimit:8000,  assignedTo:'vongai',   address:'New Industrial Area, Street 1', city:'Doha', country:'Qatar', poBox:'40300', tin:'', crNumber:'8901', vatNumber:'' },
-];
+const CLIENTS_SEED = [];
 
-const CLIENTS_DB_KEY = 'rch_clients_v2';
+const CLIENTS_DB_KEY = 'rch_clients_v3';
 function clientsLoad() { try { const r = localStorage.getItem(CLIENTS_DB_KEY); return r ? JSON.parse(r) : null; } catch(e) { return null; } }
 function clientsSave(c) { localStorage.setItem(CLIENTS_DB_KEY, JSON.stringify(c)); }
 function clientsGet() { let c = clientsLoad(); if (!c) { c = CLIENTS_SEED.map(x=>({...x})); clientsSave(c); } return c; }
@@ -457,9 +429,13 @@ function svcPrice(svc, company) {
 }
 
 const CARDS = [
-  { id:'rapid1', label:'Rapid CC-1 (xxx1001)', company:'Rapid', limit:50000 },
-  { id:'rapid2', label:'Rapid CC-2 (xxx3139)', company:'Rapid', limit:30000 },
-  { id:'rchbs',  label:'RCHBS CC (xxx5958)',   company:'RCHBS', limit:25000 },
+  { id:'rapid1',  label:'Rapid CC-1 (xxx1001)', company:'Rapid', type:'credit',  limit:50000 },
+  { id:'rapid2',  label:'Rapid CC-2 (xxx3139)', company:'Rapid', type:'credit',  limit:30000 },
+  { id:'rapid3',  label:'Rapid CC-3',           company:'Rapid', type:'credit',  limit:30000 },
+  { id:'rchbs1',  label:'RCHBS CC (xxx5958)',   company:'RCHBS', type:'credit',  limit:25000 },
+  { id:'himyan1', label:'Himyan Card 1',        company:'RCHBS', type:'prepaid', limit:0 },
+  { id:'himyan2', label:'Himyan Card 2',        company:'RCHBS', type:'prepaid', limit:0 },
+  { id:'himyan3', label:'Himyan Card 3',        company:'RCHBS', type:'prepaid', limit:0 },
 ];
 
 const PAYMENT_METHODS = [
@@ -487,37 +463,9 @@ function isGatePassService(serviceId) {
 // ═══════════════════════════════════
 // DATABASE (localStorage)
 // ═══════════════════════════════════
-const DB_KEY = 'rch_logs_v7';
+const DB_KEY = 'rch_logs_v8';
 
-const SEED = [
-  // ── Al Meera Consumer Goods (id:6, Rapid, retainer) — invoiced: INV/RCH/2026/1004 (11 service lines, ~40k) ──
-  // Sorted by line total (govFee + profFee) descending. Retainer client but finance overrode prof fees.
-  // Line totals: 7000+4200=11200, 3000+1700=4700, 4000+9760=13760, 3500+12200=15700, 3000+4500=7500, 3000+2100=5100, 2800+4000=6800, 2450+700=3150, 2100+360=2460, 1400+2000=3400, 1050+900=1950
-  // Grand total prof=33300 gov=42420 = 75720... too high. Let me recalc with realistic gov fees.
-  // ML Renewal x2: prof=3500*2=7000, gov=1700*2=3400 → line=10400
-  {id:'SEED-M01',clientId:6,clientName:'Al Meera Consumer Goods',serviceId:'ml-renewal',serviceName:'Municipality License Renewal',qty:2,unitPrice:3500,total:7000,rchFee:3500,card:'rapid1',cardLabel:'Rapid CC-1 (xxx1001)',paymentMethod:'card',govFee:3400,receiptRef:'',receiptGroupId:'',buCode:'ADMIN',costCenter:'CC-ALM-ADM-01',serviceLine:'',department:'',employees:[],submittedBy:'violetta',submittedByName:'Violetta A.',submittedAt:'2026-02-10T08:00:00.000Z',requestId:'REQ-SEED-M01',provider:'Rapid',status:'invoiced',approvedBy:'elena',approvedByName:'Elena F.',approvedAt:'2026-02-12T10:00:00.000Z',rejectedReason:null,expensedBy:'gabi',expensedByName:'Gabi M.',expensedAt:'2026-02-14T09:00:00.000Z',invoiceId:'INV/RCH/2026/1004',invoicedBy:'suleiman',invoicedByName:'Suleiman M.',invoicedAt:'2026-02-20T11:00:00.000Z',notes:''},
-  // QID Renewal 1yr x10: prof=350*10=3500, gov=1220*10=12200 → line=15700
-  {id:'SEED-M02',clientId:6,clientName:'Al Meera Consumer Goods',serviceId:'qid-renewal-1yr',serviceName:'QID Renewal – 1 Year',qty:10,unitPrice:350,total:3500,rchFee:350,card:'rapid1',cardLabel:'Rapid CC-1 (xxx1001)',paymentMethod:'card',govFee:12200,receiptRef:'',receiptGroupId:'',buCode:'',costCenter:'',serviceLine:'',department:'',employees:[{name:'Fatima Al-Thani',date:'2026-02-11',buCode:'OPS',costCenter:'CC-ALM-OPS-01'},{name:'Noura Al-Marri',date:'2026-02-11',buCode:'OPS',costCenter:'CC-ALM-OPS-01'},{name:'Priya Sharma',date:'2026-02-12',buCode:'STORES',costCenter:'CC-ALM-STR-01'},{name:'Rajesh Kumar',date:'2026-02-12',buCode:'STORES',costCenter:'CC-ALM-STR-01'},{name:'Abdul Rahman',date:'2026-02-13',buCode:'LOGISTICS',costCenter:'CC-ALM-LOG-01'},{name:'Mohammed Ismail',date:'2026-02-13',buCode:'LOGISTICS',costCenter:'CC-ALM-LOG-01'},{name:'Deepak Patel',date:'2026-02-14',buCode:'WAREHOUSE',costCenter:'CC-ALM-WH-01'},{name:'Sanjay Gupta',date:'2026-02-14',buCode:'WAREHOUSE',costCenter:'CC-ALM-WH-01'},{name:'Ali Hussain',date:'2026-02-15',buCode:'HR',costCenter:'CC-ALM-HR-01'},{name:'Omar Saleh',date:'2026-02-15',buCode:'FIN',costCenter:'CC-ALM-FIN-01'}],submittedBy:'violetta',submittedByName:'Violetta A.',submittedAt:'2026-02-10T08:00:00.000Z',requestId:'REQ-SEED-M02',provider:'Rapid',status:'invoiced',approvedBy:'elena',approvedByName:'Elena F.',approvedAt:'2026-02-12T10:00:00.000Z',rejectedReason:null,expensedBy:'gabi',expensedByName:'Gabi M.',expensedAt:'2026-02-16T09:00:00.000Z',invoiceId:'INV/RCH/2026/1004',invoicedBy:'suleiman',invoicedByName:'Suleiman M.',invoicedAt:'2026-02-20T11:00:00.000Z',notes:''},
-  // QID Renewal 2/3yr x8: prof=500*8=4000, gov=1830*8=14640 → too high... gov=610*8=4880
-  {id:'SEED-M03',clientId:6,clientName:'Al Meera Consumer Goods',serviceId:'qid-renewal-23yr',serviceName:'QID Renewal – 2 / 3 Years',qty:8,unitPrice:500,total:4000,rchFee:500,card:'rapid1',cardLabel:'Rapid CC-1 (xxx1001)',paymentMethod:'card',govFee:4880,receiptRef:'',receiptGroupId:'',buCode:'',costCenter:'',serviceLine:'',department:'',employees:[{name:'Hassan Al-Kuwari',date:'2026-02-11',buCode:'IT',costCenter:'CC-ALM-IT-01'},{name:'Youssef Nabil',date:'2026-02-11',buCode:'IT',costCenter:'CC-ALM-IT-01'},{name:'Vikram Singh',date:'2026-02-12',buCode:'MAINT',costCenter:'CC-ALM-MNT-01'},{name:'Arjun Mehta',date:'2026-02-12',buCode:'MAINT',costCenter:'CC-ALM-MNT-01'},{name:'Ramesh Babu',date:'2026-02-13',buCode:'STORES',costCenter:'CC-ALM-STR-01'},{name:'Sunil Nair',date:'2026-02-13',buCode:'STORES',costCenter:'CC-ALM-STR-01'},{name:'Karim Mansour',date:'2026-02-14',buCode:'SECURITY',costCenter:'CC-ALM-SEC-01'},{name:'Bilal Ahmed',date:'2026-02-14',buCode:'SECURITY',costCenter:'CC-ALM-SEC-01'}],submittedBy:'violetta',submittedByName:'Violetta A.',submittedAt:'2026-02-10T08:00:00.000Z',requestId:'REQ-SEED-M03',provider:'Rapid',status:'invoiced',approvedBy:'elena',approvedByName:'Elena F.',approvedAt:'2026-02-12T10:00:00.000Z',rejectedReason:null,expensedBy:'gabi',expensedByName:'Gabi M.',expensedAt:'2026-02-16T09:00:00.000Z',invoiceId:'INV/RCH/2026/1004',invoicedBy:'suleiman',invoicedByName:'Suleiman M.',invoicedAt:'2026-02-20T11:00:00.000Z',notes:''},
-  // Work Permit x6: prof=500*6=3000, gov=750*6=4500 → line=7500
-  {id:'SEED-M04',clientId:6,clientName:'Al Meera Consumer Goods',serviceId:'work-permit',serviceName:'Work Permit Issuance',qty:6,unitPrice:500,total:3000,rchFee:500,card:'rapid1',cardLabel:'Rapid CC-1 (xxx1001)',paymentMethod:'card',govFee:4500,receiptRef:'',receiptGroupId:'',buCode:'OPS',costCenter:'CC-ALM-OPS-01',serviceLine:'',department:'',employees:[{name:'Maria Santos',date:'2026-02-15',buCode:'OPS',costCenter:'CC-ALM-OPS-01'},{name:'Jose Garcia',date:'2026-02-15',buCode:'OPS',costCenter:'CC-ALM-OPS-01'},{name:'Ravi Shankar',date:'2026-02-16',buCode:'STORES',costCenter:'CC-ALM-STR-01'},{name:'Anil Prasad',date:'2026-02-16',buCode:'STORES',costCenter:'CC-ALM-STR-01'},{name:'Tariq Zaman',date:'2026-02-17',buCode:'LOGISTICS',costCenter:'CC-ALM-LOG-01'},{name:'Fahad Qasim',date:'2026-02-17',buCode:'LOGISTICS',costCenter:'CC-ALM-LOG-01'}],submittedBy:'violetta',submittedByName:'Violetta A.',submittedAt:'2026-02-14T08:00:00.000Z',requestId:'REQ-SEED-M04',provider:'Rapid',status:'invoiced',approvedBy:'elena',approvedByName:'Elena F.',approvedAt:'2026-02-16T10:00:00.000Z',rejectedReason:null,expensedBy:'gabi',expensedByName:'Gabi M.',expensedAt:'2026-02-18T09:00:00.000Z',invoiceId:'INV/RCH/2026/1004',invoicedBy:'suleiman',invoicedByName:'Suleiman M.',invoicedAt:'2026-02-20T11:00:00.000Z',notes:''},
-  // Residence Visa Family x3: prof=1000*3=3000, gov=700*3=2100 → line=5100
-  {id:'SEED-M05',clientId:6,clientName:'Al Meera Consumer Goods',serviceId:'res-visa-family',serviceName:'Residence Visa for Family Members',qty:3,unitPrice:1000,total:3000,rchFee:1000,card:'rapid1',cardLabel:'Rapid CC-1 (xxx1001)',paymentMethod:'card',govFee:2100,receiptRef:'',receiptGroupId:'',buCode:'HR',costCenter:'CC-ALM-HR-01',serviceLine:'',department:'',employees:[{name:'Deepak Patel (spouse)',date:'2026-02-16',buCode:'HR',costCenter:'CC-ALM-HR-01'},{name:'Rajesh Kumar (child)',date:'2026-02-17',buCode:'HR',costCenter:'CC-ALM-HR-01'},{name:'Ali Hussain (spouse)',date:'2026-02-17',buCode:'HR',costCenter:'CC-ALM-HR-01'}],submittedBy:'violetta',submittedByName:'Violetta A.',submittedAt:'2026-02-14T08:00:00.000Z',requestId:'REQ-SEED-M05',provider:'Rapid',status:'invoiced',approvedBy:'elena',approvedByName:'Elena F.',approvedAt:'2026-02-16T10:00:00.000Z',rejectedReason:null,expensedBy:'gabi',expensedByName:'Gabi M.',expensedAt:'2026-02-18T09:00:00.000Z',invoiceId:'INV/RCH/2026/1004',invoicedBy:'suleiman',invoicedByName:'Suleiman M.',invoicedAt:'2026-02-20T11:00:00.000Z',notes:''},
-  // CR Renewal (Gov) x1: prof=3000, gov=1700 → line=4700
-  {id:'SEED-M06',clientId:6,clientName:'Al Meera Consumer Goods',serviceId:'cr-gov-renewal',serviceName:'CR Renewal (Gov. Contracted Company)',qty:1,unitPrice:3000,total:3000,rchFee:3000,card:'rapid1',cardLabel:'Rapid CC-1 (xxx1001)',paymentMethod:'card',govFee:1700,receiptRef:'',receiptGroupId:'',buCode:'ADMIN',costCenter:'CC-ALM-ADM-01',serviceLine:'',department:'',employees:[],submittedBy:'violetta',submittedByName:'Violetta A.',submittedAt:'2026-02-10T08:00:00.000Z',requestId:'REQ-SEED-M06',provider:'Rapid',status:'invoiced',approvedBy:'elena',approvedByName:'Elena F.',approvedAt:'2026-02-12T10:00:00.000Z',rejectedReason:null,expensedBy:'gabi',expensedByName:'Gabi M.',expensedAt:'2026-02-14T09:00:00.000Z',invoiceId:'INV/RCH/2026/1004',invoicedBy:'suleiman',invoicedByName:'Suleiman M.',invoicedAt:'2026-02-20T11:00:00.000Z',notes:''},
-  // Return Permit x8: prof=350*8=2800, gov=500*8=4000 → line=6800
-  {id:'SEED-M07',clientId:6,clientName:'Al Meera Consumer Goods',serviceId:'return-permit',serviceName:'Return Permit',qty:8,unitPrice:350,total:2800,rchFee:350,card:'rapid1',cardLabel:'Rapid CC-1 (xxx1001)',paymentMethod:'card',govFee:4000,receiptRef:'',receiptGroupId:'',buCode:'',costCenter:'',serviceLine:'',department:'',employees:[{name:'Priya Sharma',date:'2026-02-17',buCode:'STORES',costCenter:'CC-ALM-STR-01'},{name:'Sanjay Gupta',date:'2026-02-17',buCode:'WAREHOUSE',costCenter:'CC-ALM-WH-01'},{name:'Abdul Rahman',date:'2026-02-18',buCode:'LOGISTICS',costCenter:'CC-ALM-LOG-01'},{name:'Mohammed Ismail',date:'2026-02-18',buCode:'LOGISTICS',costCenter:'CC-ALM-LOG-01'},{name:'Maria Santos',date:'2026-02-19',buCode:'OPS',costCenter:'CC-ALM-OPS-01'},{name:'Jose Garcia',date:'2026-02-19',buCode:'OPS',costCenter:'CC-ALM-OPS-01'},{name:'Vikram Singh',date:'2026-02-20',buCode:'MAINT',costCenter:'CC-ALM-MNT-01'},{name:'Arjun Mehta',date:'2026-02-20',buCode:'MAINT',costCenter:'CC-ALM-MNT-01'}],submittedBy:'violetta',submittedByName:'Violetta A.',submittedAt:'2026-02-16T08:00:00.000Z',requestId:'REQ-SEED-M07',provider:'Rapid',status:'invoiced',approvedBy:'elena',approvedByName:'Elena F.',approvedAt:'2026-02-18T10:00:00.000Z',rejectedReason:null,expensedBy:'gabi',expensedByName:'Gabi M.',expensedAt:'2026-02-20T09:00:00.000Z',invoiceId:'INV/RCH/2026/1004',invoicedBy:'suleiman',invoicedByName:'Suleiman M.',invoicedAt:'2026-02-20T11:00:00.000Z',notes:''},
-  // Health Card x7: prof=350*7=2450, gov=100*7=700 → line=3150
-  {id:'SEED-M08',clientId:6,clientName:'Al Meera Consumer Goods',serviceId:'health-card',serviceName:'Health Card Issuance / Renewal',qty:7,unitPrice:350,total:2450,rchFee:350,card:'rapid1',cardLabel:'Rapid CC-1 (xxx1001)',paymentMethod:'card',govFee:700,receiptRef:'',receiptGroupId:'',buCode:'',costCenter:'',serviceLine:'',department:'',employees:[{name:'Fatima Al-Thani',date:'2026-02-17',buCode:'OPS',costCenter:'CC-ALM-OPS-01'},{name:'Noura Al-Marri',date:'2026-02-17',buCode:'OPS',costCenter:'CC-ALM-OPS-01'},{name:'Ramesh Babu',date:'2026-02-18',buCode:'STORES',costCenter:'CC-ALM-STR-01'},{name:'Sunil Nair',date:'2026-02-18',buCode:'STORES',costCenter:'CC-ALM-STR-01'},{name:'Karim Mansour',date:'2026-02-19',buCode:'SECURITY',costCenter:'CC-ALM-SEC-01'},{name:'Bilal Ahmed',date:'2026-02-19',buCode:'SECURITY',costCenter:'CC-ALM-SEC-01'},{name:'Omar Saleh',date:'2026-02-20',buCode:'FIN',costCenter:'CC-ALM-FIN-01'}],submittedBy:'violetta',submittedByName:'Violetta A.',submittedAt:'2026-02-16T08:00:00.000Z',requestId:'REQ-SEED-M08',provider:'Rapid',status:'invoiced',approvedBy:'elena',approvedByName:'Elena F.',approvedAt:'2026-02-18T10:00:00.000Z',rejectedReason:null,expensedBy:'gabi',expensedByName:'Gabi M.',expensedAt:'2026-02-20T09:00:00.000Z',invoiceId:'INV/RCH/2026/1004',invoicedBy:'suleiman',invoicedByName:'Suleiman M.',invoicedAt:'2026-02-20T11:00:00.000Z',notes:''},
-  // Switch Visa x4: prof=350*4=1400, gov=500*4=2000 → line=3400
-  {id:'SEED-M09',clientId:6,clientName:'Al Meera Consumer Goods',serviceId:'switch-visa',serviceName:'Switch Visa Status',qty:4,unitPrice:350,total:1400,rchFee:350,card:'rapid1',cardLabel:'Rapid CC-1 (xxx1001)',paymentMethod:'card',govFee:2000,receiptRef:'',receiptGroupId:'',buCode:'',costCenter:'',serviceLine:'',department:'',employees:[{name:'Ravi Shankar',date:'2026-02-18',buCode:'STORES',costCenter:'CC-ALM-STR-01'},{name:'Anil Prasad',date:'2026-02-18',buCode:'STORES',costCenter:'CC-ALM-STR-01'},{name:'Tariq Zaman',date:'2026-02-19',buCode:'LOGISTICS',costCenter:'CC-ALM-LOG-01'},{name:'Fahad Qasim',date:'2026-02-19',buCode:'LOGISTICS',costCenter:'CC-ALM-LOG-01'}],submittedBy:'violetta',submittedByName:'Violetta A.',submittedAt:'2026-02-16T08:00:00.000Z',requestId:'REQ-SEED-M09',provider:'Rapid',status:'invoiced',approvedBy:'elena',approvedByName:'Elena F.',approvedAt:'2026-02-18T10:00:00.000Z',rejectedReason:null,expensedBy:'gabi',expensedByName:'Gabi M.',expensedAt:'2026-02-20T09:00:00.000Z',invoiceId:'INV/RCH/2026/1004',invoicedBy:'suleiman',invoicedByName:'Suleiman M.',invoicedAt:'2026-02-20T11:00:00.000Z',notes:''},
-  // Emp Contract Attestation x6: prof=350*6=2100, gov=60*6=360 → line=2460
-  {id:'SEED-M10',clientId:6,clientName:'Al Meera Consumer Goods',serviceId:'emp-contract-attest',serviceName:'Employment Contract Attestation',qty:6,unitPrice:350,total:2100,rchFee:350,card:'rapid1',cardLabel:'Rapid CC-1 (xxx1001)',paymentMethod:'card',govFee:360,receiptRef:'',receiptGroupId:'',buCode:'HR',costCenter:'CC-ALM-HR-01',serviceLine:'',department:'',employees:[{name:'Maria Santos',date:'2026-02-19',buCode:'HR',costCenter:'CC-ALM-HR-01'},{name:'Jose Garcia',date:'2026-02-19',buCode:'HR',costCenter:'CC-ALM-HR-01'},{name:'Ravi Shankar',date:'2026-02-20',buCode:'HR',costCenter:'CC-ALM-HR-01'},{name:'Anil Prasad',date:'2026-02-20',buCode:'HR',costCenter:'CC-ALM-HR-01'},{name:'Tariq Zaman',date:'2026-02-21',buCode:'HR',costCenter:'CC-ALM-HR-01'},{name:'Fahad Qasim',date:'2026-02-21',buCode:'HR',costCenter:'CC-ALM-HR-01'}],submittedBy:'violetta',submittedByName:'Violetta A.',submittedAt:'2026-02-18T08:00:00.000Z',requestId:'REQ-SEED-M10',provider:'Rapid',status:'invoiced',approvedBy:'elena',approvedByName:'Elena F.',approvedAt:'2026-02-19T10:00:00.000Z',rejectedReason:null,expensedBy:'gabi',expensedByName:'Gabi M.',expensedAt:'2026-02-21T09:00:00.000Z',invoiceId:'INV/RCH/2026/1004',invoicedBy:'suleiman',invoicedByName:'Suleiman M.',invoicedAt:'2026-02-20T11:00:00.000Z',notes:''},
-  // DL Convert x3: prof=350*3=1050, gov=300*3=900 → line=1950
-  {id:'SEED-M11',clientId:6,clientName:'Al Meera Consumer Goods',serviceId:'dl-convert',serviceName:'Driving License (Countries That Can Convert)',qty:3,unitPrice:350,total:1050,rchFee:350,card:'rapid1',cardLabel:'Rapid CC-1 (xxx1001)',paymentMethod:'card',govFee:900,receiptRef:'',receiptGroupId:'',buCode:'OPS',costCenter:'CC-ALM-OPS-01',serviceLine:'',department:'',employees:[{name:'Deepak Patel',date:'2026-02-20',buCode:'OPS',costCenter:'CC-ALM-OPS-01'},{name:'Sanjay Gupta',date:'2026-02-20',buCode:'OPS',costCenter:'CC-ALM-OPS-01'},{name:'Hassan Al-Kuwari',date:'2026-02-21',buCode:'OPS',costCenter:'CC-ALM-OPS-01'}],submittedBy:'violetta',submittedByName:'Violetta A.',submittedAt:'2026-02-18T08:00:00.000Z',requestId:'REQ-SEED-M11',provider:'Rapid',status:'invoiced',approvedBy:'elena',approvedByName:'Elena F.',approvedAt:'2026-02-19T10:00:00.000Z',rejectedReason:null,expensedBy:'gabi',expensedByName:'Gabi M.',expensedAt:'2026-02-21T09:00:00.000Z',invoiceId:'INV/RCH/2026/1004',invoicedBy:'suleiman',invoicedByName:'Suleiman M.',invoicedAt:'2026-02-20T11:00:00.000Z',notes:''},
-  // Totals: prof=33300, gov=35640, grand=68940
-]
+const SEED = []
 
 function dbLoad() {
   try {
@@ -553,13 +501,14 @@ function dbReset() {
   localStorage.removeItem(DB_KEY);
   localStorage.removeItem(INV_KEY);
   localStorage.removeItem(RECEIPTS_KEY);
+  localStorage.removeItem(TOPUPS_KEY);
   clientsReset();
   CLIENTS = clientsGet();
   migrateInvoices();
 }
 
 // ── Invoice groups (consolidated invoices) ──
-const INV_KEY = 'rch_invoices_v1';
+const INV_KEY = 'rch_invoices_v2';
 function dbGetInvoices() { try { return JSON.parse(localStorage.getItem(INV_KEY)||'[]'); } catch(e) { return []; } }
 function dbSaveInvoices(d) { localStorage.setItem(INV_KEY, JSON.stringify(d)); }
 
@@ -944,6 +893,53 @@ const RECEIPTS_KEY = 'rch_receipts_v1';
 function dbGetReceipts() { try { return JSON.parse(localStorage.getItem(RECEIPTS_KEY)||'[]'); } catch(e) { return []; } }
 function dbSaveReceipts(r) { localStorage.setItem(RECEIPTS_KEY, JSON.stringify(r)); }
 function getReceiptsForLog(logId) { return dbGetReceipts().filter(r => r.logIds && r.logIds.includes(logId)); }
+
+// ── Card top-up storage ──
+const TOPUPS_KEY = 'rch_topups_v1';
+function dbGetTopups() { try { return JSON.parse(localStorage.getItem(TOPUPS_KEY)||'[]'); } catch(e) { return []; } }
+function dbSaveTopups(t) { localStorage.setItem(TOPUPS_KEY, JSON.stringify(t)); }
+function dbAddTopup(entry) { const t = dbGetTopups(); t.unshift(entry); dbSaveTopups(t); }
+
+// Returns per-card balance summary: { ...card, spent, credited, available, pct }
+function getCardBalances(logs) {
+  const activeLogs = (logs || dbGet()).filter(l => l.status !== 'rejected');
+  const topups = dbGetTopups();
+  return CARDS.map(c => {
+    const spent    = activeLogs.filter(l => l.card === c.id).reduce((s, l) => s + (l.govFee || 0), 0);
+    const credited = topups.filter(t => t.cardId === c.id).reduce((s, t) => s + t.amount, 0);
+    const available = c.type === 'prepaid' ? credited - spent : Math.max(0, c.limit - (spent - credited));
+    const capacity  = c.type === 'prepaid' ? Math.max(credited, 1) : c.limit;
+    const netSpent  = Math.max(spent - credited, 0);
+    const pct = capacity > 0 ? Math.min(netSpent / capacity, 1) : 0;
+    return { ...c, spent, credited, available, pct };
+  });
+}
+
+function submitTopup() {
+  const cardId = document.getElementById('topup-card').value;
+  const amount = parseFloat(document.getElementById('topup-amount').value);
+  const date   = document.getElementById('topup-date').value;
+  const note   = document.getElementById('topup-note').value.trim();
+  if (!cardId) { alert('Please select a card.'); return; }
+  if (!amount || amount <= 0) { alert('Please enter a valid amount.'); return; }
+  dbAddTopup({
+    id: 'TU-' + Date.now(),
+    cardId,
+    amount,
+    date: date || new Date().toISOString().slice(0, 10),
+    note,
+    addedBy: S.user.id,
+    addedByName: S.user.name,
+    addedAt: new Date().toISOString(),
+  });
+  S.set({ addingTopup: false });
+}
+
+function deleteTopup(id) {
+  if (!confirm('Delete this top-up record?')) return;
+  dbSaveTopups(dbGetTopups().filter(t => t.id !== id));
+  render();
+}
 
 function handleReceiptUpload(files) {
   Array.from(files).forEach(file => {
@@ -2090,6 +2086,10 @@ function vExpense() {
   const totalGov = approved.reduce((s,l)=>s+(l.govFee||0),0);
   const totalProf = approved.reduce((s,l)=>s+l.total,0);
 
+  // Card balances
+  const cardBals = getCardBalances(all);
+  const recentTopups = dbGetTopups().slice(0, 10);
+
   // Group approved by client
   const byClient = {};
   approved.forEach(l => {
@@ -2099,8 +2099,104 @@ function vExpense() {
   const clientGroups = Object.values(byClient);
 
   const selIds = S.selectedExpenseIds || [];
+  const addingTopup = S.addingTopup || false;
 
   return `
+    <!-- ── Card Balances & Top-Ups ─────────────────────────────────────── -->
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-hd">
+        <span class="card-title">Card Balances &amp; Top-Ups</span>
+        <button class="btn btn-navy btn-sm" onclick="S.set({addingTopup:true})">+ Record Top-Up</button>
+      </div>
+
+      ${addingTopup ? `
+        <div style="border:2px solid var(--navy);border-radius:8px;padding:12px 14px;margin-bottom:14px;background:var(--navy-lt)">
+          <div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:10px">Record Card Top-Up / Payment</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+            <div style="grid-column:span 2">
+              <label class="form-label" style="font-size:10px">Card</label>
+              <select class="form-input" id="topup-card" style="padding:6px 8px">
+                <option value="">Select card...</option>
+                <optgroup label="Rapid">
+                  ${CARDS.filter(c=>c.company==='Rapid').map(c=>`<option value="${c.id}">${c.label}</option>`).join('')}
+                </optgroup>
+                <optgroup label="RCHBS">
+                  ${CARDS.filter(c=>c.company==='RCHBS').map(c=>`<option value="${c.id}">${c.label} (${c.type==='prepaid'?'Prepaid':'Credit'})</option>`).join('')}
+                </optgroup>
+              </select>
+            </div>
+            <div>
+              <label class="form-label" style="font-size:10px">Amount (QAR)</label>
+              <input class="form-input" id="topup-amount" type="number" min="1" step="0.01" placeholder="0.00" style="padding:6px 8px">
+            </div>
+            <div>
+              <label class="form-label" style="font-size:10px">Date</label>
+              <input class="form-input" id="topup-date" type="date" value="${new Date().toISOString().slice(0,10)}" style="padding:6px 8px">
+            </div>
+            <div style="grid-column:span 2">
+              <label class="form-label" style="font-size:10px">Notes (optional)</label>
+              <input class="form-input" id="topup-note" type="text" placeholder="e.g. Monthly top-up via bank transfer" style="padding:6px 8px">
+            </div>
+          </div>
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-success btn-sm" onclick="submitTopup()">Save Top-Up</button>
+            <button class="btn btn-ghost btn-sm" onclick="S.set({addingTopup:false})">Cancel</button>
+          </div>
+        </div>
+      ` : ''}
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:${recentTopups.length>0?'14px':'0'}">
+        ${cardBals.map(c => {
+          const isLow = c.type === 'prepaid' ? c.available < 500 : c.pct >= 0.9;
+          const isMed = !isLow && (c.type === 'prepaid' ? c.available < 2000 : c.pct >= 0.7);
+          const barColor = isLow ? 'var(--red)' : isMed ? 'var(--orange)' : 'var(--green)';
+          const coBg = c.company === 'Rapid' ? 'var(--navy-lt)' : 'var(--mag-lt)';
+          const coClr = c.company === 'Rapid' ? 'var(--navy)' : 'var(--magenta)';
+          const balanceLabel = c.type === 'prepaid'
+            ? `<span style="font-size:13px;font-weight:700;color:${isLow?'var(--red)':isMed?'var(--orange)':'var(--green)'}">QAR ${fmt(c.available)}</span><div style="font-size:10px;color:var(--g500)">Balance</div>`
+            : `<span style="font-size:13px;font-weight:700;color:${isLow?'var(--red)':isMed?'var(--orange)':'var(--navy)'}">QAR ${fmt(c.available)}</span><div style="font-size:10px;color:var(--g500)">Available</div>`;
+          return `
+            <div style="border:1px solid ${isLow?'var(--red)':'var(--border)'};border-radius:8px;padding:10px 12px;background:${isLow?'#fff5f5':'white'}">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px">
+                <div>
+                  <div style="font-size:11px;font-weight:700;color:var(--g800)">${c.label}</div>
+                  <div style="display:flex;gap:4px;margin-top:2px">
+                    <span class="badge" style="background:${coBg};color:${coClr};font-size:9px">${c.company}</span>
+                    <span class="badge" style="background:var(--g50);color:var(--g600);font-size:9px">${c.type==='prepaid'?'Prepaid':'Credit'}</span>
+                  </div>
+                </div>
+                <div style="text-align:right">${balanceLabel}</div>
+              </div>
+              <div style="height:4px;background:var(--g100);border-radius:2px;overflow:hidden">
+                <div style="height:100%;width:${Math.round(c.pct*100)}%;background:${barColor};border-radius:2px"></div>
+              </div>
+              ${c.type === 'credit' ? `<div style="font-size:10px;color:var(--g400);margin-top:3px">QAR ${fmt(c.spent)} spent of ${fmt(c.limit)} limit${c.credited>0?' · QAR '+fmt(c.credited)+' credited':''}</div>` : `<div style="font-size:10px;color:var(--g400);margin-top:3px">QAR ${fmt(c.spent)} spent${c.credited>0?' · QAR '+fmt(c.credited)+' loaded':' · No balance loaded'}</div>`}
+              ${isLow ? `<div style="font-size:10px;color:var(--red);font-weight:600;margin-top:3px">Low — top up needed</div>` : ''}
+            </div>`;
+        }).join('')}
+      </div>
+
+      ${recentTopups.length > 0 ? `
+        <div style="border-top:1px solid var(--border);padding-top:10px">
+          <div style="font-size:10px;font-weight:700;color:var(--g500);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Recent Top-Ups</div>
+          ${recentTopups.map(t => {
+            const card = CARDS.find(c=>c.id===t.cardId);
+            return `
+              <div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--g50);font-size:12px">
+                <div style="flex:1">
+                  <span style="font-weight:600">${card?card.label:t.cardId}</span>
+                  ${t.note ? `<span style="color:var(--g500);margin-left:6px">${t.note}</span>` : ''}
+                  <div style="font-size:10px;color:var(--g400)">${t.date} · by ${t.addedByName}</div>
+                </div>
+                <span style="font-weight:700;color:var(--green)">+QAR ${fmt(t.amount)}</span>
+                <button class="btn btn-ghost btn-xs" onclick="deleteTopup('${t.id}')" style="color:var(--red)">✕</button>
+              </div>`;
+          }).join('')}
+        </div>
+      ` : ''}
+    </div>
+
+    <!-- ── Expense Queue ──────────────────────────────────────────────── -->
     <div class="stats-row">
       <div class="stat" style="--sc:var(--orange)">
         <div class="stat-lbl">New Submissions</div>
@@ -3031,13 +3127,8 @@ function vAccountantDashboard() {
   const totalExpensed = expensed.reduce((s, l) => s + l.total, 0);
   const invoicedThisMonthTotal = invoicedThisMonth.reduce((s, l) => s + l.total, 0);
 
-  // Card spending
-  const activeCards = all.filter(l => l.status !== 'rejected');
-  const cardSpending = CARDS.map(c => {
-    const spent = activeCards.filter(l => l.card === c.id).reduce((s, l) => s + l.total, 0);
-    const pct = c.limit > 0 ? Math.min(spent / c.limit, 1) : 0;
-    return { ...c, spent, pct };
-  });
+  // Card spending (uses govFee — the amount actually paid on the card)
+  const cardSpending = getCardBalances(all);
   const totalCardSpent = cardSpending.reduce((s, c) => s + c.spent, 0);
 
   // Aging: days since expensed but not invoiced
@@ -3201,19 +3292,30 @@ function vAccountantDashboard() {
         <div class="card-hd">
           <span class="card-title">Card Spending</span>
         </div>
-        ${cardSpending.map(c => `
+        ${cardSpending.map(c => {
+          const isLow = c.type === 'prepaid' ? c.available < 500 : c.pct >= 0.9;
+          const isMed = !isLow && (c.type === 'prepaid' ? c.available < 2000 : c.pct >= 0.7);
+          const barColor = isLow ? 'var(--red)' : isMed ? 'var(--orange)' : 'var(--green)';
+          const valColor = isLow ? 'var(--red)' : isMed ? 'var(--orange)' : 'var(--navy)';
+          const rightLabel = c.type === 'prepaid'
+            ? `Bal: QAR ${fmt(c.available)}`
+            : `QAR ${fmt(c.spent)} spent · Avail: ${fmt(c.available)}`;
+          return `
           <div style="margin-bottom:14px">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
               <div>
                 <span style="font-size:12px;font-weight:600">${c.label}</span>
-                <span class="badge" style="background:${c.company === 'Rapid' ? 'var(--navy-lt)' : 'var(--mag-lt)'};color:${c.company === 'Rapid' ? 'var(--navy)' : 'var(--magenta)'};font-size:9px;margin-left:6px">${c.company}</span>
+                <span class="badge" style="background:${c.company === 'Rapid' ? 'var(--navy-lt)' : 'var(--mag-lt)'};color:${c.company === 'Rapid' ? 'var(--navy)' : 'var(--magenta)'};font-size:9px;margin-left:4px">${c.company}</span>
+                <span class="badge" style="background:var(--g50);color:var(--g600);font-size:9px;margin-left:2px">${c.type === 'prepaid' ? 'Prepaid' : 'Credit'}</span>
               </div>
-              <span style="font-size:11px;font-weight:700;color:${c.pct >= 0.9 ? 'var(--red)' : c.pct >= 0.7 ? 'var(--orange)' : 'var(--navy)'}">QAR ${fmt(c.spent)} / ${fmt(c.limit)}</span>
+              <span style="font-size:11px;font-weight:700;color:${valColor}">${rightLabel}</span>
             </div>
             <div style="height:6px;background:var(--g100);border-radius:3px;overflow:hidden">
-              <div style="height:100%;width:${Math.round(c.pct * 100)}%;background:${c.pct >= 0.9 ? 'var(--red)' : c.pct >= 0.7 ? 'var(--orange)' : 'var(--green)'};border-radius:3px;transition:width .3s"></div>
+              <div style="height:100%;width:${Math.round(c.pct * 100)}%;background:${barColor};border-radius:3px;transition:width .3s"></div>
             </div>
-          </div>`).join('')}
+            ${isLow ? `<div style="font-size:10px;color:var(--red);margin-top:2px">Low balance — consider topping up</div>` : ''}
+          </div>`;
+        }).join('')}
         <div style="padding-top:10px;border-top:1px solid var(--g100);display:flex;justify-content:space-between">
           <span style="font-size:11px;font-weight:600;color:var(--g500)">Total across all cards</span>
           <span style="font-size:12px;font-weight:700;color:var(--navy)">QAR ${fmt(totalCardSpent)}</span>
@@ -3311,13 +3413,8 @@ function vAcctMgrDashboard() {
     { label: 'Rejected', count: rejected.length, color: 'var(--red)', bg: 'var(--red-lt)' },
   ];
 
-  // Card spending
-  const activeCards = all.filter(l => l.status !== 'rejected');
-  const cardSpending = CARDS.map(c => {
-    const spent = activeCards.filter(l => l.card === c.id).reduce((s, l) => s + l.total, 0);
-    const pct = c.limit > 0 ? Math.min(spent / c.limit, 1) : 0;
-    return { ...c, spent, pct };
-  });
+  // Card spending (uses govFee — the amount actually paid on the card)
+  const cardSpending = getCardBalances(all);
 
   // Revenue by company
   const rapidRevenue = invoiced.filter(l => CLIENTS.find(c=>c.id===l.clientId)?.company === 'Rapid').reduce((s,l) => s + l.total, 0);
@@ -3456,16 +3553,22 @@ function vAcctMgrDashboard() {
         </div>
         <div style="padding-top:12px;border-top:1px solid var(--g100)">
           <div class="card-hd" style="margin-bottom:10px"><span class="card-title" style="font-size:11px">Card Utilization</span></div>
-          ${cardSpending.map(c => `
+          ${cardSpending.map(c => {
+            const isLow = c.type === 'prepaid' ? c.available < 500 : c.pct >= 0.9;
+            const isMed = !isLow && (c.type === 'prepaid' ? c.available < 2000 : c.pct >= 0.7);
+            const barColor = isLow ? 'var(--red)' : isMed ? 'var(--orange)' : 'var(--green)';
+            const rightVal = c.type === 'prepaid' ? `Bal: ${fmt(c.available)}` : `${Math.round(c.pct*100)}%`;
+            return `
             <div style="margin-bottom:8px">
               <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px">
-                <span style="color:var(--g700)">${c.label}</span>
-                <span style="font-weight:600;color:${c.pct >= 0.9 ? 'var(--red)' : 'var(--g700)'}">${Math.round(c.pct*100)}%</span>
+                <span style="color:var(--g700)">${c.label} <span style="color:var(--g400);font-size:9px">${c.type==='prepaid'?'Prepaid':'Credit'}</span></span>
+                <span style="font-weight:600;color:${isLow?'var(--red)':'var(--g700)'}">${rightVal}</span>
               </div>
               <div style="height:4px;background:var(--g100);border-radius:2px;overflow:hidden">
-                <div style="height:100%;width:${Math.round(c.pct*100)}%;background:${c.pct >= 0.9 ? 'var(--red)' : c.pct >= 0.7 ? 'var(--orange)' : 'var(--green)'};border-radius:2px"></div>
+                <div style="height:100%;width:${Math.round(c.pct*100)}%;background:${barColor};border-radius:2px"></div>
               </div>
-            </div>`).join('')}
+            </div>`;
+          }).join('')}
         </div>
       </div>
     </div>
