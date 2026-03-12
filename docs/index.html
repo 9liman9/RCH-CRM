@@ -599,6 +599,20 @@ let S = {
   amendedFees: {},
   // receipt preview modal
   receiptModal: null,  // { receipts: [{id,fileName,base64,mimeType}], index: 0 }
+  // client onboarding wizard
+  onboardStep: 0,
+  onboardForm: {
+    name:'', nickname:'', contact:'', email:'', phone:'',
+    company:null, type:null,
+    address:'', city:'Doha', country:'Qatar', poBox:'',
+    tin:'', crNumber:'', vatNumber:'',
+    contractStart:'', contractEnd:'', contractRef:'',
+    contractFile:null,
+    retainerFee:'',
+    invoicingPref:'thursday', invoicingOther:'',
+    assignedTo:''
+  },
+  onboardDone: false,
 };
 
 function set(patch) {
@@ -685,6 +699,60 @@ function initNewService() {
     logServices:[{serviceId:'',qty:1,unitPrice:'',employees:[{name:'',date:new Date().toISOString().split('T')[0],buCode:'',costCenter:''}],serviceLine:'',department:''}],
     logDone:false, editingLogId:null
   });
+}
+
+function initOnboardClient() {
+  set({
+    view:'onboard', onboardStep:0, onboardDone:false,
+    onboardForm:{
+      name:'', nickname:'', contact:'', email:'', phone:'',
+      company:null, type:null,
+      address:'', city:'Doha', country:'Qatar', poBox:'',
+      tin:'', crNumber:'', vatNumber:'',
+      contractStart:'', contractEnd:'', contractRef:'',
+      contractFile:null,
+      retainerFee:'',
+      invoicingPref:'thursday', invoicingOther:'',
+      assignedTo: S.user.type==='am' ? S.user.id : ''
+    }
+  });
+}
+
+function handleContractUpload(files) {
+  const file = files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    S.onboardForm.contractFile = { fileName:file.name, base64:e.target.result, mimeType:file.type };
+    render();
+  };
+  reader.readAsDataURL(file);
+}
+
+function submitOnboardClient() {
+  const f = S.onboardForm;
+  if (!f.name.trim()) { alert('Legal name is required'); return; }
+  if (!f.company) { alert('Please select Rapid or RCHBS'); return; }
+  if (!f.type) { alert('Please select Per-Job or Retainer'); return; }
+  if (!f.contractStart) { alert('Contract start date is required'); return; }
+  if (!f.contractEnd) { alert('Contract end date is required'); return; }
+  const nextId = Math.max(...clientsGet().map(c=>c.id), 0) + 1;
+  clientAdd({
+    id:nextId, name:f.name.trim(), nickname:f.nickname.trim(),
+    company:f.company, contact:f.contact.trim(), email:f.email.trim(), phone:f.phone.trim(),
+    type:f.type, creditLimit:0, assignedTo:f.assignedTo||S.user.id,
+    address:f.address||'', city:f.city||'Doha', country:f.country||'Qatar', poBox:f.poBox||'',
+    tin:f.tin||'', crNumber:f.crNumber||'', vatNumber:f.vatNumber||'',
+    contractStart:f.contractStart, contractEnd:f.contractEnd, contractRef:f.contractRef.trim(),
+    contractFile:f.contractFile,
+    retainerFee: f.type==='retainer' ? (Number(f.retainerFee)||0) : null,
+    invoicingPref:f.invoicingPref,
+    invoicingOther: f.invoicingPref==='other' ? f.invoicingOther.trim() : '',
+    onboardedAt: new Date().toISOString(),
+    onboardedBy: S.user.id
+  });
+  CLIENTS = clientsGet();
+  set({ onboardStep:3, onboardDone:true });
 }
 
 function addServiceRow() {
@@ -932,7 +1000,7 @@ function submitTopup() {
     addedByName: S.user.name,
     addedAt: new Date().toISOString(),
   });
-  S.set({ addingTopup: false });
+  set({ addingTopup: false });
 }
 
 function deleteTopup(id) {
@@ -1240,6 +1308,9 @@ function vDashboardAM() {
       <button class="btn btn-primary" onclick="initNewService()" style="gap:6px">
         <span style="font-size:15px">⊕</span> New Service
       </button>
+      <button class="btn btn-navy" onclick="initOnboardClient()" style="gap:6px">
+        <span style="font-size:14px">🤝</span> Onboard Client
+      </button>
       <button class="btn btn-ghost" onclick="set({view:'submissions'})" style="gap:6px">
         <span style="font-size:14px">📋</span> View All Submissions
       </button>
@@ -1522,9 +1593,10 @@ function vClients() {
         ${tabBtn('Rapid Clearing House', rapidCount, 'Rapid')}
         ${tabBtn('RCHBS', rchbsCount, 'RCHBS')}
       </div>
-      <button class="btn btn-primary btn-sm" onclick="set({addingClient:true,newClientForm:{name:'',company:'${tab}',contact:'',email:'',phone:'',type:'per-job',creditLimit:5000,address:'',city:'Doha',country:'Qatar',poBox:'',tin:'',crNumber:'',vatNumber:''}})" style="gap:4px">
-        <span style="font-size:14px">+</span> Add Client
-      </button>
+      ${(S.user.type==='am'||S.user.type==='tl')
+        ? `<button class="btn btn-primary btn-sm" onclick="initOnboardClient()" style="gap:4px"><span style="font-size:14px">+</span> Onboard Client</button>`
+        : `<button class="btn btn-primary btn-sm" onclick="set({addingClient:true,newClientForm:{name:'',company:'${tab}',contact:'',email:'',phone:'',type:'per-job',creditLimit:5000,address:'',city:'Doha',country:'Qatar',poBox:'',tin:'',crNumber:'',vatNumber:''}})" style="gap:4px"><span style="font-size:14px">+</span> Add Client</button>`
+      }
     </div>
 
     <div class="card" style="overflow-x:auto">
@@ -1537,6 +1609,234 @@ function vClients() {
           ${tableRows}
         </tbody>
       </table>
+    </div>`;
+}
+
+// ═══════════════════════════════════
+// VIEW: Client Onboarding Wizard
+// ═══════════════════════════════════
+function vOnboardClient() {
+  const f = S.onboardForm;
+  const steps = ['Basic Info','Contract','Review','Done'];
+  const stepsHTML = `<div class="stepper">${steps.map((s,i)=>{
+    const done=i<S.onboardStep, active=i===S.onboardStep;
+    return `<div class="step ${done?'done':active?'active':''}">
+      <div class="step-circle">${done?'✓':i+1}</div>
+      <div class="step-lbl">${s}</div>
+    </div>`;
+  }).join('')}</div>`;
+
+  const companyColor = f.company==='Rapid' ? 'var(--navy)' : f.company==='RCHBS' ? 'var(--magenta)' : 'var(--g500)';
+  const companyBg = f.company==='Rapid' ? 'var(--navy-lt)' : f.company==='RCHBS' ? 'var(--mag-lt)' : 'var(--g100)';
+  const companyChip = f.company ? `<span style="font-size:11px;font-weight:700;color:${companyColor};background:${companyBg};padding:3px 9px;border-radius:20px">${f.company}</span>` : '';
+
+  let body = '';
+
+  // ── STEP 0: Basic Info ──
+  if (S.onboardStep === 0) {
+    const selBtn = (field, val, label, sub, selColor, selBg) => {
+      const sel = f[field] === val;
+      return `<button type="button" onclick="S.onboardForm.${field}='${val}';render()"
+        style="padding:16px;border-radius:10px;border:2px solid ${sel?selColor:'var(--border)'};background:${sel?selBg:'white'};cursor:pointer;text-align:center;transition:all .15s">
+        <div style="font-size:14px;font-weight:700;color:${sel?selColor:'var(--g700)'}">${label}</div>
+        <div style="font-size:11px;color:var(--g500);margin-top:4px">${sub}</div>
+      </button>`;
+    };
+    body = `
+      <div class="form-group">
+        <label class="form-label">Legal Name <span style="color:var(--red)">*</span></label>
+        <input class="form-input" placeholder="Full legal entity name" value="${f.name}" oninput="S.onboardForm.name=this.value">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Nickname / Trade Name</label>
+        <input class="form-input" placeholder="Optional short name or trade name" value="${f.nickname}" oninput="S.onboardForm.nickname=this.value">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Contact Person</label>
+        <input class="form-input" placeholder="Primary contact name" value="${f.contact}" oninput="S.onboardForm.contact=this.value">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input class="form-input" type="email" placeholder="email@company.com" value="${f.email}" oninput="S.onboardForm.email=this.value">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone</label>
+          <input class="form-input" placeholder="+974 ..." value="${f.phone}" oninput="S.onboardForm.phone=this.value">
+        </div>
+      </div>
+
+      <div style="margin:8px 0;padding-top:12px;border-top:1px solid var(--border)">
+        <div style="font-size:10px;font-weight:700;color:var(--g500);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Address</div>
+        <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:8px;margin-bottom:8px">
+          <input class="form-input" style="font-size:12px" placeholder="Street address" value="${f.address}" oninput="S.onboardForm.address=this.value">
+          <input class="form-input" style="font-size:12px" placeholder="City" value="${f.city}" oninput="S.onboardForm.city=this.value">
+          <input class="form-input" style="font-size:12px" placeholder="Country" value="${f.country}" oninput="S.onboardForm.country=this.value">
+          <input class="form-input" style="font-size:12px" placeholder="P.O. Box" value="${f.poBox}" oninput="S.onboardForm.poBox=this.value">
+        </div>
+      </div>
+
+      <div style="margin:8px 0;padding-top:12px;border-top:1px solid var(--border)">
+        <div style="font-size:10px;font-weight:700;color:var(--g500);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Tax &amp; Registration</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+          <input class="form-input" style="font-size:12px" placeholder="TIN (Tax ID)" value="${f.tin}" oninput="S.onboardForm.tin=this.value">
+          <input class="form-input" style="font-size:12px" placeholder="CR Number" value="${f.crNumber}" oninput="S.onboardForm.crNumber=this.value">
+          <input class="form-input" style="font-size:12px" placeholder="VAT Number" value="${f.vatNumber}" oninput="S.onboardForm.vatNumber=this.value">
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-top:16px">
+        <label class="form-label">Company <span style="color:var(--red)">*</span></label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          ${selBtn('company','Rapid','Rapid Clearing House','RCH W.L.L.','var(--navy)','var(--navy-lt)')}
+          ${selBtn('company','RCHBS','RCH Business Solutions','RCHBS W.L.L.','var(--magenta)','var(--mag-lt)')}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Contract Type <span style="color:var(--red)">*</span></label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          ${selBtn('type','per-job','Per-Job','Billed per service rendered','var(--green)','var(--green-lt)')}
+          ${selBtn('type','retainer','Retainer','Fixed monthly fee','var(--navy)','var(--navy-lt)')}
+        </div>
+      </div>`;
+  }
+
+  // ── STEP 1: Contract Details ──
+  if (S.onboardStep === 1) {
+    const prefBtn = (val, label, desc) => {
+      const sel = f.invoicingPref===val;
+      return `<button type="button" onclick="S.onboardForm.invoicingPref='${val}';render()"
+        style="padding:10px;border-radius:8px;border:2px solid ${sel?'var(--navy)':'var(--border)'};background:${sel?'var(--navy-lt)':'white'};cursor:pointer;text-align:left;transition:all .15s">
+        <div style="font-size:12px;font-weight:600;color:${sel?'var(--navy)':'var(--g700)'}">${label}</div>
+        <div style="font-size:10px;color:var(--g500);margin-top:2px">${desc}</div>
+      </button>`;
+    };
+    body = `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="form-group">
+          <label class="form-label">Contract Start Date <span style="color:var(--red)">*</span></label>
+          <input class="form-input" type="date" value="${f.contractStart}" onchange="S.onboardForm.contractStart=this.value">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Contract End Date <span style="color:var(--red)">*</span></label>
+          <input class="form-input" type="date" value="${f.contractEnd}" onchange="S.onboardForm.contractEnd=this.value">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Service Agreement Reference</label>
+        <input class="form-input" placeholder="e.g. SA-2026-001" value="${f.contractRef}" oninput="S.onboardForm.contractRef=this.value">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Contract Attachment</label>
+        ${f.contractFile
+          ? `<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--green-lt);border-radius:8px;border:1px solid rgba(26,122,74,.15)">
+              <span style="font-size:14px">📎</span>
+              <span style="font-size:12px;font-weight:600;color:var(--green);flex:1">${f.contractFile.fileName}</span>
+              <button class="btn btn-ghost btn-xs" onclick="S.onboardForm.contractFile=null;render()" style="color:var(--red)">Remove</button>
+            </div>`
+          : `<input type="file" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" class="form-input" onchange="handleContractUpload(this.files)">`}
+      </div>
+      ${f.type==='retainer' ? `
+        <div class="form-group">
+          <label class="form-label">Monthly Retainer Fee (QAR)</label>
+          <input class="form-input" type="number" min="0" step="0.01" placeholder="e.g. 5000" value="${f.retainerFee}" oninput="S.onboardForm.retainerFee=this.value">
+        </div>` : ''}
+      <div class="form-group">
+        <label class="form-label">Invoicing Preference</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          ${prefBtn('monthly','Monthly','Once per month')}
+          ${prefBtn('bimonthly','Bi-Monthly','Twice per month')}
+          ${prefBtn('thursday','Thursday Cycle','Standard weekly batch')}
+          ${prefBtn('other','Other','Custom arrangement')}
+        </div>
+        ${f.invoicingPref==='other' ? `<input class="form-input" style="margin-top:8px" placeholder="Describe invoicing arrangement..." value="${f.invoicingOther}" oninput="S.onboardForm.invoicingOther=this.value">` : ''}
+      </div>
+      ${S.user.type==='tl' ? `
+        <div class="form-group">
+          <label class="form-label">Assign to Account Manager</label>
+          <select class="form-input" onchange="S.onboardForm.assignedTo=this.value">
+            <option value="">— Select AM —</option>
+            ${USERS.filter(u=>u.type==='am').map(u=>`<option value="${u.id}" ${f.assignedTo===u.id?'selected':''}>${u.name}</option>`).join('')}
+          </select>
+        </div>` : ''}`;
+  }
+
+  // ── STEP 2: Review ──
+  if (S.onboardStep === 2) {
+    const row = (label, val) => val ? `<div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid var(--g100)">
+      <span style="font-size:11px;color:var(--g500);min-width:140px">${label}</span>
+      <span style="font-size:12px;font-weight:600;color:var(--g800)">${val}</span>
+    </div>` : '';
+    const typeBadge = f.type==='retainer'
+      ? `<span style="font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;background:var(--navy-lt);color:var(--navy)">Retainer</span>`
+      : `<span style="font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;background:var(--green-lt);color:var(--green)">Per-Job</span>`;
+    const prefLabels = {monthly:'Monthly',bimonthly:'Bi-Monthly',thursday:'Thursday Cycle',other:'Other: '+(f.invoicingOther||'—')};
+    body = `
+      <div style="font-size:10px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Client Details</div>
+      ${row('Legal Name', f.name)}
+      ${row('Nickname', f.nickname)}
+      ${row('Company', f.company)}
+      <div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid var(--g100)">
+        <span style="font-size:11px;color:var(--g500);min-width:140px">Contract Type</span>
+        ${typeBadge}
+      </div>
+      ${row('Contact', f.contact)}
+      ${row('Email', f.email)}
+      ${row('Phone', f.phone)}
+      ${f.address ? row('Address', [f.address, f.city, f.country, f.poBox?'P.O. Box '+f.poBox:''].filter(Boolean).join(', ')) : ''}
+      ${row('TIN', f.tin)}${row('CR Number', f.crNumber)}${row('VAT Number', f.vatNumber)}
+
+      <div style="font-size:10px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.5px;margin:16px 0 8px">Contract Details</div>
+      ${row('Start Date', f.contractStart)}
+      ${row('End Date', f.contractEnd)}
+      ${row('Agreement Ref', f.contractRef)}
+      ${row('Contract File', f.contractFile ? '📎 '+f.contractFile.fileName : '—')}
+      ${f.type==='retainer' ? row('Retainer Fee', 'QAR '+(Number(f.retainerFee)||0).toLocaleString()) : ''}
+      ${row('Invoicing', prefLabels[f.invoicingPref]||f.invoicingPref)}
+      ${S.user.type==='tl' ? row('Assigned AM', (USERS.find(u=>u.id===f.assignedTo)||{}).name||'—') : ''}`;
+  }
+
+  // ── STEP 3: Done ──
+  if (S.onboardStep === 3) {
+    body = `
+      <div style="text-align:center;padding:24px">
+        <div style="font-size:48px;margin-bottom:12px">✅</div>
+        <div style="font-weight:800;font-size:16px;color:var(--green);margin-bottom:8px">Client Onboarded!</div>
+        <div style="font-size:12px;color:var(--g500);line-height:1.8">
+          <strong>${f.name}</strong>${f.nickname?' ('+f.nickname+')':''} has been added to <strong>${f.company}</strong><br>
+          Type: ${f.type==='retainer'?'Retainer':'Per-Job'} · Contract: ${f.contractStart} to ${f.contractEnd}
+        </div>
+        <div style="display:flex;gap:10px;justify-content:center;margin-top:20px">
+          <button class="btn btn-ghost" onclick="set({view:'dashboard'})">Back to Dashboard</button>
+          <button class="btn btn-primary" onclick="set({view:'clients'})">View Clients</button>
+          <button class="btn btn-navy" onclick="initOnboardClient()">Onboard Another</button>
+        </div>
+      </div>`;
+  }
+
+  // Navigation
+  const step = S.onboardStep;
+  const canNext = (step===0 && f.name.trim() && f.company && f.type) ||
+                  (step===1 && f.contractStart && f.contractEnd) ||
+                  (step===2);
+  const backAction = step===0 ? `set({view:'dashboard'})` : `set({onboardStep:S.onboardStep-1})`;
+  const nextAction = step < 2 ? `set({onboardStep:S.onboardStep+1})` : `submitOnboardClient()`;
+
+  return `
+    <button class="btn btn-ghost btn-sm" onclick="${backAction}" style="margin-bottom:14px">← Back</button>
+    <div class="card" style="max-width:680px">
+      <div class="card-hd">
+        <span class="card-title" style="font-size:15px">Onboard New Client${f.name ? ' — '+f.name : ''}</span>
+        ${companyChip}
+      </div>
+      ${stepsHTML}
+      <div style="padding:0 4px">${body}</div>
+      ${step < 3 ? `
+        <div style="display:flex;justify-content:space-between;margin-top:18px;padding-top:14px;border-top:1px solid var(--border)">
+          <button class="btn btn-ghost btn-sm" onclick="${backAction}">← Back</button>
+          <button class="btn ${step < 2 ? 'btn-primary' : 'btn-success'} btn-sm" onclick="${nextAction}" ${!canNext?'disabled':''}>${step < 2 ? 'Next →' : 'Onboard Client ✓'}</button>
+        </div>` : ''}
     </div>`;
 }
 
@@ -3872,12 +4172,14 @@ function getNav(type) {
     am: [
       item('dashboard','◈','Dashboard',''),
       item('clients','👥','Clients',''),
+      item('onboard','🤝','Onboard Client',''),
       item('log','⊕','New Service',''),
       item('submissions','📋','My Submissions',''),
     ],
     tl: [
       item('dashboard','◈','Dashboard',''),
       item('clients','👥','Clients',''),
+      item('onboard','🤝','Onboard Client',''),
       item('log','⊕','New Service',''),
       item('approvals','✓','Approval Queue', counts.pending||''),
       item('submissions','📋','All Submissions',''),
@@ -3910,7 +4212,7 @@ function getNav(type) {
 }
 
 function getViewTitle() {
-  const map = {dashboard:'Dashboard',clients:'Clients',log:'New Service',complete_service:'Complete Service',submissions:'Submissions',approvals:'Approval Queue',expense:'Expense Tracker',finance:'Invoice Queue',cfo:'Management',services_catalog:'Service Catalog',price_list:'Price List'};
+  const map = {dashboard:'Dashboard',clients:'Clients',onboard:'Onboard Client',log:'New Service',complete_service:'Complete Service',submissions:'Submissions',approvals:'Approval Queue',expense:'Expense Tracker',finance:'Invoice Queue',cfo:'Management',services_catalog:'Service Catalog',price_list:'Price List'};
   if (S.invoiceId) return 'Invoice Preview';
   return map[S.view]||'Dashboard';
 }
@@ -3921,6 +4223,7 @@ function renderView() {
   if (S.view==='dashboard'  && t==='accountant')                  return vAccountantDashboard();
   if (S.view==='dashboard'  && t==='acct_mgr')                   return vAcctMgrDashboard();
   if (S.view==='clients'    && (t==='am'||t==='tl'||t==='acct_mgr'||t==='cfo')) return vClients();
+  if (S.view==='onboard'   && (t==='am'||t==='tl'))              return vOnboardClient();
   if (S.view==='log')                                             return vLogService();
   if (S.view==='complete_service')                                  return vCompleteService();
   if (S.view==='submissions')                                     return vSubmissions();
