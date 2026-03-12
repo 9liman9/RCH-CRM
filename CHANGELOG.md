@@ -2,6 +2,29 @@
 
 All notable changes to the RCH CRM System Vision project.
 
+## [0.5.0] - 2026-03-12
+
+### Added
+- **PDF export** via html2pdf.js — download invoices as PDF directly from the browser
+- **Receipt preview modal** with full-size view and download capability
+- **Per-employee government fee inputs** when employee quantity exceeds 1
+- **Invoice amendment** feature allowing accountants and AMs to edit submitted invoices
+- **Purchase Order (PO) number** field on invoices, displayed in client info block
+- **Multi-page invoice** support with automatic A4 pagination (up to 15 items on first page, 25 on continuation pages)
+- **PDF.js canvas rendering** for PDF receipts attached to invoice line items
+- **BU/CC pill tags** rendering business unit and cost centre as styled badges
+
+### Changed
+- Seed data updated to v7 with Al Meera Consumer Goods invoice (~40k, 11 varied service lines)
+- Invoice service lines now sorted by total amount (highest first)
+- VAT row made more prominent (bold navy text)
+- Retainer clients: RCH professional fees auto-set to 0 in service log workflow
+- Client dropdown in service wizard shows `· Retainer` or `· Per-Job` suffix
+
+### Fixed
+- Invoice print layout — fixed A4 page margins and overflow clipping
+- Invoice totals computed live from line items for retainer clients
+
 ## [0.4.0] - 2026-03-10
 
 ### Added
