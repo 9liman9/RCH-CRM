@@ -25,32 +25,41 @@ The goal of this project is to replace the current paper-based, manual finance p
 ## Repository Structure
 
 ```
-rch-crm-vision/
-├── README.md                          # This file
-├── CHANGELOG.md                       # Version history
+RCH-CRM/
+├── README.md                              # This file
+├── CHANGELOG.md                           # Version history (semver)
+├── CLAUDE.md                              # AI assistant guide for this codebase
+├── package.json                           # Node.js deps (docx only)
 ├── .gitignore
 │
 ├── docs/
-│   └── RCH_CRM_System_Vision.docx    # The main vision document (16 sections, ~290 paragraphs)
+│   ├── index.html                         # GitHub Pages site (mirrors prototype)
+│   ├── .nojekyll                          # Prevents GitHub Pages Jekyll processing
+│   ├── RCH_CRM_System_Vision.docx         # Generated Word vision document
+│   ├── RCH - price list 2025.pdf
+│   ├── RCHBS - price list 2024.pdf
+│   ├── RCH Invoice Template.pdf
+│   ├── RCHBS Invoice Template.pdf
+│   └── *.xlsm                             # Macro-enabled invoice Excel templates
 │
 ├── prototype/
-│   └── index.html                     # Interactive HTML prototype (open in any browser)
+│   └── index.html                         # Interactive SPA prototype (~5000 lines)
 │
 ├── flowcharts/
-│   ├── src/                           # Graphviz DOT source files (editable)
+│   ├── src/                               # Graphviz DOT source files (editable)
 │   │   ├── ideal_system.dot
 │   │   ├── current_invoice_lifecycle.dot
 │   │   └── current_money_flow.dot
-│   └── rendered/                      # PNG renders at 200 DPI
+│   └── rendered/                          # PNG renders at 200 DPI
 │       ├── ideal_system.png
 │       ├── current_invoice_lifecycle.png
 │       └── current_money_flow.png
 │
 ├── scripts/
-│   └── generate_document.js           # Node.js script that generates the .docx file
+│   └── generate_document.js               # Node.js script — generates the .docx file
 │
 └── assets/
-    └── rch_logo.jpg                   # RCH brand logo
+    └── rch_logo.jpg                       # RCH brand logo
 ```
 
 ---
@@ -86,13 +95,31 @@ A fully clickable HTML prototype demonstrating the key CRM screens. **Just doubl
 
 Screens included:
 - **Dashboard** — Finance home screen with uninvoiced services, overdue alerts, invoice status
-- **Invoicing** — Batch invoice workflow with client-grouped selection for efficient processing
+- **Invoicing** — Batch invoice workflow with client-grouped selection and invoice approval/rejection
 - **Clients** — Spending limits with progress bars, retainer/per-job badges, custom invoice flags
-- **Cards** — All 7 company cards with spending vs limits, low balance warnings
+- **Client Onboarding** — Step-by-step wizard for AMs/TL to register new clients
+- **Cards** — Dynamic card management with per-card transaction ledgers, add/edit/deactivate
 - **Schedule** — Visual timeline for recurring and annual invoices
-- **AM Demo** — Enhanced Account Manager service logging flow with multi-service support and completion stage
+- **Role Management** — Create/edit roles, assign permission tags per role or per user
+- **AM View** — Account Manager service logging flow with multi-service support and completion stage
+- **Elena View** — AM Team Leader approval queue for submitted services
+- **Gabi View** — Expense tracking with compact Card Health summary and top-up management
+- **CFO View** — Management dashboard with pipeline metrics
 
-Mock data uses real client names (ABB, Seaquest, EY, Acrogym, Hitachi, Property Finder) and realistic service data.
+Mock data includes 4 seed clients (Al Jazeera Trading, Gulf Pearl Marine, DAE, Crescent Bay Hospitality) with realistic service data.
+
+**Demo logins** (select user from dropdown — no real authentication):
+
+| User | Role |
+|------|------|
+| Admin | Super Admin (all permissions) |
+| Violetta A. | Account Manager |
+| Vongai K. | Account Manager |
+| Elena F. | Team Leader |
+| Gabi D. | Expense Tracker |
+| Arlene M. | Accounting Manager |
+| Suleiman M. | Accountant |
+| CFO | CFO |
 
 ---
 
@@ -189,8 +216,10 @@ The script outputs `RCH_CRM_Vision_v2.docx` in the current directory.
 
 - **Document**: [docx-js](https://github.com/dolanmiu/docx) (Node.js)
 - **Flowcharts**: [Graphviz](https://graphviz.org/) DOT format
-- **Prototype**: Vanilla HTML/CSS/JS (zero dependencies)
-- **Brand**: RCH logo, Navy #1B3A5C, Magenta #A3195B
+- **Prototype**: Vanilla HTML/CSS/JS (zero npm dependencies)
+- **PDF export**: html2pdf.js (CDN) — download invoices as PDF
+- **PDF preview**: PDF.js (CDN) — render PDF receipts inline
+- **Brand**: RCH logo, Navy #1B2D5E, Magenta #C4006A
 
 ---
 

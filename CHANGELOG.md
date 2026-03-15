@@ -2,6 +2,34 @@
 
 All notable changes to the RCH CRM System Vision project.
 
+## [0.6.0] - 2026-03-15
+
+### Added
+- **Role-based permission system** with 23 granular tags across Navigation, Actions, and Data Scope categories
+- **Role Management UI** — create/edit roles, toggle permission tags per role or per user override
+- **Admin super user** (`admin`/`admin`) with all permissions for system administration
+- **Invoice approval workflow** — accountant-generated invoices require accounting manager approval; manager-generated invoices are auto-approved
+- **Invoice rejection** reverts linked service logs to `expensed` status for re-invoicing; rejected invoices kept for audit trail
+- **Dynamic card management** — cards moved from static array to localStorage (`rch_cards_v1`) with full CRUD: add, edit, deactivate
+- **Per-card transaction ledger** showing debit/credit history with running balance
+- **4 sample seed clients** — Al Jazeera Trading (Rapid/retainer), Gulf Pearl Marine (RCHBS/per-job), DAE (Rapid/per-job), Crescent Bay Hospitality (RCHBS/retainer)
+
+### Changed
+- Permission checks migrated from hardcoded role-type lookups to flexible tag-based system (`hasTag()`)
+- Default role presets maintain backward-compatible behavior for all existing users
+- Gabi dashboard redesigned — replaced cluttered card grid with compact Card Health summary using color-coded dot indicators
+- Finance and Elena (TL) now bypass Elena's approval queue when completing services (status set directly to `approved`)
+- Client data schema bumped to `rch_clients_v3`; service logs bumped to `rch_logs_v8`; invoices bumped to `rch_invoices_v2`
+
+### Removed
+- **Service line field** removed from service log form, state schema, and all data paths
+
+### Fixed
+- Gov fee input reset — multi-unit inputs now use `updateGovFeeTotal()` instead of full re-render on each keystroke
+- Retainer client professional fee — distinguish empty string from zero so `unitPrice=0` is preserved instead of falling back to list price
+- Receipt printing — heading and image wrapped in `.receipt-section` div with `page-break-inside:avoid` to prevent orphaned heading
+- PDF/print quality — force exact color rendering, add orphan/widow controls, prevent row splitting, fix transparent backgrounds in downloaded PDFs
+
 ## [0.5.0] - 2026-03-12
 
 ### Added

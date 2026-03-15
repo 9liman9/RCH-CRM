@@ -10,7 +10,7 @@ This is a **vision document + interactive prototype** for a proposed CRM system 
 
 **It is NOT a production application.** There is no backend, no database, no authentication system, and no deployment pipeline. The prototype is a single self-contained HTML file opened directly in a browser. The purpose is to communicate requirements to the IT team and management stakeholders.
 
-Current version: **v0.5.0** (see `CHANGELOG.md` for history).
+Current version: **v0.6.0** (see `CHANGELOG.md` for history).
 
 ---
 
@@ -36,7 +36,7 @@ RCH-CRM/
 │   ├── RCHBS Invoice Template.pdf
 │   └── *.xlsm                             # Macro-enabled invoice Excel templates
 ├── prototype/
-│   └── index.html                         # Interactive SPA prototype (~4000 lines)
+│   └── index.html                         # Interactive SPA prototype (~5000 lines)
 ├── flowcharts/
 │   ├── src/
 │   │   ├── ideal_system.dot               # Graphviz source — proposed future state
@@ -128,25 +128,24 @@ xdg-open prototype/index.html   # Linux
 
 The prototype loads fully from localStorage seed data. No network required after initial load (fonts/CDN assets load from internet).
 
-**Demo login UIDs** (no real authentication — just UID lookup):
-| UID | Role |
-|-----|------|
-| `arn` | Finance (Arlene) |
-| `sul` | Finance (Suleiman) |
-| `sam` | Account Manager |
-| `tom` | Account Manager |
-| `din` | Account Manager |
-| `ela` | Elena (AM Team Leader) |
-| `gab` | Gabi (Expense Tracking) |
-| `cfo` | CFO |
-| `ops` | Operations |
+**Demo logins** (no real authentication — select user from dropdown, password `rch2026` for all except admin):
+| ID | Name | Role |
+|----|------|------|
+| `admin` | Admin | Super Admin (all permissions) |
+| `violetta` | Violetta A. | Account Manager |
+| `vongai` | Vongai K. | Account Manager |
+| `elena` | Elena F. | Team Leader |
+| `gabi` | Gabi D. | Expense Tracker |
+| `arlene` | Arlene M. | Accounting Manager |
+| `suleiman` | Suleiman M. | Accountant |
+| `cfo` | CFO | CFO |
 
 ---
 
 ## Prototype Architecture
 
 ### Single-File SPA
-`prototype/index.html` is a single ~4000-line file containing all HTML, CSS, and JavaScript. This is intentional — makes it trivially shareable and editable by non-developers.
+`prototype/index.html` is a single ~5000-line file containing all HTML, CSS, and JavaScript. This is intentional — makes it trivially shareable and editable by non-developers.
 
 ### State Management
 A global state object `S` with a reactive `.set(patch)` method:
@@ -162,13 +161,27 @@ Each user role maps to a dedicated view function:
 - `vGabi()` — Expense/payment verification dashboard
 - `vCFO()` — Management overview with pipeline metrics
 
+### Permission System
+A tag-based permission system with 23 granular tags across three categories:
+- **Navigation** — controls which views a user can access (`view-dashboard`, `view-finance`, etc.)
+- **Actions** — controls what a user can do (`can-approve`, `can-invoice`, `can-manage-roles`, etc.)
+- **Data Scope** — controls data visibility (`scope-own-clients`, `scope-all-logs`, etc.)
+
+Roles define default tag sets. Per-user tag overrides are stored separately. The `hasTag(tag)` helper checks the current user's effective tags.
+
 ### LocalStorage Schema
 Data is stored with version-pinned keys to allow schema migration:
 | Key | Contents |
 |-----|----------|
-| `rch_logs_v7` | Service logs array |
-| `rch_invoices_v1` | Generated invoices array |
-| `rch_clients_v2` | Client directory array |
+| `rch_logs_v8` | Service logs array |
+| `rch_invoices_v2` | Generated invoices array (with approval status) |
+| `rch_clients_v3` | Client directory array |
+| `rch_cards_v1` | Company cards (dynamic, seeded from static `CARDS`) |
+| `rch_topups_v1` | Card top-up transactions |
+| `rch_receipts_v1` | Receipt attachments |
+| `rch_roles_v1` | Custom role definitions |
+| `rch_user_tags_v1` | Per-user permission tag overrides |
+| `rch_services_custom_v1` | Custom service definitions |
 
 **Never change a version key without also writing a migration function** (`migrateInvoices()` pattern exists for reference).
 
@@ -201,6 +214,8 @@ Inline CSS custom properties for per-instance theming:
 - Event handlers: `handle{Action}()` — `handleLogin`, `handleLogout`
 - Formatters: `fmt()`, `fmtDate()`, `fmtDT()`, `numToWords()`
 - DB helpers: `dbLoad()`, `dbSave()`, `dbGet()`, `dbAdd()`, `dbUpdate()`, `dbReset()`
+- Card helpers: `dbGetCards()`, `dbSaveCards()`, `dbAddCard()`, `dbUpdateCard()`
+- Permission helpers: `hasTag()`, `getTagsForUser()`, `rolesGet()`, `userTagsGet()`
 
 ---
 
@@ -220,7 +235,8 @@ ops_pending → am_completing → pending → approved → expensed → invoiced
 | `pending` | Elena | Submitted, awaiting Elena's review |
 | `approved` | Gabi | Elena approved; awaiting Gabi expense verification |
 | `expensed` | Finance | Gabi verified; ready for invoicing |
-| `invoiced` | Finance | Invoice generated |
+| `pending_approval` | Accounting Manager | Invoice created by accountant, awaiting manager approval |
+| `invoiced` | Finance | Invoice approved (or auto-approved if created by manager) |
 | `paid` | Finance | Payment received |
 | `rejected` | — | Rejected at `pending` stage by Elena |
 
@@ -295,7 +311,7 @@ All services, invoices, cards, and accounts must differentiate by company. This 
 
 - **Do not add npm packages to the prototype.** It must remain zero-dependency and openable by double-clicking.
 - **Do not introduce a backend, database, or server.** This is a prototype/vision document, not production software.
-- **Do not change localStorage version keys** (`v7`, `v2`, `v1`) without writing a migration function — changing keys silently drops all existing data.
+- **Do not change localStorage version keys** (`v8`, `v3`, `v2`, `v1`) without writing a migration function — changing keys silently drops all existing data.
 - **Do not split `prototype/index.html` into multiple files.** Single-file portability is an intentional design constraint.
 - **Do not regenerate the Word doc on every change** — only at version milestones.
 - **Do not forget to update `docs/index.html`** whenever `prototype/index.html` changes.
