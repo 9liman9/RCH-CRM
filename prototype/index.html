@@ -276,6 +276,9 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
   thead{break-inside:avoid;display:table-header-group}
   tfoot{display:table-footer-group}
   .inv-wrap .inv-bank-section,.inv-wrap .inv-notes-section,.inv-wrap tfoot{break-inside:avoid;page-break-inside:avoid}
+  /* Keep receipt heading and image together — prevents orphaned heading on a page without the image */
+  .receipt-section{page-break-inside:avoid;break-inside:avoid;margin-bottom:16px}
+  .receipt-section > *:first-child{page-break-after:avoid;break-after:avoid}
   /* Print typography in physical units */
   .inv-wrap{font-size:10pt}
   .inv-tbl th{font-size:8pt}
@@ -566,7 +569,7 @@ let S = {
   logStep: 0,
   logClient: null,
   logProvider: null,  // 'Rapid' or 'RCHBS'
-  logServices: [],    // [{serviceId, qty, unitPrice, employees:[], buCode, costCenter, serviceLine, department}]
+  logServices: [],    // [{serviceId, qty, unitPrice, employees:[], buCode, costCenter, department}]
   logDone: false,
   // AM completion flow (post-OPs)
   completingRequestId: null,
@@ -709,7 +712,7 @@ function handleLogout() {
 function initNewService() {
   set({
     view:'log', logStep:0, logClient:null, logProvider:null,
-    logServices:[{serviceId:'',qty:1,unitPrice:'',employees:[{name:'',date:new Date().toISOString().split('T')[0],buCode:'',costCenter:''}],serviceLine:'',department:''}],
+    logServices:[{serviceId:'',qty:1,unitPrice:'',employees:[{name:'',date:new Date().toISOString().split('T')[0],buCode:'',costCenter:''}],department:''}],
     logDone:false, editingLogId:null
   });
 }
@@ -769,7 +772,7 @@ function submitOnboardClient() {
 }
 
 function addServiceRow() {
-  S.logServices.push({serviceId:'',qty:1,unitPrice:'',employees:[{name:'',date:new Date().toISOString().split('T')[0],buCode:'',costCenter:''}],serviceLine:'',department:''});
+  S.logServices.push({serviceId:'',qty:1,unitPrice:'',employees:[{name:'',date:new Date().toISOString().split('T')[0],buCode:'',costCenter:''}],department:''});
   render();
 }
 
@@ -809,7 +812,10 @@ function submitNewServices() {
   S.logServices.forEach(s => {
     const svc = SERVICES.find(sv=>sv.id===s.serviceId);
     if (!svc) return;
-    const unitPrice = parseFloat(s.unitPrice) || svcPrice(svc, S.logProvider);
+    const isRetainer = client.type === 'retainer';
+    const unitPrice = (s.unitPrice !== '' && s.unitPrice !== null && s.unitPrice !== undefined)
+      ? (parseFloat(s.unitPrice) || 0)
+      : (isRetainer ? 0 : svcPrice(svc, S.logProvider));
     const total = unitPrice * s.qty;
     const emps = s.employees.slice(0, s.qty);
     const firstEmp = emps[0] || {};
@@ -821,7 +827,7 @@ function submitNewServices() {
       rchFee: unitPrice,
       card:'', cardLabel:'', paymentMethod:'', govFee:0,
       receiptRef:'', receiptGroupId:'',
-      buCode: firstEmp.buCode||'', costCenter: firstEmp.costCenter||'', serviceLine: s.serviceLine||'', department: s.department||'',
+      buCode: firstEmp.buCode||'', costCenter: firstEmp.costCenter||'', department: s.department||'',
       employees: emps,
       submittedBy: S.user.id, submittedByName: S.user.name,
       submittedAt: now,
@@ -1178,6 +1184,14 @@ function removeUploadedReceipt(id) {
   render();
 }
 
+function updateGovFeeTotal(id) {
+  const raw = (S.completeForm.govFees || {})[id];
+  const arr = Array.isArray(raw) ? raw : [];
+  const total = arr.reduce((s, v) => s + (parseFloat(v) || 0), 0);
+  const el = document.getElementById('gov-total-' + id);
+  if (el) el.textContent = 'QAR ' + fmt(total);
+}
+
 function toggleCompleteId(id) {
   const idx = S.completingIds.indexOf(id);
   if (idx === -1) S.completingIds.push(id);
@@ -1193,6 +1207,7 @@ function submitCompletion() {
   const receiptGroupId = 'RG-'+Date.now().toString(36).toUpperCase();
   const now = new Date().toISOString();
   const perSvcReceipts = S.perServiceReceipts || {};
+  const bypassElena = S.user.type === 'accountant' || S.user.type === 'tl';
 
   S.completingIds.forEach(id => {
     const rawFee = (f.govFees||{})[id];
@@ -1216,7 +1231,8 @@ function submitCompletion() {
     }
 
     const patch = {
-      status:'pending',
+      status: bypassElena ? 'approved' : 'pending',
+      ...(bypassElena ? { approvedBy: S.user.id, approvedByName: S.user.name, approvedAt: now, elenaChecked: true } : {}),
       paymentMethod: f.paymentMethod,
       card: card ? card.id : '',
       cardLabel: card ? card.label : (f.paymentMethod === 'cash' ? 'Cash' : 'Other'),
@@ -1358,7 +1374,7 @@ function editLog(id) {
       qty: log.qty,
       unitPrice: log.unitPrice || '',
       employees: (log.employees||[]).slice(),
-      buCode: log.buCode||'', costCenter: log.costCenter||'', serviceLine: log.serviceLine||'', department: log.department||''
+      buCode: log.buCode||'', costCenter: log.costCenter||'', department: log.department||''
     }],
     logDone: false,
     editingLogId: id
@@ -2162,16 +2178,11 @@ function vLogService() {
           <div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:10px">${svc.label} × ${s.qty}</div>
           ${empHTML}
           ${deptHTML}
-          <div>
-            <label class="form-label" style="margin-bottom:3px">Service Line <span style="font-weight:400;text-transform:none">(opt.)</span></label>
-            <input class="form-input" type="text" placeholder="Service Line" value="${s.serviceLine||''}"
-              oninput="S.logServices[${idx}].serviceLine=this.value">
-          </div>
         </div>`;
     }).join('');
 
     body = `
-      <div style="font-size:12px;color:var(--g500);margin-bottom:14px">Fill in details for each service. Employee fields apply to employee-based services. BU / Cost Center / Service Line are optional.</div>
+      <div style="font-size:12px;color:var(--g500);margin-bottom:14px">Fill in details for each service. Employee fields apply to employee-based services. BU / Cost Center are optional.</div>
       ${detailSections}`;
   }
 
@@ -2347,12 +2358,12 @@ function vCompleteService() {
                   return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">' +
                     '<span style="font-size:11px;color:var(--g700);min-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + empName + '</span>' +
                     '<input class="form-input" type="number" min="0" step="10" placeholder="0" value="' + val + '"' +
-                    ' oninput="if(!S.completeForm.govFees)S.completeForm.govFees={};if(!Array.isArray(S.completeForm.govFees[\'' + id + '\']))S.completeForm.govFees[\'' + id + '\']=Array(' + l.qty + ').fill(\'\');S.completeForm.govFees[\'' + id + '\'][' + i + ']=this.value;render()"' +
+                    ' oninput="if(!S.completeForm.govFees)S.completeForm.govFees={};if(!Array.isArray(S.completeForm.govFees[\'' + id + '\']))S.completeForm.govFees[\'' + id + '\']=Array(' + l.qty + ').fill(\'\');S.completeForm.govFees[\'' + id + '\'][' + i + ']=this.value;updateGovFeeTotal(\'' + id + '\')"' +
                     ' style="width:110px;padding:5px 8px;font-size:12px">' +
                     '</div>';
                 }).join('')}
                 <div style="display:flex;justify-content:flex-end;padding-top:4px;border-top:1px solid var(--border);margin-top:6px">
-                  <span style="font-size:11px;font-weight:700;color:var(--navy)">Total Gov Fee: QAR ${fmt(govFeeTotal)}</span>
+                  <span id="gov-total-${id}" style="font-size:11px;font-weight:700;color:var(--navy)">QAR ${fmt(govFeeTotal)}</span>
                 </div>
               ` : `
               <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
@@ -3616,16 +3627,18 @@ function vInvoicePreview() {
               <div style="font-size:10px;color:var(--g500)">of ${totalPages}</div>
             </div>
           </div>
-          <div style="font-size:11px;font-weight:700;color:var(--g500);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">
-            Attached Receipt — ${r.logName}
+          <div class="receipt-section">
+            <div style="font-size:11px;font-weight:700;color:var(--g500);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">
+              Attached Receipt — ${r.logName}
+            </div>
+            <div style="font-size:11px;color:var(--g700);margin-bottom:12px">${r.fileName}</div>
+            ${r.mimeType.startsWith('image/')
+              ? `<img src="${r.base64}" style="max-width:100%;max-height:240mm;object-fit:contain;display:block;border:1px solid var(--border);border-radius:6px">`
+              : `<div style="padding:30px;background:var(--g50);border:1px solid var(--border);border-radius:8px;text-align:center;font-size:13px;color:var(--g700)">
+                  Attachment: ${r.fileName}
+                </div>`
+            }
           </div>
-          <div style="font-size:11px;color:var(--g700);margin-bottom:12px">${r.fileName}</div>
-          ${r.mimeType.startsWith('image/')
-            ? `<img src="${r.base64}" style="max-width:100%;max-height:240mm;object-fit:contain;border:1px solid var(--border);border-radius:6px">`
-            : `<div style="padding:30px;background:var(--g50);border:1px solid var(--border);border-radius:8px;text-align:center;font-size:13px;color:var(--g700)">
-                Attachment: ${r.fileName}
-              </div>`
-          }
           <div class="doc-page-number">Page ${totalInvPages + i + 1} of ${totalPages}</div>
         </div>`
       ).join('')}
