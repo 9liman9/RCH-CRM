@@ -68,26 +68,27 @@ RCH-CRM/
 
 ### Vision Document (`docs/RCH_CRM_System_Vision.docx`)
 
-The main deliverable. 16 sections covering:
+The main deliverable. 17 sections covering:
 
 | # | Section | Description |
 |---|---------|-------------|
 | 1 | Where We Are Today | Brief current-state summary with pain points |
 | 2 | What We Want to Achieve | CFO's 4 goals: zero errors, finance autonomy, real-time visibility, spending limits |
 | 3 | The Ideal System: Overview | High-level flow diagram with all roles |
-| 4 | Client Setup | Retainer vs per-job, agreements, custom invoice fields |
+| 4 | Client Setup | Onboarding wizard, retainer vs per-job, agreements, custom invoice fields |
 | 5 | Services Offered | Service categories for Rapid and RCHBS |
-| 6 | Service Flow | 12-step flow with multi-service support: Client → AM → OPs → AM logs (multiple services) → Elena → Gabi → Verified |
-| 7 | Invoicing | Batch generation with client-grouped selection; 3 types: weekly Thursday, scheduled/retainer, annual lookback |
+| 6 | Service Flow | Client → AM → OPs → AM logs → Elena → Gabi → Verified (with Elena bypass for Finance/TL) |
+| 7 | Invoicing | Batch generation, invoice approval workflow (accountant → manager), 3 invoice types |
 | 8 | Price List Management | Managed by Elena, auto-applied, custom rates per client |
-| 9 | Card Management | 7 cards (3 Rapid CC, 1 RCHBS CC, 3 Himyan), payment method tracking |
+| 9 | Card Management | Dynamic card CRUD, per-card transaction ledgers, payment method tracking |
 | 10 | Payment Tracking | Opening balances, payment matching, receivables, proactive follow-up |
 | 11 | PVs and RVs | Semi-automatic creation with Finance approval |
 | 12 | Bank Reconciliation | Auto-match with exception handling, paper card statement limitation |
 | 13 | Filing and Archiving | Digital-first with paper savings, minimal physical backup |
 | 14 | Accounting Software + VAT | Software-agnostic integration, VAT readiness for Jan 2027 |
 | 15 | Dashboards | 5 role-based views: Finance, AM, Elena, Gabi, Management/CFO |
-| 16 | Glossary | All terms and abbreviations |
+| 16 | Permissions & Roles | Tag-based permission system with 23 tags, role management UI, per-user overrides |
+| 17 | Glossary | All terms and abbreviations |
 
 ### Interactive Prototype (`prototype/index.html`)
 
