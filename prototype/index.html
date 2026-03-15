@@ -267,6 +267,19 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
   .doc-page .inv-wrap{border:none;border-radius:0;max-width:100%;padding:0;box-shadow:none}
   .content > .fade{animation:none}
   .receipt-print-page{display:block!important;page-break-before:always;break-before:always;padding:20px;min-height:200px}
+  /* Force exact color rendering — prevents navy/magenta backgrounds being stripped */
+  *,*::before,*::after{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important}
+  /* Prevent stray single lines at page edges */
+  p,td,th,li{orphans:2;widows:2}
+  /* Prevent rows and key sections splitting across pages */
+  tr{break-inside:avoid;page-break-inside:avoid}
+  thead{break-inside:avoid;display:table-header-group}
+  tfoot{display:table-footer-group}
+  .inv-wrap .inv-bank-section,.inv-wrap .inv-notes-section,.inv-wrap tfoot{break-inside:avoid;page-break-inside:avoid}
+  /* Print typography in physical units */
+  .inv-wrap{font-size:10pt}
+  .inv-tbl th{font-size:8pt}
+  .inv-tbl td{font-size:10pt}
 }
 .receipt-print-page{display:none}
 .doc-page canvas{max-width:100%!important;height:auto!important}
@@ -3552,7 +3565,7 @@ async function downloadInvoicePdf() {
       const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
       for (let i = 0; i < pages.length; i++) {
         if (i > 0) pdf.addPage();
-        const canvas = await html2canvas(pages[i], { scale: 2, useCORS: true, logging: false });
+        const canvas = await html2canvas(pages[i], { scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff' });
         const imgData = canvas.toDataURL('image/jpeg', 0.95);
         const pdfW = pdf.internal.pageSize.getWidth();
         const pdfH = (canvas.height * pdfW) / canvas.width;
@@ -3565,7 +3578,7 @@ async function downloadInvoicePdf() {
         margin: 0,
         filename: fileName,
         image: { type: 'jpeg', quality: 0.95 },
-        html2canvas: { scale: 2, useCORS: true, logging: false },
+        html2canvas: { scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff' },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
         pagebreak: { mode: ['css', 'legacy'] }
       });
