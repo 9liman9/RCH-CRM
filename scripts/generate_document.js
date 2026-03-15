@@ -297,13 +297,18 @@ const doc = new Document({
 
         h2("4.1 Creating a New Client"),
 
-        para("When an Account Manager creates a new client, the system collects the following information:"),
+        para("The system provides a step-by-step onboarding wizard that guides the Account Manager through the process. The wizard collects the following information:"),
 
-        bulletItem("Company name"),
-        bulletItem("Contact person name"),
-        bulletItem("Email address and phone number"),
-        bulletItem("Location (city, country)"),
-        bulletItem("Any special invoicing dates or payment terms"),
+        bulletItem("Company name and nickname (short name used in daily communication)"),
+        bulletItem("Which RCH entity the client falls under (Rapid or RCHBS)"),
+        bulletItem("Contact person name, email address, and phone number"),
+        bulletItem("Location: street address, city, country, and P.O. Box"),
+        bulletItem("Commercial Registration (CR) number"),
+        bulletItem("Client type: retainer or per-job"),
+        bulletItem("Credit limit (the maximum uninvoiced spending allowed before invoicing is triggered)"),
+        bulletItem("Assigned Account Manager"),
+        bulletItem("Contract start and end dates"),
+        bulletItem("Invoicing preference (weekly Thursday cycle, spending limit triggered, or custom schedule)"),
 
         para("After entering the basic details, the system asks a key question: is this client on a retainer agreement, or are they per-job?"),
 
@@ -406,6 +411,8 @@ const doc = new Document({
 
         para("Every submission by an Account Manager is reviewed by Elena, the AM Team Leader. Elena checks that the information is complete and correct: the right client, the right company, the right service type, the right amounts, and the receipt is properly uploaded. If something is wrong or missing, she sends it back to the AM for correction. If everything is correct, she approves the submission."),
 
+        greenCallout("Exception:", "When a Finance Department member or Elena herself completes a service on behalf of an AM, Elena\u2019s approval step is bypassed automatically. The service is marked as approved and moves directly to Gabi\u2019s payment verification. This avoids unnecessary bottlenecks when senior staff are already handling the work."),
+
         h2("5.6 Step 6: Gabi Verifies the Payment"),
 
         para("After Elena\u2019s approval, the submission goes to Gabi for payment verification. Gabi checks her phone for the SMS bank alerts to confirm that the payment actually happened on the correct card for the correct amount. This step ensures that what was entered into the system matches what actually happened at the bank level."),
@@ -454,7 +461,11 @@ const doc = new Document({
 
         h3("Review, Approve, and Send"),
 
-        para("The generated invoice goes into \u201CDraft\u201D status. The Finance Department reviews it on screen. Once confirmed, it is approved and the status changes to ready for sending. The method of delivery (manual email or system-automated) will be decided during implementation. Once the invoice is sent, all the services included on it are marked as \u201CInvoiced\u201D in the CRM, and the invoice data is automatically synced to the accounting software. No manual re-entry is needed."),
+        para("The generated invoice goes through an approval workflow that depends on who created it. If an accountant generates the invoice, it enters \u201CPending Approval\u201D status and appears in the Accounting Manager\u2019s approval queue. The Accounting Manager reviews the invoice and either approves or rejects it. If the Accounting Manager herself generates the invoice, it is automatically approved and skips the approval queue."),
+
+        para("When an invoice is rejected, the Accounting Manager provides a reason. The rejection reverts all linked service logs back to \u201CExpensed\u201D status so they can be re-selected for a corrected invoice. Rejected invoices are kept in the system for audit trail purposes and displayed in a collapsible section for reference."),
+
+        para("Once approved, the invoice status changes to ready for sending. The method of delivery (manual email or system-automated) will be decided during implementation. Once the invoice is sent, all the services included on it are marked as \u201CInvoiced\u201D in the CRM, and the invoice data is automatically synced to the accounting software. No manual re-entry is needed."),
 
         greenCallout("What disappears:", "No more building invoices line by line in Excel. No more Wednesday paper sorting. No more printing, scanning, or pairing receipts. No more typing the same data into the accounting software by hand. The process that currently takes two full days (Wednesday and Thursday) is reduced to a review-and-approve task on Thursday."),
 
@@ -484,9 +495,11 @@ const doc = new Document({
         // ========== SECTION 8: CARD MANAGEMENT ==========
         h1("9. Card Management and Spending Tracking"),
 
-        h2("9.1 Current Card Setup"),
+        h2("9.1 Card Setup and Management"),
 
-        para("Rapid currently uses 3 credit cards. RCHBS uses 1 credit card and 3 Himyan prepaid cards. All cards are from QNB and are held by the Operations team. The number and type of cards may change in the future, so the system must allow admin users to add, remove, or update cards at any time."),
+        para("Rapid currently uses 3 credit cards. RCHBS uses 1 credit card and 3 Himyan prepaid cards. All cards are from QNB and are held by the Operations team. The system supports full dynamic card management: authorized users can add new cards, edit card details (label, credit limit), and deactivate cards that are no longer in use. Deactivated cards are hidden from service logging forms but their historical transactions are preserved."),
+
+        para("Each card has a dedicated detail panel accessible through a tabbed interface. The detail panel shows the card\u2019s properties (company, type, limit) and a full transaction ledger. The ledger merges all debits (government fees paid via the card, linked from service logs) and credits (top-ups) into a single chronological view with a running balance. For credit cards, the opening balance appears as the initial credit limit entry."),
 
         h2("9.2 Payment Method Tracking"),
 
@@ -618,11 +631,11 @@ const doc = new Document({
         h2("15.4 Gabi View"),
 
         bulletItem("All submissions awaiting her payment verification"),
-        bulletItem("Card spending per card, per day, per company"),
-        bulletItem("Card balance indicators (low balance warnings for top-ups)"),
+        bulletItem("Card Health summary \u2014 a compact overview of all active cards with color-coded dot indicators (green = healthy, orange = getting low, red = near limit) for at-a-glance status"),
+        bulletItem("Click-through to Card Management tab for detailed per-card transaction ledgers"),
+        bulletItem("Card top-up recording directly from the expense tracker"),
         bulletItem("Daily expense log (replacing the current Excel tracking)"),
         bulletItem("Expense report preparation tools (first half and second half of month)"),
-        bulletItem("Transaction history with uploaded receipts"),
 
         h2("15.5 Management / CFO View"),
 
@@ -635,8 +648,49 @@ const doc = new Document({
 
         para("All data on every dashboard is live. There is no need to ask someone to compile a report or dig through binders. Any question about a client, an invoice, a payment, or a card balance can be answered in seconds."),
 
-        // ========== SECTION 15: GLOSSARY ==========
-        h1("16. Glossary"),
+        pageBreak(),
+
+        // ========== SECTION 16: PERMISSIONS ==========
+        h1("16. Permissions and Role Management"),
+
+        para("The system uses a tag-based permission model to control what each user can see and do. Rather than hard-coding permissions into each role, the system defines a set of permission tags that can be flexibly assigned to roles and individual users."),
+
+        h2("16.1 Permission Tags"),
+
+        para("Permission tags are organized into three categories:"),
+
+        bulletItem("Navigation tags \u2014 control which screens a user can access (e.g. Dashboard, Clients, Finance/Invoicing, Expense Tracker, CFO Dashboard, Role Management)"),
+        bulletItem("Action tags \u2014 control what operations a user can perform (e.g. Approve/Reject Submissions, Create Invoices, Verify Expenses, Onboard Clients, Manage Roles)"),
+        bulletItem("Data Scope tags \u2014 control how much data a user can see (e.g. See Own Clients Only vs. See All Clients, See Own Logs Only vs. See All Logs)"),
+
+        para("The system currently defines 23 permission tags across these three categories. New tags can be added as the system evolves."),
+
+        h2("16.2 Default Roles"),
+
+        para("Each role in the system has a default set of permission tags. The default roles are:"),
+
+        bulletItem("Account Manager \u2014 can access their own clients and logs, log new services, onboard clients, and view submissions"),
+        bulletItem("Team Leader (Elena) \u2014 can see all clients and logs, approve submissions, manage the service catalog and price lists, and reassign clients between AMs"),
+        bulletItem("Expense Tracker (Gabi) \u2014 can access the expense tracker and verify expenses"),
+        bulletItem("Accountant \u2014 can access finance/invoicing, create invoices, and see all data"),
+        bulletItem("Accounting Manager \u2014 same as accountant, plus can approve or reject invoices created by accountants"),
+        bulletItem("CFO \u2014 can access the management dashboard and view all client data"),
+        bulletItem("Super Admin \u2014 has all permission tags; used for system administration"),
+
+        h2("16.3 Role Management UI"),
+
+        para("Authorized administrators can manage roles through a dedicated Role Management screen. From this screen they can:"),
+
+        bulletItem("Create new roles with a custom set of permission tags"),
+        bulletItem("Edit existing roles by toggling individual tags on or off"),
+        bulletItem("Override permissions for individual users \u2014 granting or revoking specific tags without changing the role definition itself"),
+
+        para("Per-user overrides are useful when a single person needs a capability that their role does not normally include (for example, temporarily granting an AM the ability to approve submissions while Elena is on leave). Role definitions and user overrides are stored separately, so changes to a role automatically apply to all users in that role unless they have a personal override."),
+
+        pageBreak(),
+
+        // ========== SECTION 17: GLOSSARY ==========
+        h1("17. Glossary"),
 
         para("This section explains the terms and abbreviations used in this document."),
 
@@ -681,6 +735,11 @@ const doc = new Document({
               ["PRO", "Public Relations Officer services \u2014 the broad category covering immigration, company documents, traffic, and administrative government services"],
               ["VAT", "Value Added Tax \u2014 Qatar is introducing VAT in June 2026 with implementation in January 2027; the system must be VAT-ready"],
               ["Verified", "A service that has been approved by both Elena and Gabi and is ready to be invoiced"],
+              ["Permission Tag", "A granular access control flag (e.g. can-invoice, view-dashboard) assigned to roles or individual users to control what they can see and do"],
+              ["Role Management", "The system screen where administrators create and edit roles, assign permission tags, and set per-user overrides"],
+              ["Invoice Approval", "The workflow where accountant-generated invoices require Accounting Manager approval before being sent; manager-generated invoices are auto-approved"],
+              ["Transaction Ledger", "A chronological record of all debits (government fee payments) and credits (top-ups) on a specific company card, with running balance"],
+              ["Client Onboarding", "The step-by-step wizard used by Account Managers to register a new client in the system, collecting all required details including company, type, credit limit, and contract dates"],
             ]).map((row, i) =>
               new TableRow({
                 children: [
