@@ -893,6 +893,51 @@ function savePoNumber(invoiceId, poNum) {
   set({});
 }
 
+function approveInvoice(invoiceId) {
+  if (S.user?.type !== 'acct_mgr') return;
+  const invoices = dbGetInvoices();
+  const inv = invoices.find(i => i.id === invoiceId);
+  if (!inv || inv.status !== 'pending_approval') return;
+  Object.assign(inv, {
+    status: 'approved',
+    approvedAt: new Date().toISOString(),
+    approvedBy: S.user.id,
+    approvedByName: S.user.name
+  });
+  dbSaveInvoices(invoices);
+  set({});
+}
+
+function rejectInvoice(invoiceId) {
+  if (S.user?.type !== 'acct_mgr') return;
+  const note = prompt('Rejection reason (optional):') ?? '';
+  const invoices = dbGetInvoices();
+  const inv = invoices.find(i => i.id === invoiceId);
+  if (!inv || inv.status !== 'pending_approval') return;
+  Object.assign(inv, {
+    status: 'rejected',
+    rejectedAt: new Date().toISOString(),
+    rejectedBy: S.user.id,
+    rejectedByName: S.user.name,
+    rejectionNote: note || null
+  });
+  dbSaveInvoices(invoices);
+  // Revert linked service logs back to expensed
+  const allLogs = dbGet();
+  inv.logIds.forEach(id => {
+    const i = allLogs.findIndex(l => l.id === id);
+    if (i >= 0) {
+      allLogs[i].status = 'expensed';
+      delete allLogs[i].invoiceId;
+      delete allLogs[i].invoicedBy;
+      delete allLogs[i].invoicedByName;
+      delete allLogs[i].invoicedAt;
+    }
+  });
+  dbSave(allLogs);
+  set({invoiceId: null});
+}
+
 function expenseSelected() {
   (S.selectedExpenseIds||[]).forEach(id => {
     dbUpdate(id, {status:'expensed', expensedBy:S.user.id, expensedByName:S.user.name, expensedAt:new Date().toISOString(), gabiChecked:true});
@@ -912,7 +957,7 @@ function saveEditExpense() {
   if (!f) return;
   const log = dbGet().find(l => l.id === S.editingExpenseId);
   const provider = log?.provider || 'Rapid';
-  const availableCards = CARDS.filter(c => c.company === provider);
+  const availableCards = dbGetCards().filter(c => c.active !== false && c.company === provider);
   const card = f.paymentMethod === 'card' ? availableCards.find(c=>c.id===f.card) : null;
   dbUpdate(S.editingExpenseId, {
     govFee: parseFloat(f.govFee) || 0,
@@ -981,11 +1026,31 @@ function dbGetTopups() { try { return JSON.parse(localStorage.getItem(TOPUPS_KEY
 function dbSaveTopups(t) { localStorage.setItem(TOPUPS_KEY, JSON.stringify(t)); }
 function dbAddTopup(entry) { const t = dbGetTopups(); t.unshift(entry); dbSaveTopups(t); }
 
+// ── Card storage (dynamic, seeded from CARDS) ──
+const CARDS_KEY = 'rch_cards_v1';
+function dbGetCards() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(CARDS_KEY)||'null');
+    if (stored && stored.length) return stored;
+  } catch(e) {}
+  // Seed from static CARDS
+  const seeded = CARDS.map(c => ({...c, active: true, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()}));
+  localStorage.setItem(CARDS_KEY, JSON.stringify(seeded));
+  return seeded;
+}
+function dbSaveCards(cards) { localStorage.setItem(CARDS_KEY, JSON.stringify(cards)); }
+function dbAddCard(card) { const cards = dbGetCards(); cards.push(card); dbSaveCards(cards); }
+function dbUpdateCard(id, patch) {
+  const cards = dbGetCards();
+  const c = cards.find(x => x.id === id);
+  if (c) { Object.assign(c, patch, {updatedAt: new Date().toISOString()}); dbSaveCards(cards); }
+}
+
 // Returns per-card balance summary: { ...card, spent, credited, available, pct }
 function getCardBalances(logs) {
   const activeLogs = (logs || dbGet()).filter(l => l.status !== 'rejected');
   const topups = dbGetTopups();
-  return CARDS.map(c => {
+  return dbGetCards().filter(c => c.active !== false).map(c => {
     const spent    = activeLogs.filter(l => l.card === c.id).reduce((s, l) => s + (l.govFee || 0), 0);
     const credited = topups.filter(t => t.cardId === c.id).reduce((s, t) => s + t.amount, 0);
     const available = c.type === 'prepaid' ? credited - spent : Math.max(0, c.limit - (spent - credited));
@@ -994,6 +1059,36 @@ function getCardBalances(logs) {
     const pct = capacity > 0 ? Math.min(netSpent / capacity, 1) : 0;
     return { ...c, spent, credited, available, pct };
   });
+}
+
+// Build debit/credit ledger for a card
+function getCardLedger(cardId) {
+  const card = dbGetCards().find(c => c.id === cardId);
+  if (!card) return [];
+  const allLogs = dbGet().filter(l => l.card === cardId && l.status !== 'rejected');
+  const topups = dbGetTopups().filter(t => t.cardId === cardId);
+
+  const entries = [];
+  // Opening balance for credit cards
+  if (card.type === 'credit' && card.limit > 0) {
+    entries.push({ date: card.createdAt || '2026-01-01T00:00:00', desc: 'Credit limit', debit: 0, credit: card.limit, type: 'opening' });
+  }
+  // Debits from service logs
+  allLogs.forEach(l => {
+    if ((l.govFee || 0) > 0) {
+      entries.push({ date: l.submittedAt || l.createdAt, desc: `${l.serviceName} — ${l.clientName}`, debit: l.govFee, credit: 0, type: 'expense', id: l.id, status: l.status });
+    }
+  });
+  // Credits from top-ups
+  topups.forEach(t => {
+    entries.push({ date: t.date + 'T00:00:00', desc: `Top-up${t.note ? ' — ' + t.note : ''}`, debit: 0, credit: t.amount, type: 'topup', id: t.id });
+  });
+  // Sort chronologically
+  entries.sort((a, b) => new Date(a.date) - new Date(b.date));
+  // Calculate running balance
+  let balance = 0;
+  entries.forEach(e => { balance += e.credit - e.debit; e.balance = balance; });
+  return entries;
 }
 
 function submitTopup() {
@@ -1020,6 +1115,46 @@ function deleteTopup(id) {
   if (!confirm('Delete this top-up record?')) return;
   dbSaveTopups(dbGetTopups().filter(t => t.id !== id));
   render();
+}
+
+function handleAddCard() {
+  const label = document.getElementById('new-card-label')?.value?.trim();
+  const company = document.getElementById('new-card-company')?.value;
+  const type = document.getElementById('new-card-type')?.value;
+  const limit = parseFloat(document.getElementById('new-card-limit')?.value) || 0;
+  if (!label) { alert('Card label is required.'); return; }
+  if (!company) { alert('Please select a company.'); return; }
+  if (type === 'credit' && limit <= 0) { alert('Credit cards need a limit > 0.'); return; }
+  const now = new Date().toISOString();
+  dbAddCard({
+    id: 'card-' + Date.now(),
+    label, company, type: type || 'credit',
+    limit: type === 'prepaid' ? 0 : limit,
+    active: true, createdAt: now, updatedAt: now
+  });
+  S.addingCard = false;
+  set({});
+}
+
+function handleSaveEditCard() {
+  const id = S.editingCardId;
+  if (!id) return;
+  const label = document.getElementById('edit-card-label')?.value?.trim();
+  const limit = parseFloat(document.getElementById('edit-card-limit')?.value) || 0;
+  if (!label) { alert('Card label is required.'); return; }
+  const card = dbGetCards().find(c => c.id === id);
+  const patch = { label };
+  if (card && card.type === 'credit') patch.limit = limit;
+  dbUpdateCard(id, patch);
+  S.editingCardId = null;
+  set({});
+}
+
+function deactivateCard(id) {
+  if (!confirm('Deactivate this card? It will be hidden but its history is preserved.')) return;
+  dbUpdateCard(id, { active: false });
+  S.selectedCardId = null;
+  set({});
 }
 
 function handleReceiptUpload(files) {
@@ -1054,7 +1189,7 @@ function submitCompletion() {
   const f = S.completeForm;
   if (!f.paymentMethod) { alert('Please select a payment method'); return; }
   if (f.paymentMethod === 'card' && !f.card) { alert('Please select a card'); return; }
-  const card = f.paymentMethod === 'card' ? CARDS.find(c=>c.id===f.card) : null;
+  const card = f.paymentMethod === 'card' ? dbGetCards().find(c=>c.id===f.card) : null;
   const receiptGroupId = 'RG-'+Date.now().toString(36).toUpperCase();
   const now = new Date().toISOString();
   const perSvcReceipts = S.perServiceReceipts || {};
@@ -1168,6 +1303,8 @@ function generateBatchInvoice(clientId) {
   const totalProfFee = grpLogs.reduce((s,l) => s + l.total, 0);
   const totalGovFee  = grpLogs.reduce((s,l) => s + (l.govFee||0), 0);
 
+  const isManager = S.user.type === 'acct_mgr';
+  const now = new Date().toISOString();
   const invoice = {
     id: invId,
     clientId,
@@ -1175,12 +1312,17 @@ function generateBatchInvoice(clientId) {
     provider: grpLogs[0].provider,
     logIds,
     poNumber: S.pendingPoNumber ? S.pendingPoNumber.trim() : '',
-    createdAt: new Date().toISOString(),
+    createdAt: now,
     createdBy: S.user.id,
     createdByName: S.user.name,
     totalProfFee,
     totalGovFee,
-    grandTotal: totalProfFee + totalGovFee
+    grandTotal: totalProfFee + totalGovFee,
+    status: isManager ? 'approved' : 'pending_approval',
+    approvedAt: isManager ? now : null,
+    approvedBy: isManager ? S.user.id : null,
+    approvedByName: isManager ? S.user.name : null,
+    rejectedAt: null, rejectedBy: null, rejectedByName: null, rejectionNote: null
   };
   S.pendingPoNumber = '';
   dbSaveInvoices([...dbGetInvoices(), invoice]);
@@ -2145,7 +2287,7 @@ function vCompleteService() {
 
   const f = S.completeForm;
   const provider = firstLog?.provider || 'Rapid';
-  const availableCards = CARDS.filter(c => c.company === provider);
+  const availableCards = dbGetCards().filter(c => c.active !== false && c.company === provider);
 
   const totalRchFees = selectedLogs.reduce((s,l) => s + l.total, 0);
 
@@ -2394,135 +2536,201 @@ function vApprovals() {
 // ═══════════════════════════════════
 // Card Management Tab (Gabi)
 // ═══════════════════════════════════
-function vCardManagement(cardBals, recentTopups, allLogs) {
-  const topups = dbGetTopups();
-  const expandedCard = S.expandedCard || null;
-
-  function cardTile(c) {
-    const isLow = c.type === 'prepaid' ? c.available < 500 : c.pct >= 0.9;
-    const isMed = !isLow && (c.type === 'prepaid' ? c.available < 2000 : c.pct >= 0.7);
-    const barColor = isLow ? 'var(--red)' : isMed ? 'var(--orange)' : 'var(--green)';
-    const isExpanded = expandedCard === c.id;
-
-    // Build combined ledger (transactions + topups) sorted by date desc
-    const cardLogs = allLogs.filter(l => l.card === c.id && l.status !== 'rejected')
-      .map(l => ({ type:'tx', date: l.submittedAt, label: l.serviceName, sub: l.clientName, amount: -(l.govFee||0), id: l.id, status: l.status }));
-    const cardTopups = topups.filter(t => t.cardId === c.id)
-      .map(t => ({ type:'topup', date: t.date+'T00:00:00', label: 'Top-Up', sub: t.note||'', amount: t.amount, id: t.id }));
-    const ledger = [...cardLogs, ...cardTopups].sort((a,b) => new Date(b.date) - new Date(a.date)).slice(0, 30);
-
-    const balanceLabel = c.type === 'prepaid'
-      ? `<span style="font-size:14px;font-weight:800;color:${isLow?'var(--red)':isMed?'var(--orange)':'var(--green)'}">QAR ${fmt(c.available)}</span><div style="font-size:10px;color:var(--g500)">Balance</div>`
-      : `<span style="font-size:14px;font-weight:800;color:${isLow?'var(--red)':isMed?'var(--orange)':'var(--navy)'}">QAR ${fmt(c.available)}</span><div style="font-size:10px;color:var(--g500)">Available</div>`;
-
-    return `
-      <div style="border:1px solid ${isExpanded?'var(--navy)':isLow?'var(--red)':'var(--border)'};border-radius:10px;overflow:hidden;background:white;${isLow?'box-shadow:0 0 0 1px var(--red)':''}">
-        <div style="padding:12px 14px;cursor:pointer;background:${isExpanded?'var(--navy-lt)':'white'}"
-          onclick="S.expandedCard=${isExpanded?'null':"'"+c.id+"'"};render()">
-          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px">
-            <div>
-              <div style="font-size:12px;font-weight:700;color:var(--g900)">${c.label}</div>
-              <div style="display:flex;gap:4px;margin-top:3px">
-                <span class="badge" style="background:${c.company==='Rapid'?'var(--navy-lt)':'var(--mag-lt)'};color:${c.company==='Rapid'?'var(--navy)':'var(--magenta)'};font-size:9px">${c.company}</span>
-                <span class="badge" style="background:var(--g50);color:var(--g600);font-size:9px">${c.type==='prepaid'?'Prepaid':'Credit'}</span>
-              </div>
-            </div>
-            <div style="text-align:right">${balanceLabel}</div>
-          </div>
-          <div style="height:5px;background:var(--g100);border-radius:3px;overflow:hidden">
-            <div style="height:100%;width:${Math.round(c.pct*100)}%;background:${barColor};border-radius:3px;transition:width .3s"></div>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">
-            <div style="font-size:10px;color:var(--g400)">
-              ${c.type === 'credit' ? `QAR ${fmt(c.spent)} spent of ${fmt(c.limit)} limit` : `QAR ${fmt(c.spent)} spent${c.credited>0?' · QAR '+fmt(c.credited)+' loaded':''}`}
-            </div>
-            <div style="font-size:10px;color:${isExpanded?'var(--navy)':'var(--g400)'}">
-              ${isExpanded?'▲ Hide history':'▼ Show history'} · ${ledger.length} entries
-            </div>
-          </div>
-          ${isLow ? `<div style="font-size:10px;color:var(--red);font-weight:600;margin-top:3px">Low — top up needed</div>` : ''}
-        </div>
-        ${isExpanded ? `
-          <div style="border-top:1px solid var(--border);padding:10px 14px 4px">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-              <div style="font-size:10px;font-weight:700;color:var(--g500);text-transform:uppercase;letter-spacing:.4px">Transaction History</div>
-              <button class="btn btn-navy btn-xs" onclick="event.stopPropagation();S.addingTopup=true;S.topupPreselect='${c.id}';render()">+ Top-Up</button>
-            </div>
-            ${ledger.length === 0 ? `<div style="font-size:11px;color:var(--g400);padding:8px 0">No transactions yet</div>` :
-              ledger.map(entry => `
-                <div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--g50);font-size:11px">
-                  <div style="width:20px;text-align:center;font-size:13px">${entry.type==='topup'?'⬆':'💳'}</div>
-                  <div style="flex:1">
-                    <div style="font-weight:600;color:var(--g800)">${entry.label}</div>
-                    <div style="font-size:10px;color:var(--g400)">${entry.sub ? entry.sub+' · ' : ''}${fmtDate(entry.date)}</div>
-                  </div>
-                  <div style="font-weight:700;color:${entry.type==='topup'?'var(--green)':'var(--g700)'}">
-                    ${entry.type==='topup'?'+':''}QAR ${fmt(Math.abs(entry.amount))}
-                  </div>
-                </div>`).join('')}
-          </div>
-        ` : ''}
-      </div>`;
-  }
-
+function vCardManagement(cardBals) {
+  const cards = dbGetCards().filter(c => c.active !== false);
+  const selectedId = S.selectedCardId || (cards.length ? cards[0].id : null);
+  const selCard = cardBals.find(c => c.id === selectedId);
   const addingTopup = S.addingTopup || false;
-  const preselect = S.topupPreselect || '';
+  const addingCard = S.addingCard || false;
+  const editingId = S.editingCardId || null;
+
+  // Ledger for selected card
+  const ledger = selectedId ? getCardLedger(selectedId) : [];
 
   return `
-    ${addingTopup ? `
+    <!-- Card tabs + Add button -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div style="display:flex;gap:4px;flex-wrap:wrap;flex:1">
+        ${cards.map(c => {
+          const active = c.id === selectedId;
+          const bal = cardBals.find(b => b.id === c.id);
+          const isLow = bal ? (bal.type === 'prepaid' ? bal.available < 500 : bal.pct >= 0.9) : false;
+          const coClr = c.company === 'Rapid' ? 'var(--navy)' : 'var(--magenta)';
+          return `<button onclick="S.selectedCardId='${c.id}';S.editingCardId=null;render()"
+            style="padding:6px 12px;font-size:11px;font-weight:${active?'700':'500'};border:1px solid ${active?coClr:'var(--border)'};
+            border-radius:6px;background:${active?(c.company==='Rapid'?'var(--navy-lt)':'var(--mag-lt)'):'white'};
+            color:${active?coClr:'var(--g500)'};cursor:pointer;position:relative;white-space:nowrap">
+            ${isLow ? '<span style="position:absolute;top:-2px;right:-2px;width:7px;height:7px;background:var(--red);border-radius:50%;border:1px solid white"></span>' : ''}
+            ${c.label}
+          </button>`;
+        }).join('')}
+      </div>
+      <button class="btn btn-navy btn-sm" onclick="S.addingCard=!S.addingCard;render()" style="flex-shrink:0;margin-left:8px">+ Add Card</button>
+    </div>
+
+    ${addingCard ? `
       <div class="card" style="margin-bottom:16px;border:2px solid var(--navy)">
-        <div class="card-hd" style="margin-bottom:10px"><span class="card-title">Record Card Top-Up / Payment</span></div>
+        <div class="card-hd" style="margin-bottom:10px"><span class="card-title">Add New Card</span></div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
           <div style="grid-column:span 2">
-            <label class="form-label" style="font-size:10px">Card</label>
-            <select class="form-input" id="topup-card" style="padding:6px 8px">
-              <option value="">Select card...</option>
-              <optgroup label="Rapid">
-                ${CARDS.filter(c=>c.company==='Rapid').map(c=>`<option value="${c.id}" ${preselect===c.id?'selected':''}>${c.label}</option>`).join('')}
-              </optgroup>
-              <optgroup label="RCHBS">
-                ${CARDS.filter(c=>c.company==='RCHBS').map(c=>`<option value="${c.id}" ${preselect===c.id?'selected':''}>${c.label} (${c.type==='prepaid'?'Prepaid':'Credit'})</option>`).join('')}
-              </optgroup>
+            <label class="form-label" style="font-size:10px">Card Label</label>
+            <input class="form-input" id="new-card-label" type="text" placeholder="e.g. RCHBS CC-2 (xxx1234)" style="padding:6px 8px">
+          </div>
+          <div>
+            <label class="form-label" style="font-size:10px">Company</label>
+            <select class="form-input" id="new-card-company" style="padding:6px 8px">
+              <option value="Rapid">Rapid</option>
+              <option value="RCHBS">RCHBS</option>
             </select>
           </div>
           <div>
-            <label class="form-label" style="font-size:10px">Amount (QAR)</label>
-            <input class="form-input" id="topup-amount" type="number" min="1" step="0.01" placeholder="0.00" style="padding:6px 8px">
+            <label class="form-label" style="font-size:10px">Type</label>
+            <select class="form-input" id="new-card-type" style="padding:6px 8px" onchange="document.getElementById('new-card-limit-row').style.display=this.value==='credit'?'block':'none'">
+              <option value="credit">Credit Card</option>
+              <option value="prepaid">Prepaid Card</option>
+            </select>
           </div>
-          <div>
-            <label class="form-label" style="font-size:10px">Date</label>
-            <input class="form-input" id="topup-date" type="date" value="${new Date().toISOString().slice(0,10)}" style="padding:6px 8px">
-          </div>
-          <div style="grid-column:span 2">
-            <label class="form-label" style="font-size:10px">Notes (optional)</label>
-            <input class="form-input" id="topup-note" type="text" placeholder="e.g. Monthly top-up via bank transfer" style="padding:6px 8px">
+          <div id="new-card-limit-row" style="grid-column:span 2">
+            <label class="form-label" style="font-size:10px">Credit Limit (QAR)</label>
+            <input class="form-input" id="new-card-limit" type="number" min="0" step="100" placeholder="50000" style="padding:6px 8px">
           </div>
         </div>
         <div style="display:flex;gap:6px">
-          <button class="btn btn-success btn-sm" onclick="submitTopup()">Save Top-Up</button>
-          <button class="btn btn-ghost btn-sm" onclick="S.addingTopup=false;S.topupPreselect='';render()">Cancel</button>
+          <button class="btn btn-success btn-sm" onclick="handleAddCard()">Save Card</button>
+          <button class="btn btn-ghost btn-sm" onclick="S.addingCard=false;render()">Cancel</button>
         </div>
       </div>
-    ` : `
-      <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
-        <button class="btn btn-navy btn-sm" onclick="S.addingTopup=true;S.topupPreselect='';render()">+ Record Top-Up</button>
-      </div>
-    `}
+    ` : ''}
 
-    ${['Rapid','RCHBS'].map(co => {
-      const coLabel = co==='Rapid' ? 'Rapid Clearing House' : 'RCH Business Solutions';
-      const coClrVar = co==='Rapid' ? 'var(--navy)' : 'var(--magenta)';
-      const coCards = cardBals.filter(c=>c.company===co);
-      return `
-        <div style="margin-bottom:20px">
-          <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:${coClrVar};letter-spacing:.5px;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid ${coClrVar}">
-            ${coLabel}
+    ${selCard ? `
+      <!-- Card detail panel -->
+      <div class="card" style="margin-bottom:16px">
+        ${editingId === selectedId ? `
+          <!-- Edit mode -->
+          <div class="card-hd" style="margin-bottom:10px"><span class="card-title">Edit Card</span></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+            <div style="grid-column:span 2">
+              <label class="form-label" style="font-size:10px">Label</label>
+              <input class="form-input" id="edit-card-label" type="text" value="${selCard.label}" style="padding:6px 8px">
+            </div>
+            ${selCard.type === 'credit' ? `
+              <div>
+                <label class="form-label" style="font-size:10px">Credit Limit (QAR)</label>
+                <input class="form-input" id="edit-card-limit" type="number" min="0" value="${selCard.limit}" style="padding:6px 8px">
+              </div>` : ''}
+            <div>
+              <label class="form-label" style="font-size:10px">Company</label>
+              <div style="padding:7px 0;font-size:12px;color:var(--g500)">${selCard.company} (read-only)</div>
+            </div>
           </div>
-          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px">
-            ${coCards.map(c=>cardTile(c)).join('')}
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-success btn-sm" onclick="handleSaveEditCard()">Save</button>
+            <button class="btn btn-ghost btn-sm" onclick="S.editingCardId=null;render()">Cancel</button>
+            <button class="btn btn-sm" style="background:var(--red-lt);color:var(--red);margin-left:auto" onclick="deactivateCard('${selCard.id}')">Deactivate</button>
           </div>
-        </div>`;
-    }).join('')}`;
+        ` : `
+          <!-- View mode -->
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px">
+            <div>
+              <div style="font-size:15px;font-weight:800;color:var(--g900);margin-bottom:4px">${selCard.label}</div>
+              <div style="display:flex;gap:6px;align-items:center">
+                <span class="badge" style="background:${selCard.company==='Rapid'?'var(--navy-lt)':'var(--mag-lt)'};color:${selCard.company==='Rapid'?'var(--navy)':'var(--magenta)'}">${selCard.company}</span>
+                <span class="badge" style="background:var(--g50);color:var(--g600)">${selCard.type==='prepaid'?'Prepaid':'Credit'}</span>
+                ${selCard.type==='credit' ? `<span style="font-size:11px;color:var(--g500)">Limit: QAR ${fmt(selCard.limit)}</span>` : ''}
+              </div>
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="S.editingCardId='${selCard.id}';render()">Edit</button>
+          </div>
+
+          <!-- Balance summary -->
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px">
+            <div style="padding:12px;background:var(--g50);border-radius:8px;text-align:center">
+              <div style="font-size:10px;font-weight:600;color:var(--g500);text-transform:uppercase;margin-bottom:4px">Available</div>
+              <div style="font-size:18px;font-weight:800;color:${selCard.pct>=0.9?'var(--red)':selCard.pct>=0.7?'var(--orange)':'var(--green)'}">QAR ${fmt(selCard.available)}</div>
+            </div>
+            <div style="padding:12px;background:var(--g50);border-radius:8px;text-align:center">
+              <div style="font-size:10px;font-weight:600;color:var(--g500);text-transform:uppercase;margin-bottom:4px">Total Spent</div>
+              <div style="font-size:18px;font-weight:800;color:var(--red)">QAR ${fmt(selCard.spent)}</div>
+            </div>
+            <div style="padding:12px;background:var(--g50);border-radius:8px;text-align:center">
+              <div style="font-size:10px;font-weight:600;color:var(--g500);text-transform:uppercase;margin-bottom:4px">${selCard.type==='credit'?'Utilization':'Total Loaded'}</div>
+              <div style="font-size:18px;font-weight:800;color:var(--navy)">${selCard.type==='credit' ? Math.round(selCard.pct*100)+'%' : 'QAR '+fmt(selCard.credited)}</div>
+            </div>
+          </div>
+
+          <!-- Utilization bar -->
+          <div style="height:6px;background:var(--g100);border-radius:3px;overflow:hidden;margin-bottom:16px">
+            <div style="height:100%;width:${Math.round(selCard.pct*100)}%;background:${selCard.pct>=0.9?'var(--red)':selCard.pct>=0.7?'var(--orange)':'var(--green)'};border-radius:3px;transition:width .3s"></div>
+          </div>
+        `}
+      </div>
+
+      <!-- Ledger + Top-up button -->
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+          <span class="card-title">Transaction Ledger</span>
+          <button class="btn btn-navy btn-sm" onclick="S.addingTopup=true;S.topupPreselect='${selectedId}';render()">+ Record Top-Up</button>
+        </div>
+
+        ${addingTopup ? `
+          <div style="border:2px solid var(--navy);border-radius:8px;padding:12px;margin-bottom:14px;background:var(--navy-lt)">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+              <div style="grid-column:span 2">
+                <label class="form-label" style="font-size:10px">Card</label>
+                <select class="form-input" id="topup-card" style="padding:6px 8px">
+                  ${cards.map(c=>`<option value="${c.id}" ${(S.topupPreselect||selectedId)===c.id?'selected':''}>${c.label}</option>`).join('')}
+                </select>
+              </div>
+              <div>
+                <label class="form-label" style="font-size:10px">Amount (QAR)</label>
+                <input class="form-input" id="topup-amount" type="number" min="1" step="0.01" placeholder="0.00" style="padding:6px 8px">
+              </div>
+              <div>
+                <label class="form-label" style="font-size:10px">Date</label>
+                <input class="form-input" id="topup-date" type="date" value="${new Date().toISOString().slice(0,10)}" style="padding:6px 8px">
+              </div>
+              <div style="grid-column:span 2">
+                <label class="form-label" style="font-size:10px">Notes (optional)</label>
+                <input class="form-input" id="topup-note" type="text" placeholder="e.g. Monthly top-up" style="padding:6px 8px">
+              </div>
+            </div>
+            <div style="display:flex;gap:6px">
+              <button class="btn btn-success btn-sm" onclick="submitTopup()">Save Top-Up</button>
+              <button class="btn btn-ghost btn-sm" onclick="S.addingTopup=false;render()">Cancel</button>
+            </div>
+          </div>
+        ` : ''}
+
+        ${ledger.length === 0 ? `<div style="text-align:center;padding:24px;color:var(--g400);font-size:12px">No transactions yet</div>` : `
+          <div style="overflow-x:auto">
+            <table class="client-table" style="font-size:12px;width:100%">
+              <thead>
+                <tr>
+                  <th style="width:100px">Date</th>
+                  <th>Description</th>
+                  <th class="r" style="width:90px;color:var(--red)">Debit</th>
+                  <th class="r" style="width:90px;color:var(--green)">Credit</th>
+                  <th class="r" style="width:100px">Balance</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${ledger.map(e => `
+                  <tr>
+                    <td style="white-space:nowrap;color:var(--g500);font-size:11px">${fmtDate(e.date)}</td>
+                    <td>
+                      <span style="font-weight:${e.type==='opening'?'700':'500'}">${e.desc}</span>
+                      ${e.status ? `<span class="badge" style="margin-left:4px;font-size:8px;background:var(--g100);color:var(--g500)">${e.status}</span>` : ''}
+                    </td>
+                    <td class="r" style="color:var(--red);font-weight:${e.debit>0?'600':'400'}">${e.debit > 0 ? fmt(e.debit) : '—'}</td>
+                    <td class="r" style="color:var(--green);font-weight:${e.credit>0?'600':'400'}">${e.credit > 0 ? fmt(e.credit) : '—'}</td>
+                    <td class="r" style="font-weight:700;color:${e.balance<0?'var(--red)':'var(--navy)'}">${fmt(e.balance)}</td>
+                  </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+        `}
+      </div>
+    ` : `<div class="empty-state"><div class="empty-icon">💳</div><div class="empty-txt">No cards configured</div><div class="empty-sub">Add a card to get started.</div></div>`}`;
 }
 
 // ═══════════════════════════════════
@@ -2538,7 +2746,6 @@ function vExpense() {
 
   // Card balances
   const cardBals = getCardBalances(all);
-  const recentTopups = dbGetTopups().slice(0, 10);
 
   // Group approved by client
   const byClient = {};
@@ -2549,8 +2756,6 @@ function vExpense() {
   const clientGroups = Object.values(byClient);
 
   const selIds = S.selectedExpenseIds || [];
-  const addingTopup = S.addingTopup || false;
-
   const gabiTab = S.gabiTab || 'expense';
 
   return `
@@ -2564,109 +2769,31 @@ function vExpense() {
       </button>
     </div>
 
-    ${gabiTab === 'cards' ? vCardManagement(cardBals, recentTopups, all) : `
+    ${gabiTab === 'cards' ? vCardManagement(cardBals) : `
 
-    <!-- ── Card Balances & Top-Ups ─────────────────────────────────────── -->
+    <!-- ── Card Health Summary ─────────────────────────────────────── -->
     <div class="card" style="margin-bottom:16px">
       <div class="card-hd">
-        <span class="card-title">Card Balances &amp; Top-Ups</span>
-        <button class="btn btn-navy btn-sm" onclick="S.set({addingTopup:true})">+ Record Top-Up</button>
+        <span class="card-title">Card Health</span>
+        <button class="btn btn-ghost btn-sm" onclick="S.gabiTab='cards';render()">Manage Cards →</button>
       </div>
-
-      ${addingTopup ? `
-        <div style="border:2px solid var(--navy);border-radius:8px;padding:12px 14px;margin-bottom:14px;background:var(--navy-lt)">
-          <div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:10px">Record Card Top-Up / Payment</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
-            <div style="grid-column:span 2">
-              <label class="form-label" style="font-size:10px">Card</label>
-              <select class="form-input" id="topup-card" style="padding:6px 8px">
-                <option value="">Select card...</option>
-                <optgroup label="Rapid">
-                  ${CARDS.filter(c=>c.company==='Rapid').map(c=>`<option value="${c.id}">${c.label}</option>`).join('')}
-                </optgroup>
-                <optgroup label="RCHBS">
-                  ${CARDS.filter(c=>c.company==='RCHBS').map(c=>`<option value="${c.id}">${c.label} (${c.type==='prepaid'?'Prepaid':'Credit'})</option>`).join('')}
-                </optgroup>
-              </select>
-            </div>
-            <div>
-              <label class="form-label" style="font-size:10px">Amount (QAR)</label>
-              <input class="form-input" id="topup-amount" type="number" min="1" step="0.01" placeholder="0.00" style="padding:6px 8px">
-            </div>
-            <div>
-              <label class="form-label" style="font-size:10px">Date</label>
-              <input class="form-input" id="topup-date" type="date" value="${new Date().toISOString().slice(0,10)}" style="padding:6px 8px">
-            </div>
-            <div style="grid-column:span 2">
-              <label class="form-label" style="font-size:10px">Notes (optional)</label>
-              <input class="form-input" id="topup-note" type="text" placeholder="e.g. Monthly top-up via bank transfer" style="padding:6px 8px">
-            </div>
-          </div>
-          <div style="display:flex;gap:6px">
-            <button class="btn btn-success btn-sm" onclick="submitTopup()">Save Top-Up</button>
-            <button class="btn btn-ghost btn-sm" onclick="S.set({addingTopup:false})">Cancel</button>
-          </div>
-        </div>
-      ` : ''}
-
-      ${['Rapid','RCHBS'].map(co => {
-        const coCards = cardBals.filter(c=>c.company===co);
-        const coLabel = co==='Rapid' ? 'Rapid Clearing House' : 'RCH Business Solutions';
-        const coClrVar = co==='Rapid' ? 'var(--navy)' : 'var(--magenta)';
-        return `
-          <div style="margin-bottom:${recentTopups.length>0||co==='Rapid'?'12px':'0'}">
-            <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:${coClrVar};letter-spacing:.4px;margin-bottom:7px">${coLabel}</div>
-            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px">
-              ${coCards.map(c => {
-                const isLow = c.type === 'prepaid' ? c.available < 500 : c.pct >= 0.9;
-                const isMed = !isLow && (c.type === 'prepaid' ? c.available < 2000 : c.pct >= 0.7);
-                const barColor = isLow ? 'var(--red)' : isMed ? 'var(--orange)' : 'var(--green)';
-                const coBg = co === 'Rapid' ? 'var(--navy-lt)' : 'var(--mag-lt)';
-                const balanceLabel = c.type === 'prepaid'
-                  ? `<span style="font-size:13px;font-weight:700;color:${isLow?'var(--red)':isMed?'var(--orange)':'var(--green)'}">QAR ${fmt(c.available)}</span><div style="font-size:10px;color:var(--g500)">Balance</div>`
-                  : `<span style="font-size:13px;font-weight:700;color:${isLow?'var(--red)':isMed?'var(--orange)':'var(--navy)'}">QAR ${fmt(c.available)}</span><div style="font-size:10px;color:var(--g500)">Available</div>`;
-                return `
-                  <div style="border:1px solid ${isLow?'var(--red)':'var(--border)'};border-radius:8px;padding:10px 12px;background:${isLow?'#fff5f5':'white'}">
-                    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px">
-                      <div>
-                        <div style="font-size:11px;font-weight:700;color:var(--g800)">${c.label}</div>
-                        <div style="display:flex;gap:4px;margin-top:2px">
-                          <span class="badge" style="background:${coBg};color:${coClrVar};font-size:9px">${c.company}</span>
-                          <span class="badge" style="background:var(--g50);color:var(--g600);font-size:9px">${c.type==='prepaid'?'Prepaid':'Credit'}</span>
-                        </div>
-                      </div>
-                      <div style="text-align:right">${balanceLabel}</div>
-                    </div>
-                    <div style="height:4px;background:var(--g100);border-radius:2px;overflow:hidden">
-                      <div style="height:100%;width:${Math.round(c.pct*100)}%;background:${barColor};border-radius:2px"></div>
-                    </div>
-                    ${c.type === 'credit' ? `<div style="font-size:10px;color:var(--g400);margin-top:3px">QAR ${fmt(c.spent)} spent of ${fmt(c.limit)} limit${c.credited>0?' · QAR '+fmt(c.credited)+' credited':''}</div>` : `<div style="font-size:10px;color:var(--g400);margin-top:3px">QAR ${fmt(c.spent)} spent${c.credited>0?' · QAR '+fmt(c.credited)+' loaded':' · No balance loaded'}</div>`}
-                    ${isLow ? `<div style="font-size:10px;color:var(--red);font-weight:600;margin-top:3px">Low — top up needed</div>` : ''}
-                  </div>`;
-              }).join('')}
-            </div>
-          </div>`;
-      }).join('')}
-      ${recentTopups.length > 0 ? '<div style="height:2px"></div>' : ''}
-
-      ${recentTopups.length > 0 ? `
-        <div style="border-top:1px solid var(--border);padding-top:10px">
-          <div style="font-size:10px;font-weight:700;color:var(--g500);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Recent Top-Ups</div>
-          ${recentTopups.map(t => {
-            const card = CARDS.find(c=>c.id===t.cardId);
-            return `
-              <div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--g50);font-size:12px">
-                <div style="flex:1">
-                  <span style="font-weight:600">${card?card.label:t.cardId}</span>
-                  ${t.note ? `<span style="color:var(--g500);margin-left:6px">${t.note}</span>` : ''}
-                  <div style="font-size:10px;color:var(--g400)">${t.date} · by ${t.addedByName}</div>
-                </div>
-                <span style="font-weight:700;color:var(--green)">+QAR ${fmt(t.amount)}</span>
-                <button class="btn btn-ghost btn-xs" onclick="deleteTopup('${t.id}')" style="color:var(--red)">✕</button>
-              </div>`;
-          }).join('')}
-        </div>
-      ` : ''}
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px">
+        ${cardBals.map(c => {
+          const isLow = c.type === 'prepaid' ? c.available < 500 : c.pct >= 0.9;
+          const isMed = !isLow && (c.type === 'prepaid' ? c.available < 2000 : c.pct >= 0.7);
+          const dotClr = isLow ? 'var(--red)' : isMed ? 'var(--orange)' : 'var(--green)';
+          return `
+            <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:background .1s"
+              onclick="S.gabiTab='cards';S.selectedCardId='${c.id}';render()" onmouseover="this.style.background='var(--g50)'" onmouseout="this.style.background='white'">
+              <span style="width:8px;height:8px;border-radius:50%;background:${dotClr};flex-shrink:0"></span>
+              <div style="flex:1;min-width:0">
+                <div style="font-size:11px;font-weight:600;color:var(--g800);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.label}</div>
+                <div style="font-size:10px;color:var(--g400)">${c.company} · ${c.type==='prepaid'?'Prepaid':'Credit'}</div>
+              </div>
+              <div style="font-size:12px;font-weight:700;color:${isLow?'var(--red)':isMed?'var(--orange)':'var(--navy)'};white-space:nowrap">QAR ${fmt(c.available)}</div>
+            </div>`;
+        }).join('')}
+      </div>
     </div>
 
     <!-- ── Expense Queue ──────────────────────────────────────────────── -->
@@ -2793,7 +2920,7 @@ function vExpense() {
         if (isEditing && S.editExpenseForm) {
           const ef = S.editExpenseForm;
           const provider = l.provider || 'Rapid';
-          const availableCards = CARDS.filter(c => c.company === provider);
+          const availableCards = dbGetCards().filter(c => c.active !== false && c.company === provider);
           return `
             <div style="border:2px solid var(--navy);border-radius:10px;padding:12px 14px;margin-bottom:8px;background:var(--navy-lt)">
               <div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:10px">Edit Expense — ${l.clientName} · ${l.serviceName}</div>
@@ -2861,7 +2988,12 @@ function vFinance() {
   const all = dbGet();
   const expensed = all.filter(l => l.status === 'expensed');
   const invoiced  = all.filter(l => l.status === 'invoiced');
-  const invGroups = dbGetInvoices().slice().sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+  const allInvoices = dbGetInvoices().slice().sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+  // Backward compat: invoices without status are treated as approved
+  allInvoices.forEach(inv => { if (!inv.status) inv.status = 'approved'; });
+  const pendingApproval = allInvoices.filter(i => i.status === 'pending_approval');
+  const invGroups = allInvoices.filter(i => i.status === 'approved');
+  const rejectedInvs = allInvoices.filter(i => i.status === 'rejected');
   const pipelineLogs = all.filter(l => ['pending','approved','expensed'].includes(l.status));
 
   // Group expensed logs by clientId
@@ -2892,10 +3024,10 @@ function vFinance() {
         <div class="stat-val">QAR ${fmt(totalExpensed)}</div>
         <div class="stat-sub">Prof + Gov fees</div>
       </div>
-      <div class="stat" style="--sc:var(--green)">
-        <div class="stat-lbl">Invoices Issued</div>
-        <div class="stat-val">${invGroups.length}</div>
-        <div class="stat-sub">All time</div>
+      <div class="stat" style="--sc:${pendingApproval.length ? 'var(--orange)' : 'var(--green)'}">
+        <div class="stat-lbl">${pendingApproval.length ? 'Awaiting Approval' : 'Invoices Issued'}</div>
+        <div class="stat-val">${pendingApproval.length || invGroups.length}</div>
+        <div class="stat-sub">${pendingApproval.length ? pendingApproval.length + ' invoice' + (pendingApproval.length!==1?'s':'') + ' pending' : 'All time'}</div>
       </div>
     </div>
 
@@ -3006,8 +3138,44 @@ function vFinance() {
       }).join('')}
     ` : `<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-txt">Nothing to invoice yet</div><div class="empty-sub">Items will appear here once expenses are recorded.</div></div>`}
 
+    ${pendingApproval.length > 0 ? `
+      <div style="font-size:11px;font-weight:700;color:var(--orange);text-transform:uppercase;margin:20px 0 10px;letter-spacing:.5px">Pending Approval (${pendingApproval.length})</div>
+      ${pendingApproval.map(inv => {
+        const co = inv.provider === 'Rapid'
+          ? `<span class="badge" style="background:var(--navy-lt);color:var(--navy)">${inv.provider}</span>`
+          : `<span class="badge" style="background:var(--mag-lt);color:var(--magenta)">${inv.provider}</span>`;
+        const isManager = S.user?.type === 'acct_mgr';
+        return `
+          <div class="log-card" style="border-left:3px solid var(--orange)">
+            <div class="log-card-top">
+              <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                ${co}
+                <span class="badge" style="background:var(--orange-lt);color:var(--orange)">Pending Approval</span>
+                <strong style="font-size:13px">${inv.clientName}</strong>
+                <span style="font-size:11px;color:var(--magenta);font-weight:700">${inv.id}</span>
+                <span style="font-size:11px;color:var(--g500)">${inv.logIds.length} service${inv.logIds.length!==1?'s':''}</span>
+              </div>
+              <div style="display:flex;gap:6px;align-items:center">
+                ${isManager ? `
+                  <button class="btn btn-success btn-xs" onclick="approveInvoice('${inv.id}')">Approve</button>
+                  <button class="btn btn-danger btn-xs" onclick="rejectInvoice('${inv.id}')">Reject</button>
+                ` : `<span style="font-size:11px;color:var(--orange);font-weight:600">Awaiting manager approval</span>`}
+                <button class="btn btn-ghost btn-xs" onclick="set({invoiceId:'${inv.id}'})">View</button>
+              </div>
+            </div>
+            <div class="log-meta">
+              <span class="log-meta-item">🏦 Gov: QAR ${fmt(inv.totalGovFee)}</span>
+              <span class="log-meta-item">💼 Prof: QAR ${fmt(inv.totalProfFee)}</span>
+              <span class="log-meta-item">💰 Total: QAR ${fmt(inv.grandTotal)}</span>
+              <span class="log-meta-item">📅 ${fmtDT(inv.createdAt)}</span>
+              <span class="log-meta-item">👤 ${inv.createdByName}</span>
+            </div>
+          </div>`;
+      }).join('')}
+    ` : ''}
+
     ${invGroups.length > 0 ? `
-      <div style="font-size:11px;font-weight:700;color:var(--g500);text-transform:uppercase;margin:20px 0 10px;letter-spacing:.5px">Issued Invoices</div>
+      <div style="font-size:11px;font-weight:700;color:var(--g500);text-transform:uppercase;margin:20px 0 10px;letter-spacing:.5px">Approved Invoices (${invGroups.length})</div>
       ${invGroups.map(inv => {
         const co = inv.provider === 'Rapid'
           ? `<span class="badge" style="background:var(--navy-lt);color:var(--navy)">${inv.provider}</span>`
@@ -3032,6 +3200,35 @@ function vFinance() {
             </div>
           </div>`;
       }).join('')}
+    ` : ''}
+
+    ${rejectedInvs.length > 0 ? `
+      <details style="margin-top:16px">
+        <summary style="font-size:11px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.5px;cursor:pointer;padding:4px 0">Rejected Invoices (${rejectedInvs.length})</summary>
+        ${rejectedInvs.map(inv => {
+          const co = inv.provider === 'Rapid'
+            ? `<span class="badge" style="background:var(--navy-lt);color:var(--navy)">${inv.provider}</span>`
+            : `<span class="badge" style="background:var(--mag-lt);color:var(--magenta)">${inv.provider}</span>`;
+          return `
+            <div class="log-card" style="opacity:.7;border-left:3px solid var(--red)">
+              <div class="log-card-top">
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                  ${co}
+                  <span class="badge" style="background:var(--red-lt);color:var(--red)">Rejected</span>
+                  <strong style="font-size:13px">${inv.clientName}</strong>
+                  <span style="font-size:11px;color:var(--magenta);font-weight:700">${inv.id}</span>
+                </div>
+                <button class="btn btn-ghost btn-xs" onclick="set({invoiceId:'${inv.id}'})">View</button>
+              </div>
+              <div class="log-meta">
+                <span class="log-meta-item">💰 QAR ${fmt(inv.grandTotal)}</span>
+                <span class="log-meta-item">📅 ${fmtDT(inv.createdAt)}</span>
+                ${inv.rejectionNote ? `<span class="log-meta-item" style="color:var(--red)">Reason: ${inv.rejectionNote}</span>` : ''}
+                ${inv.rejectedByName ? `<span class="log-meta-item">Rejected by ${inv.rejectedByName}</span>` : ''}
+              </div>
+            </div>`;
+        }).join('')}
+      </details>
     ` : ''}`;
 }
 
@@ -3168,11 +3365,18 @@ function vInvoicePreview() {
           <button onclick="set({invoiceId:null})">← Back</button>
           <span style="font-weight:700">${invoice.id}</span>
           <span style="opacity:.6;font-size:12px">${invoice.clientName}</span>
+          ${(invoice.status||'approved') === 'pending_approval' ? `<span class="badge" style="background:var(--orange);color:white;font-size:10px">Pending Approval</span>` : ''}
+          ${(invoice.status||'approved') === 'rejected' ? `<span class="badge" style="background:var(--red);color:white;font-size:10px">Rejected</span>` : ''}
+          ${(invoice.status||'approved') === 'approved' ? `<span class="badge" style="background:var(--green);color:white;font-size:10px">Approved</span>` : ''}
         </div>
         <div style="display:flex;align-items:center;gap:12px">
+          ${(invoice.status||'approved') === 'pending_approval' && S.user?.type === 'acct_mgr' ? `
+            <button onclick="approveInvoice('${invoice.id}')" style="background:var(--green);color:white;font-weight:700">Approve</button>
+            <button onclick="rejectInvoice('${invoice.id}')" style="background:var(--red);color:white;font-weight:700">Reject</button>
+          ` : ''}
           <span style="font-size:12px;opacity:.6">${totalPages} page${totalPages>1?'s':''}</span>
           <span style="font-size:12px;opacity:.6">QAR ${fmt(invoice.grandTotal)}</span>
-          ${['accountant','acct_mgr'].includes(S.user?.type) ? `<button onclick="S.amendingInvoice=!S.amendingInvoice;S.amendedFees={};render()">✎ Amend</button>` : ''}
+          ${['accountant','acct_mgr'].includes(S.user?.type) && (invoice.status||'approved') === 'approved' ? `<button onclick="S.amendingInvoice=!S.amendingInvoice;S.amendedFees={};render()">✎ Amend</button>` : ''}
           <button onclick="printInvoice()" style="background:rgba(255,255,255,.22)">🖨 Print</button>
           <button onclick="downloadInvoicePdf()" style="background:rgba(255,255,255,.22)">⬇ Download PDF</button>
         </div>
@@ -3674,7 +3878,7 @@ function vAccountantDashboard() {
       <div class="stat" style="--sc:var(--orange)">
         <div class="stat-lbl">Card Spending</div>
         <div class="stat-val">QAR ${fmt(totalCardSpent)}</div>
-        <div class="stat-sub">Across ${CARDS.length} cards</div>
+        <div class="stat-sub">Across ${dbGetCards().filter(c=>c.active!==false).length} cards</div>
       </div>
     </div>
 
@@ -4363,6 +4567,7 @@ function getNav(type) {
       pending: logs.filter(l=>l.status==='pending').length,
       approved: logs.filter(l=>l.status==='approved').length,
       expensed: logs.filter(l=>l.status==='expensed').length,
+      pendingApproval: dbGetInvoices().filter(i=>i.status==='pending_approval').length,
     };
   })();
 
@@ -4402,7 +4607,7 @@ function getNav(type) {
     acct_mgr: [
       item('dashboard','◈','Dashboard',''),
       item('clients','👥','Clients',''),
-      item('finance','🧾','Invoice Queue', counts.expensed||''),
+      item('finance','🧾','Invoice Queue', (counts.pendingApproval + counts.expensed)||''),
       item('submissions','📋','All Submissions',''),
       item('price_list','💲','Price List',''),
     ],
