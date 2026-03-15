@@ -300,7 +300,65 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 // ═══════════════════════════════════
 // USERS
 // ═══════════════════════════════════
+const ALL_TAGS = [
+  // Navigation
+  { id:'view-dashboard',        category:'Navigation', label:'Dashboard' },
+  { id:'view-clients',          category:'Navigation', label:'Clients' },
+  { id:'view-onboard',          category:'Navigation', label:'Onboard Client' },
+  { id:'view-log',              category:'Navigation', label:'New Service' },
+  { id:'view-submissions',      category:'Navigation', label:'Submissions' },
+  { id:'view-approvals',        category:'Navigation', label:'Approval Queue' },
+  { id:'view-expense',          category:'Navigation', label:'Expense Tracker' },
+  { id:'view-finance',          category:'Navigation', label:'Finance / Invoicing' },
+  { id:'view-cfo',              category:'Navigation', label:'CFO Dashboard' },
+  { id:'view-services-catalog', category:'Navigation', label:'Service Catalog' },
+  { id:'view-price-list',       category:'Navigation', label:'Price List' },
+  { id:'view-roles',            category:'Navigation', label:'Role Management' },
+  // Actions
+  { id:'can-approve',           category:'Actions', label:'Approve / Reject Submissions' },
+  { id:'can-invoice',           category:'Actions', label:'Create Invoices' },
+  { id:'can-expense',           category:'Actions', label:'Verify Expenses' },
+  { id:'can-edit-services',     category:'Actions', label:'Edit Service Catalog' },
+  { id:'can-onboard',           category:'Actions', label:'Onboard Clients' },
+  { id:'can-reassign-clients',  category:'Actions', label:'Reassign Clients' },
+  { id:'can-manage-roles',      category:'Actions', label:'Manage Roles & Permissions' },
+  // Data Scope
+  { id:'scope-own-clients',     category:'Data Scope', label:'See Own Clients Only' },
+  { id:'scope-all-clients',     category:'Data Scope', label:'See All Clients' },
+  { id:'scope-own-logs',        category:'Data Scope', label:'See Own Logs Only' },
+  { id:'scope-all-logs',        category:'Data Scope', label:'See All Logs' },
+];
+const ALL_TAG_IDS = ALL_TAGS.map(t => t.id);
+
+const DEFAULT_ROLES = {
+  'Account Manager':    ['view-dashboard','view-clients','view-onboard','view-log','view-submissions','view-price-list','can-onboard','scope-own-clients','scope-own-logs'],
+  'Team Leader':        ['view-dashboard','view-clients','view-onboard','view-log','view-approvals','view-submissions','view-services-catalog','view-price-list','can-approve','can-onboard','can-edit-services','can-reassign-clients','scope-all-clients','scope-all-logs'],
+  'Expense Tracker':    ['view-expense','can-expense','scope-all-logs'],
+  'Accountant':         ['view-dashboard','view-finance','view-submissions','view-price-list','can-invoice','scope-all-clients','scope-all-logs'],
+  'Accounting Manager': ['view-dashboard','view-clients','view-finance','view-submissions','view-price-list','can-invoice','scope-all-clients','scope-all-logs'],
+  'CFO':                ['view-cfo','view-clients','view-price-list','scope-all-clients','scope-all-logs'],
+  'Super Admin':        ALL_TAG_IDS.slice(),
+};
+
+// Roles persistence
+const ROLES_DB_KEY = 'rch_roles_v1';
+const USER_TAGS_DB_KEY = 'rch_user_tags_v1';
+function rolesLoad() { try { const r = localStorage.getItem(ROLES_DB_KEY); return r ? JSON.parse(r) : null; } catch(e) { return null; } }
+function rolesSave(r) { localStorage.setItem(ROLES_DB_KEY, JSON.stringify(r)); }
+function rolesGet() { let r = rolesLoad(); if (!r) { r = JSON.parse(JSON.stringify(DEFAULT_ROLES)); rolesSave(r); } return r; }
+function userTagsLoad() { try { const r = localStorage.getItem(USER_TAGS_DB_KEY); return r ? JSON.parse(r) : null; } catch(e) { return null; } }
+function userTagsSave(t) { localStorage.setItem(USER_TAGS_DB_KEY, JSON.stringify(t)); }
+function userTagsGet() { return userTagsLoad() || {}; }
+
+function getTagsForUser(user) {
+  const overrides = userTagsGet();
+  if (overrides[user.id]) return overrides[user.id];
+  const roles = rolesGet();
+  return roles[user.role] || [];
+}
+
 const USERS = [
+  { id:'admin',    name:'Admin',       role:'Super Admin',          password:'admin',   avatar:'🔑', type:'admin'      },
   { id:'violetta', name:'Violetta A.', role:'Account Manager',      password:'rch2026', avatar:'VA', type:'am'      },
   { id:'vongai',   name:'Vongai K.',   role:'Account Manager',      password:'rch2026', avatar:'VK', type:'am'      },
   { id:'elena',    name:'Elena F.',    role:'Team Leader',           password:'rch2026', avatar:'EF', type:'tl'      },
@@ -313,7 +371,12 @@ const USERS = [
 // ═══════════════════════════════════
 // REFERENCE DATA
 // ═══════════════════════════════════
-const CLIENTS_SEED = [];
+const CLIENTS_SEED = [
+  { id:'c-jtc00001', name:'Al Jazeera Trading & Contracting W.L.L.', nickname:'Al Jazeera', company:'Rapid', type:'retainer', retainerFee:3500, contact:'Khalid Al-Mansouri', email:'khalid@aljazeera-tc.qa', phone:'+974 4412 3300', address:'Al Sadd Street, Building 45', city:'Doha', country:'Qatar', poBox:'12340', crNumber:'78432', creditLimit:10000, assignedTo:'violetta', contractStart:'2025-09-01', contractEnd:'2026-08-31', invoicingPref:'thursday' },
+  { id:'c-gpm00002', name:'Gulf Pearl Marine Services W.L.L.', nickname:'Gulf Pearl', company:'RCHBS', type:'per-job', retainerFee:null, contact:'Fatima Al-Thani', email:'fatima@gulfpearl.qa', phone:'+974 4423 5500', address:'West Bay Tower 12, Floor 8', city:'Doha', country:'Qatar', poBox:'5567', crNumber:'91205', creditLimit:5000, assignedTo:'vongai', contractStart:'2025-11-15', contractEnd:'2026-11-14', invoicingPref:'thursday' },
+  { id:'c-dae00003', name:'Doha Advanced Engineering Co. W.L.L.', nickname:'DAE', company:'Rapid', type:'per-job', retainerFee:null, contact:'Ahmed Hassan', email:'ahmed.h@dae-qatar.com', phone:'+974 4431 7700', address:'Industrial Area, Street 44', city:'Doha', country:'Qatar', poBox:'8821', crNumber:'65410', creditLimit:8000, assignedTo:'violetta', contractStart:'2026-01-01', contractEnd:'2026-12-31', invoicingPref:'spending_limit' },
+  { id:'c-cbh00004', name:'Crescent Bay Hospitality W.L.L.', nickname:'Crescent Bay', company:'RCHBS', type:'retainer', retainerFee:5000, contact:'Sara Al-Kuwari', email:'sara@crescentbay.qa', phone:'+974 4445 9900', address:'Lusail Boulevard, Marina District', city:'Lusail', country:'Qatar', poBox:'33210', crNumber:'110782', creditLimit:15000, assignedTo:'vongai', contractStart:'2025-07-01', contractEnd:'2026-06-30', invoicingPref:'thursday' },
+];
 
 const CLIENTS_DB_KEY = 'rch_clients_v3';
 function clientsLoad() { try { const r = localStorage.getItem(CLIENTS_DB_KEY); return r ? JSON.parse(r) : null; } catch(e) { return null; } }
@@ -629,6 +692,12 @@ let S = {
     assignedTo:''
   },
   onboardDone: false,
+  // Role management
+  rolesEditingRole: null,    // role name being edited, or '__new__' for new role
+  rolesEditingTags: [],      // tags for the role being edited
+  rolesNewRoleName: '',      // name for new role
+  rolesEditingUser: null,    // user id whose tags are being overridden
+  rolesEditingUserTags: [],  // tags for the user being edited
 };
 
 function set(patch) {
@@ -641,6 +710,8 @@ function set(patch) {
 // ═══════════════════════════════════
 // HELPERS
 // ═══════════════════════════════════
+function hasTag(tag) { return S.user?.tags?.includes(tag) ?? false; }
+
 const fmt = n => Number(n).toLocaleString();
 const fmtDate = iso => { const d = new Date(iso); return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); };
 const fmtDT = iso => { const d = new Date(iso); return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short'})+' '+d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}); };
@@ -702,7 +773,13 @@ function handleLogin(e) {
   const uid2 = document.getElementById('uid').value;
   const user = USERS.find(u => u.id === uid2);
   if (!user) { set({loginError:'Please select a user'}); return; }
-  set({screen:'app', user, loginError:'', view:'dashboard'});
+  const userWithTags = { ...user, tags: getTagsForUser(user) };
+  const defaultView = userWithTags.tags.includes('view-dashboard') ? 'dashboard'
+    : userWithTags.tags.includes('view-expense') ? 'expense'
+    : userWithTags.tags.includes('view-cfo') ? 'cfo'
+    : userWithTags.tags.includes('view-finance') ? 'finance'
+    : 'dashboard';
+  set({screen:'app', user: userWithTags, loginError:'', view: defaultView});
 }
 
 function handleLogout() {
@@ -729,7 +806,7 @@ function initOnboardClient() {
       contractFile:null,
       retainerFee:'',
       invoicingPref:'thursday', invoicingOther:'',
-      assignedTo: S.user.type==='am' ? S.user.id : ''
+      assignedTo: hasTag('scope-own-clients') ? S.user.id : ''
     }
   });
 }
@@ -1207,7 +1284,7 @@ function submitCompletion() {
   const receiptGroupId = 'RG-'+Date.now().toString(36).toUpperCase();
   const now = new Date().toISOString();
   const perSvcReceipts = S.perServiceReceipts || {};
-  const bypassElena = S.user.type === 'accountant' || S.user.type === 'tl';
+  const bypassElena = hasTag('can-invoice') || hasTag('can-approve');
 
   S.completingIds.forEach(id => {
     const rawFee = (f.govFees||{})[id];
@@ -1319,7 +1396,7 @@ function generateBatchInvoice(clientId) {
   const totalProfFee = grpLogs.reduce((s,l) => s + l.total, 0);
   const totalGovFee  = grpLogs.reduce((s,l) => s + (l.govFee||0), 0);
 
-  const isManager = S.user.type === 'acct_mgr';
+  const isManager = hasTag('can-invoice') && hasTag('view-clients');
   const now = new Date().toISOString();
   const invoice = {
     id: invId,
@@ -1407,7 +1484,7 @@ function vDashboardAM() {
   const rejectedCount  = myLogs.filter(l => l.status === 'rejected').length;
 
   // History — sorted newest first
-  const historyLogs = (S.user.type === 'am' ? myLogs : allLogs).slice().sort((a,b) => new Date(b.submittedAt) - new Date(a.submittedAt));
+  const historyLogs = (hasTag('scope-all-logs') ? allLogs : myLogs).slice().sort((a,b) => new Date(b.submittedAt) - new Date(a.submittedAt));
   const canEdit = l => ['ops_pending','rejected'].includes(l.status);
   const canDelete = l => ['ops_pending','am_completing','pending','rejected'].includes(l.status);
 
@@ -1423,7 +1500,7 @@ function vDashboardAM() {
   const kanbanHTML = kanbanCols.map(col => {
     const cards = allLogs.filter(l =>
       col.statuses.includes(l.status) &&
-      (l.submittedBy === S.user.id || S.user.type === 'tl')
+      (l.submittedBy === S.user.id || hasTag('can-approve'))
     );
     const cardsHTML = cards.length === 0
       ? `<div style="text-align:center;padding:28px 0;color:var(--g500)"><div style="font-size:18px;margin-bottom:5px">○</div><div style="font-size:11px">No items</div></div>`
@@ -1455,7 +1532,7 @@ function vDashboardAM() {
     <div class="stats-row">
       <div class="stat" style="--sc:var(--navy)">
         <div class="stat-lbl">My Clients</div>
-        <div class="stat-val">${CLIENTS.filter(c=>S.user.type!=='am'||c.assignedTo===S.user.id).length}</div>
+        <div class="stat-val">${CLIENTS.filter(c=>hasTag('scope-all-clients')||c.assignedTo===S.user.id).length}</div>
         <div class="stat-sub">Assigned accounts</div>
       </div>
       <div class="stat" style="--sc:var(--green)">
@@ -1618,12 +1695,12 @@ function vClients() {
   const tab = S.clientsTab;
   const clients = CLIENTS.filter(c => {
     if (c.company !== tab) return false;
-    if (S.user.type === 'am') return c.assignedTo === S.user.id;
+    if (!hasTag('scope-all-clients')) return c.assignedTo === S.user.id;
     return true;
   }).sort((a,b) => a.name.localeCompare(b.name));
 
-  const rapidCount = CLIENTS.filter(c=>c.company==='Rapid' && (S.user.type!=='am' || c.assignedTo===S.user.id)).length;
-  const rchbsCount = CLIENTS.filter(c=>c.company==='RCHBS' && (S.user.type!=='am' || c.assignedTo===S.user.id)).length;
+  const rapidCount = CLIENTS.filter(c=>c.company==='Rapid' && (hasTag('scope-all-clients') || c.assignedTo===S.user.id)).length;
+  const rchbsCount = CLIENTS.filter(c=>c.company==='RCHBS' && (hasTag('scope-all-clients') || c.assignedTo===S.user.id)).length;
 
   const tabBtn = (label, count, company) => `
     <button class="btn ${tab===company ? 'btn-navy' : 'btn-ghost'} btn-sm" onclick="set({clientsTab:'${company}',editingClientId:null})" style="gap:4px">
@@ -1640,7 +1717,7 @@ function vClients() {
 
     if (S.editingClientId === c.id && S.editClientForm) {
       const f = S.editClientForm;
-      const totalCols = S.user.type!=='am' ? 10 : 9;
+      const totalCols = hasTag('scope-all-clients') ? 10 : 9;
       return `<tr style="background:var(--navy-lt)">
         <td><input class="form-input" style="padding:5px 8px;font-size:12px" value="${f.name}" oninput="S.editClientForm.name=this.value"></td>
         <td><input class="form-input" style="padding:5px 8px;font-size:12px" value="${f.contact}" oninput="S.editClientForm.contact=this.value"></td>
@@ -1656,7 +1733,7 @@ function vClients() {
           ? `<input class="form-input" style="padding:5px 8px;font-size:12px;width:90px" type="number" value="${f.creditLimit}" oninput="S.editClientForm.creditLimit=this.value">`
           : `<span style="font-size:12px">QAR ${fmt(f.creditLimit||0)}</span>`}</td>
         <td style="font-size:12px;color:var(--g500)" colspan="2">—</td>
-        ${S.user.type!=='am' ? `<td style="font-size:12px;color:var(--g500)">—</td>` : ''}
+        ${hasTag('scope-all-clients') ? `<td style="font-size:12px;color:var(--g500)">—</td>` : ''}
         <td style="text-align:right">
           <div style="display:flex;gap:4px;justify-content:flex-end">
             <button class="btn btn-success btn-xs" onclick="saveEditClient()">Save</button>
@@ -1699,8 +1776,8 @@ function vClients() {
         <div style="font-size:10px;color:var(--g500);margin-top:2px">QAR ${fmt(invoicedTotal)} / ${fmt(c.creditLimit)}</div>
       </td>
       <td style="font-size:12px;text-align:center;color:var(--g700)">${serviceCount}</td>
-      ${S.user.type!=='am' ? `<td style="font-size:12px">
-        ${S.user.type==='tl'
+      ${hasTag('scope-all-clients') ? `<td style="font-size:12px">
+        ${hasTag('can-reassign-clients')
           ? `<select style="font-size:11px;padding:3px 6px;border:1px solid var(--border);border-radius:6px;background:white;cursor:pointer" onchange="reassignClient(${c.id},this.value)">
               <option value="violetta" ${c.assignedTo==='violetta'?'selected':''}>Violetta A.</option>
               <option value="vongai" ${c.assignedTo==='vongai'?'selected':''}>Vongai K.</option>
@@ -1729,8 +1806,8 @@ function vClients() {
       ? `<input class="form-input" style="padding:5px 8px;font-size:12px;width:90px" type="number" placeholder="Limit" value="${S.newClientForm.creditLimit}" oninput="S.newClientForm.creditLimit=this.value">`
       : `<span style="font-size:11px;color:var(--g500)">Mgmt only</span>`}</td>
     <td colspan="2" style="font-size:10px;color:var(--g500)">New</td>
-    ${S.user.type!=='am' ? `<td>
-      ${S.user.type==='tl'
+    ${hasTag('scope-all-clients') ? `<td>
+      ${hasTag('can-reassign-clients')
         ? `<select style="font-size:11px;padding:3px 6px;border:1px solid var(--border);border-radius:6px;background:white" onchange="S.newClientForm.assignedTo=this.value">
             <option value="violetta" ${(S.newClientForm.assignedTo||'violetta')==='violetta'?'selected':''}>Violetta A.</option>
             <option value="vongai" ${(S.newClientForm.assignedTo||'violetta')==='vongai'?'selected':''}>Vongai K.</option>
@@ -1745,7 +1822,7 @@ function vClients() {
     </td>
   </tr>
   <tr style="background:var(--green-lt)">
-    <td colspan="${S.user.type!=='am' ? 10 : 9}" style="padding:6px 10px">
+    <td colspan="${hasTag('scope-all-clients') ? 10 : 9}" style="padding:6px 10px">
       <div style="font-size:10px;font-weight:700;color:var(--green);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Address & Tax Details</div>
       <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:6px;margin-bottom:6px">
         <input class="form-input" style="padding:5px 8px;font-size:11px" placeholder="Street address" value="${S.newClientForm.address||''}" oninput="S.newClientForm.address=this.value">
@@ -1767,7 +1844,7 @@ function vClients() {
         ${tabBtn('Rapid Clearing House', rapidCount, 'Rapid')}
         ${tabBtn('RCHBS', rchbsCount, 'RCHBS')}
       </div>
-      ${(S.user.type==='am'||S.user.type==='tl')
+      ${(hasTag('can-onboard'))
         ? `<button class="btn btn-primary btn-sm" onclick="initOnboardClient()" style="gap:4px"><span style="font-size:14px">+</span> Onboard Client</button>`
         : `<button class="btn btn-primary btn-sm" onclick="set({addingClient:true,newClientForm:{name:'',company:'${tab}',contact:'',email:'',phone:'',type:'per-job',creditLimit:5000,address:'',city:'Doha',country:'Qatar',poBox:'',tin:'',crNumber:'',vatNumber:''}})" style="gap:4px"><span style="font-size:14px">+</span> Add Client</button>`
       }
@@ -1776,7 +1853,7 @@ function vClients() {
     <div class="card" style="overflow-x:auto">
       <table class="client-table" style="min-width:900px">
         <thead><tr>
-          <th>Client</th><th>Contact</th><th>Email</th><th>Phone</th><th>Type</th><th>Limit</th><th>A/R Usage</th><th style="text-align:center">Services</th>${S.user.type!=='am'?'<th>Account Manager</th>':''}<th style="text-align:right">Actions</th>
+          <th>Client</th><th>Contact</th><th>Email</th><th>Phone</th><th>Type</th><th>Limit</th><th>A/R Usage</th><th style="text-align:center">Services</th>${hasTag('scope-all-clients')?'<th>Account Manager</th>':''}<th style="text-align:right">Actions</th>
         </tr></thead>
         <tbody>
           ${addRow}
@@ -1926,7 +2003,7 @@ function vOnboardClient() {
         </div>
         ${f.invoicingPref==='other' ? `<input class="form-input" style="margin-top:8px" placeholder="Describe invoicing arrangement..." value="${f.invoicingOther}" oninput="S.onboardForm.invoicingOther=this.value">` : ''}
       </div>
-      ${S.user.type==='tl' ? `
+      ${hasTag('can-reassign-clients') ? `
         <div class="form-group">
           <label class="form-label">Assign to Account Manager</label>
           <select class="form-input" onchange="S.onboardForm.assignedTo=this.value">
@@ -1968,7 +2045,7 @@ function vOnboardClient() {
       ${row('Contract File', f.contractFile ? '📎 '+f.contractFile.fileName : '—')}
       ${f.type==='retainer' ? row('Retainer Fee', 'QAR '+(Number(f.retainerFee)||0).toLocaleString()) : ''}
       ${row('Invoicing', prefLabels[f.invoicingPref]||f.invoicingPref)}
-      ${S.user.type==='tl' ? row('Assigned AM', (USERS.find(u=>u.id===f.assignedTo)||{}).name||'—') : ''}`;
+      ${hasTag('can-reassign-clients') ? row('Assigned AM', (USERS.find(u=>u.id===f.assignedTo)||{}).name||'—') : ''}`;
   }
 
   // ── STEP 3: Done ──
@@ -2037,7 +2114,7 @@ function vLogService() {
   // ── STEP 0: Client & Provider ──────────────────────────────────────────
   if (S.logStep === 0) {
     const allClients = [...CLIENTS]
-      .filter(c => S.user.type !== 'am' || c.assignedTo === S.user.id)
+      .filter(c => hasTag('scope-all-clients') || c.assignedTo === S.user.id)
       .sort((a,b)=>a.name.localeCompare(b.name));
     const providerLabel = S.logProvider === 'Rapid' ? 'Rapid Clearing House' : S.logProvider === 'RCHBS' ? 'RCH Business Solutions' : null;
     const providerChipEl = providerLabel
@@ -2428,7 +2505,7 @@ function vCompleteService() {
 // ═══════════════════════════════════
 function vSubmissions() {
   const all = dbGet();
-  const logs = S.user.type === 'am' ? all.filter(l => l.submittedBy === S.user.id) : all;
+  const logs = hasTag('scope-all-logs') ? all : all.filter(l => l.submittedBy === S.user.id);
 
   return `
     <div class="card-hd"><span class="card-title" style="font-size:15px">All Submissions</span>
@@ -4569,6 +4646,206 @@ function vPriceList() {
 }
 
 // ═══════════════════════════════════
+// ROLE MANAGEMENT
+// ═══════════════════════════════════
+function toggleRoleTag(tag) {
+  const tags = [...S.rolesEditingTags];
+  const idx = tags.indexOf(tag);
+  if (idx === -1) tags.push(tag); else tags.splice(idx, 1);
+  set({ rolesEditingTags: tags });
+}
+
+function toggleUserTag(tag) {
+  const tags = [...S.rolesEditingUserTags];
+  const idx = tags.indexOf(tag);
+  if (idx === -1) tags.push(tag); else tags.splice(idx, 1);
+  set({ rolesEditingUserTags: tags });
+}
+
+function saveRole() {
+  const roles = rolesGet();
+  const name = S.rolesEditingRole === '__new__' ? S.rolesNewRoleName.trim() : S.rolesEditingRole;
+  if (!name) return;
+  roles[name] = [...S.rolesEditingTags];
+  rolesSave(roles);
+  set({ rolesEditingRole: null, rolesEditingTags: [], rolesNewRoleName: '' });
+}
+
+function deleteRole(name) {
+  if (Object.keys(DEFAULT_ROLES).includes(name)) return;
+  const roles = rolesGet();
+  delete roles[name];
+  rolesSave(roles);
+  set({});
+}
+
+function saveUserTags() {
+  const overrides = userTagsGet();
+  overrides[S.rolesEditingUser] = [...S.rolesEditingUserTags];
+  userTagsSave(overrides);
+  // Update current user's tags if editing self
+  if (S.user && S.user.id === S.rolesEditingUser) {
+    set({ user: { ...S.user, tags: [...S.rolesEditingUserTags] }, rolesEditingUser: null, rolesEditingUserTags: [] });
+  } else {
+    set({ rolesEditingUser: null, rolesEditingUserTags: [] });
+  }
+}
+
+function resetUserTags(userId) {
+  const overrides = userTagsGet();
+  delete overrides[userId];
+  userTagsSave(overrides);
+  if (S.user && S.user.id === userId) {
+    const u = USERS.find(u => u.id === userId);
+    set({ user: { ...S.user, tags: getTagsForUser(u) } });
+  } else {
+    set({});
+  }
+}
+
+function tagCheckbox(tag, checked, onchangeFn) {
+  const t = ALL_TAGS.find(x => x.id === tag);
+  return `<label style="display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer;font-size:13px">
+    <input type="checkbox" ${checked ? 'checked' : ''} onchange="${onchangeFn}('${tag}')" style="cursor:pointer;width:16px;height:16px;accent-color:var(--navy)">
+    <span style="font-weight:500">${t ? t.label : tag}</span>
+    <span style="font-size:11px;color:var(--g400);margin-left:auto;font-family:monospace">${tag}</span>
+  </label>`;
+}
+
+function vRoles() {
+  const roles = rolesGet();
+  const roleNames = Object.keys(roles);
+  const overrides = userTagsGet();
+  const categories = [...new Set(ALL_TAGS.map(t => t.category))];
+
+  // Editing a role
+  if (S.rolesEditingRole) {
+    const isNew = S.rolesEditingRole === '__new__';
+    const title = isNew ? 'Create New Role' : `Edit Role: ${S.rolesEditingRole}`;
+    return `
+    <div class="card" style="padding:24px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+        <h3 style="margin:0;font-size:18px;color:var(--navy)">${title}</h3>
+        <button class="btn btn-ghost btn-sm" onclick="set({rolesEditingRole:null,rolesEditingTags:[],rolesNewRoleName:''})">Cancel</button>
+      </div>
+      ${isNew ? `<div class="form-group" style="margin-bottom:16px">
+        <label class="form-label">Role Name</label>
+        <input class="form-input" value="${S.rolesNewRoleName}" onchange="set({rolesNewRoleName:this.value})" placeholder="e.g. Junior Accountant" style="max-width:300px">
+      </div>` : ''}
+      <div style="font-size:13px;font-weight:600;color:var(--g500);margin-bottom:12px;text-transform:uppercase;letter-spacing:.5px">Permissions (${S.rolesEditingTags.length} of ${ALL_TAGS.length} selected)</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px">
+        ${categories.map(cat => `
+          <div style="border:1px solid var(--border);border-radius:10px;padding:16px">
+            <div style="font-size:12px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border)">${cat}</div>
+            ${ALL_TAGS.filter(t => t.category === cat).map(t =>
+              tagCheckbox(t.id, S.rolesEditingTags.includes(t.id), 'toggleRoleTag')
+            ).join('')}
+          </div>
+        `).join('')}
+      </div>
+      <div style="margin-top:20px;display:flex;gap:8px">
+        <button class="btn btn-primary" onclick="saveRole()">${isNew ? 'Create Role' : 'Save Changes'}</button>
+        <button class="btn btn-ghost" onclick="set({rolesEditingTags:ALL_TAG_IDS.slice()})">Select All</button>
+        <button class="btn btn-ghost" onclick="set({rolesEditingTags:[]})">Clear All</button>
+      </div>
+    </div>`;
+  }
+
+  // Editing a user's tag overrides
+  if (S.rolesEditingUser) {
+    const u = USERS.find(x => x.id === S.rolesEditingUser);
+    const hasOverride = !!overrides[u.id];
+    return `
+    <div class="card" style="padding:24px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+        <h3 style="margin:0;font-size:18px;color:var(--navy)">Edit Tags: ${u.name} <span style="font-size:13px;color:var(--g400);font-weight:400">(${u.role})</span></h3>
+        <button class="btn btn-ghost btn-sm" onclick="set({rolesEditingUser:null,rolesEditingUserTags:[]})">Cancel</button>
+      </div>
+      ${hasOverride ? `<div style="margin-bottom:12px;padding:8px 12px;background:var(--orange-lt, #fff8e1);border-radius:8px;font-size:12px;color:var(--orange)">This user has custom tag overrides (different from their role defaults)</div>` : ''}
+      <div style="font-size:13px;font-weight:600;color:var(--g500);margin-bottom:12px;text-transform:uppercase;letter-spacing:.5px">Permissions (${S.rolesEditingUserTags.length} of ${ALL_TAGS.length} selected)</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px">
+        ${categories.map(cat => `
+          <div style="border:1px solid var(--border);border-radius:10px;padding:16px">
+            <div style="font-size:12px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border)">${cat}</div>
+            ${ALL_TAGS.filter(t => t.category === cat).map(t =>
+              tagCheckbox(t.id, S.rolesEditingUserTags.includes(t.id), 'toggleUserTag')
+            ).join('')}
+          </div>
+        `).join('')}
+      </div>
+      <div style="margin-top:20px;display:flex;gap:8px">
+        <button class="btn btn-primary" onclick="saveUserTags()">Save User Tags</button>
+        ${hasOverride ? `<button class="btn btn-danger btn-sm" onclick="resetUserTags('${u.id}')">Reset to Role Defaults</button>` : ''}
+        <button class="btn btn-ghost" onclick="set({rolesEditingUserTags:ALL_TAG_IDS.slice()})">Select All</button>
+        <button class="btn btn-ghost" onclick="set({rolesEditingUserTags:[]})">Clear All</button>
+      </div>
+    </div>`;
+  }
+
+  // Main roles view — list of roles + users
+  return `
+  <div style="display:grid;gap:20px">
+    <div class="card" style="padding:24px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+        <h3 style="margin:0;font-size:18px;color:var(--navy)">Roles</h3>
+        <button class="btn btn-primary btn-sm" onclick="set({rolesEditingRole:'__new__',rolesEditingTags:[],rolesNewRoleName:''})">+ New Role</button>
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:13px">
+        <thead><tr style="text-align:left;border-bottom:2px solid var(--border)">
+          <th style="padding:8px 10px">Role</th><th style="padding:8px 10px">Tags</th><th style="padding:8px 10px">Users</th><th style="padding:8px 10px;text-align:right">Actions</th>
+        </tr></thead>
+        <tbody>
+          ${roleNames.map(name => {
+            const tags = roles[name];
+            const users = USERS.filter(u => u.role === name);
+            const isBuiltIn = Object.keys(DEFAULT_ROLES).includes(name);
+            return `<tr style="border-bottom:1px solid var(--border)">
+              <td style="padding:8px 10px;font-weight:600">${name} ${isBuiltIn ? '<span style="font-size:10px;color:var(--g400);font-weight:400">(built-in)</span>' : ''}</td>
+              <td style="padding:8px 10px"><span style="background:var(--navy-lt,#e8edf5);color:var(--navy);padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600">${tags.length} / ${ALL_TAGS.length}</span></td>
+              <td style="padding:8px 10px;font-size:12px;color:var(--g500)">${users.map(u=>u.name).join(', ') || '—'}</td>
+              <td style="padding:8px 10px;text-align:right">
+                <button class="btn btn-ghost btn-sm" onclick="set({rolesEditingRole:'${name.replace(/'/g,"\\'")}',rolesEditingTags:${JSON.stringify(tags)}})">Edit</button>
+                ${!isBuiltIn ? `<button class="btn btn-danger btn-sm" onclick="deleteRole('${name.replace(/'/g,"\\'")}')">Delete</button>` : ''}
+              </td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card" style="padding:24px">
+      <h3 style="margin:0 0 16px;font-size:18px;color:var(--navy)">User Tag Overrides</h3>
+      <p style="font-size:12px;color:var(--g500);margin:-8px 0 16px">Override individual user permissions beyond their role defaults.</p>
+      <table style="width:100%;border-collapse:collapse;font-size:13px">
+        <thead><tr style="text-align:left;border-bottom:2px solid var(--border)">
+          <th style="padding:8px 10px">User</th><th style="padding:8px 10px">Role</th><th style="padding:8px 10px">Status</th><th style="padding:8px 10px;text-align:right">Actions</th>
+        </tr></thead>
+        <tbody>
+          ${USERS.map(u => {
+            const hasOvr = !!overrides[u.id];
+            const userTags = getTagsForUser(u);
+            return `<tr style="border-bottom:1px solid var(--border)">
+              <td style="padding:8px 10px;font-weight:600">${u.name}</td>
+              <td style="padding:8px 10px;font-size:12px;color:var(--g500)">${u.role}</td>
+              <td style="padding:8px 10px">
+                ${hasOvr
+                  ? '<span style="background:var(--orange-lt,#fff8e1);color:var(--orange);padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600">Custom</span>'
+                  : '<span style="background:var(--green-lt,#e6f4ea);color:var(--green);padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600">Role Default</span>'}
+                <span style="font-size:11px;color:var(--g400);margin-left:4px">(${userTags.length} tags)</span>
+              </td>
+              <td style="padding:8px 10px;text-align:right">
+                <button class="btn btn-ghost btn-sm" onclick="set({rolesEditingUser:'${u.id}',rolesEditingUserTags:${JSON.stringify(userTags)}})">Edit Tags</button>
+                ${hasOvr ? `<button class="btn btn-danger btn-sm" onclick="resetUserTags('${u.id}')">Reset</button>` : ''}
+              </td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+// ═══════════════════════════════════
 // NAV CONFIG PER ROLE
 // ═══════════════════════════════════
 function getNav(type) {
@@ -4590,77 +4867,53 @@ function getNav(type) {
       ${badge ? `<span class="nav-badge">${badge}</span>` : ''}
     </div>`;
 
-  const defs = {
-    am: [
-      item('dashboard','◈','Dashboard',''),
-      item('clients','👥','Clients',''),
-      item('onboard','🤝','Onboard Client',''),
-      item('log','⊕','New Service',''),
-      item('submissions','📋','My Submissions',''),
-    ],
-    tl: [
-      item('dashboard','◈','Dashboard',''),
-      item('clients','👥','Clients',''),
-      item('onboard','🤝','Onboard Client',''),
-      item('log','⊕','New Service',''),
-      item('approvals','✓','Approval Queue', counts.pending||''),
-      item('submissions','📋','All Submissions',''),
-      item('services_catalog','📖','Service Catalog',''),
-      item('price_list','💲','Price List',''),
-    ],
-    expense: [
-      item('expense','💰','Expense Tracker', (counts.approved+(counts.pending||0))||''),
-    ],
-    accountant: [
-      item('dashboard','◈','Dashboard',''),
-      item('finance','🧾','Invoice Queue', counts.expensed||''),
-      item('submissions','📋','All Submissions',''),
-      item('price_list','💲','Price List',''),
-    ],
-    acct_mgr: [
-      item('dashboard','◈','Dashboard',''),
-      item('clients','👥','Clients',''),
-      item('finance','🧾','Invoice Queue', (counts.pendingApproval + counts.expensed)||''),
-      item('submissions','📋','All Submissions',''),
-      item('price_list','💲','Price List',''),
-    ],
-    cfo: [
-      item('cfo','📊','Overview',''),
-      item('clients','👥','Clients',''),
-      item('price_list','💲','Price List',''),
-    ],
-  };
-  return (defs[type]||[]).join('');
+  const nav = [];
+  if (hasTag('view-dashboard'))        nav.push(item('dashboard','◈','Dashboard',''));
+  if (hasTag('view-cfo'))              nav.push(item('cfo','📊','Overview',''));
+  if (hasTag('view-clients'))          nav.push(item('clients','👥','Clients',''));
+  if (hasTag('view-onboard'))          nav.push(item('onboard','🤝','Onboard Client',''));
+  if (hasTag('view-log'))              nav.push(item('log','⊕','New Service',''));
+  if (hasTag('view-approvals'))        nav.push(item('approvals','✓','Approval Queue', counts.pending||''));
+  if (hasTag('view-expense'))          nav.push(item('expense','💰','Expense Tracker', (counts.approved+(counts.pending||0))||''));
+  if (hasTag('view-finance'))          nav.push(item('finance','🧾','Invoice Queue', (counts.pendingApproval + counts.expensed)||''));
+  if (hasTag('view-submissions'))      nav.push(item('submissions','📋', hasTag('scope-all-logs')?'All Submissions':'My Submissions',''));
+  if (hasTag('view-services-catalog')) nav.push(item('services_catalog','📖','Service Catalog',''));
+  if (hasTag('view-price-list'))       nav.push(item('price_list','💲','Price List',''));
+  if (hasTag('view-roles'))            nav.push(item('roles','⚙','Role Management',''));
+  return nav.join('');
 }
 
 function getViewTitle() {
-  const map = {dashboard:'Dashboard',clients:'Clients',onboard:'Onboard Client',log:'New Service',complete_service:'Complete Service',submissions:'Submissions',approvals:'Approval Queue',expense:'Expense Tracker',finance:'Invoice Queue',cfo:'Management',services_catalog:'Service Catalog',price_list:'Price List'};
+  const map = {dashboard:'Dashboard',clients:'Clients',onboard:'Onboard Client',log:'New Service',complete_service:'Complete Service',submissions:'Submissions',approvals:'Approval Queue',expense:'Expense Tracker',finance:'Invoice Queue',cfo:'Management',services_catalog:'Service Catalog',price_list:'Price List',roles:'Role Management'};
   if (S.invoiceId) return 'Invoice Preview';
   return map[S.view]||'Dashboard';
 }
 
 function renderView() {
-  const t = S.user?.type;
-  if (S.view==='dashboard'  && (t==='am'||t==='tl'))              return vDashboardAM();
-  if (S.view==='dashboard'  && t==='accountant')                  return vAccountantDashboard();
-  if (S.view==='dashboard'  && t==='acct_mgr')                   return vAcctMgrDashboard();
-  if (S.view==='clients'    && (t==='am'||t==='tl'||t==='acct_mgr'||t==='cfo')) return vClients();
-  if (S.view==='onboard'   && (t==='am'||t==='tl'))              return vOnboardClient();
-  if (S.view==='log')                                             return vLogService();
-  if (S.view==='complete_service')                                  return vCompleteService();
-  if (S.view==='submissions')                                     return vSubmissions();
-  if (S.view==='approvals'  && t==='tl')                          return vApprovals();
-  if (S.view==='expense'    && t==='expense')                     return vExpense();
-  if (S.view==='finance'    && (t==='accountant'||t==='acct_mgr')) return vFinance();
-  if (S.view==='cfo'        && t==='cfo')                         return vCFO();
-  if (S.view==='services_catalog' && t==='tl')                    return vServiceCatalog();
-  if (S.view==='price_list')                                      return vPriceList();
-  // Default landing per type
-  if (t==='expense')    return vExpense();
-  if (t==='accountant') return vAccountantDashboard();
-  if (t==='acct_mgr')   return vAcctMgrDashboard();
-  if (t==='cfo')        return vCFO();
-  return vDashboardAM();
+  // Tag-driven view routing
+  if (S.view==='dashboard' && hasTag('view-dashboard')) {
+    if (hasTag('view-cfo'))     return vCFO();
+    if (hasTag('can-invoice') && hasTag('scope-all-clients') && !hasTag('view-cfo')) return hasTag('can-reassign-clients') || hasTag('view-clients') ? vAcctMgrDashboard() : vAccountantDashboard();
+    return vDashboardAM();
+  }
+  if (S.view==='clients'          && hasTag('view-clients'))          return vClients();
+  if (S.view==='onboard'          && hasTag('view-onboard'))          return vOnboardClient();
+  if (S.view==='log'              && hasTag('view-log'))              return vLogService();
+  if (S.view==='complete_service')                                    return vCompleteService();
+  if (S.view==='submissions'      && hasTag('view-submissions'))      return vSubmissions();
+  if (S.view==='approvals'        && hasTag('view-approvals'))        return vApprovals();
+  if (S.view==='expense'          && hasTag('view-expense'))          return vExpense();
+  if (S.view==='finance'          && hasTag('view-finance'))          return vFinance();
+  if (S.view==='cfo'              && hasTag('view-cfo'))              return vCFO();
+  if (S.view==='services_catalog' && hasTag('view-services-catalog')) return vServiceCatalog();
+  if (S.view==='price_list'       && hasTag('view-price-list'))       return vPriceList();
+  if (S.view==='roles'            && hasTag('view-roles'))            return vRoles();
+  // Default landing based on tags
+  if (hasTag('view-expense') && !hasTag('view-dashboard')) return vExpense();
+  if (hasTag('view-cfo'))        return vCFO();
+  if (hasTag('can-invoice'))     return vAccountantDashboard();
+  if (hasTag('view-dashboard'))  return vDashboardAM();
+  return `<div class="card" style="padding:24px;text-align:center;color:var(--g500)">No views available. Contact your administrator to assign permissions.</div>`;
 }
 
 // ═══════════════════════════════════
@@ -4745,7 +4998,7 @@ function render() {
           <div><div class="brand-rch">RCH</div><div class="brand-sub">CRM System</div></div>
         </div>
         <div class="sb-nav">
-          ${getNav(S.user.type)}
+          ${getNav()}
           <div style="height:1px;background:rgba(255,255,255,.07);margin:12px 8px"></div>
           <div class="nav-item" onclick="dbReset();set({})" style="font-size:11px;color:rgba(255,255,255,.25)">
             <span class="nav-icon">↺</span><span>Reset Demo Data</span>
